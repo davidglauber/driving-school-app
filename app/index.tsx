@@ -1,10 +1,11 @@
-import React from "react";
-import { Text, View } from "react-native";
+import { router, useRootNavigationState } from "expo-router";
+import { useEffect } from "react";
 
 export default function index() {
-  return (
-    <View>
-      <Text>index</Text>
-    </View>
-  );
+  const navState = useRootNavigationState();
+
+  useEffect(() => {
+    if (navState.key) router.push("/auth/login");
+  }, []);
+  // it means: if navigation is ready, redirect to login page
 }

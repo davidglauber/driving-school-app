@@ -1,4 +1,4 @@
-import { theme } from "@/src/theme";
+import { theme } from "@/theme";
 import { ThemeProvider } from "@shopify/restyle";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
@@ -29,8 +29,13 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider theme={theme}>
-      <Stack>
-        <Stack.Screen name="index" />
+      <Stack
+        initialRouteName="auth/login"
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        <Stack.Screen name="auth/login" />
       </Stack>
     </ThemeProvider>
   );
