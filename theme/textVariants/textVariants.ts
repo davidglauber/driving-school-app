@@ -1,9 +1,9 @@
 import { TextVariantsInterface } from "./textVariants.interface";
 
 export const textVariants: TextVariantsInterface = {
-    default: {
+    defaults: {
         fontFamily: "SFMedium",
         fontSize: 16,
-        color: "red"
+        color: "black"
     }
 }

@@ -1,8 +1,9 @@
 import { theme } from "@/theme";
 import { ThemeProvider } from "@shopify/restyle";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Slot, Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import "react-native-reanimated";
 
@@ -30,13 +31,11 @@ export default function RootLayout() {
   return (
     <ThemeProvider theme={theme}>
       <Stack
-        initialRouteName="auth/login"
         screenOptions={{
           headerShown: false,
         }}
-      >
-        <Stack.Screen name="auth/login" />
-      </Stack>
+      ></Stack>
+      <StatusBar style="dark" />
     </ThemeProvider>
   );
 }
