@@ -1,13 +1,14 @@
-import React from "react";
-import { Keyboard, TouchableWithoutFeedback } from "react-native";
+import React, { useState } from "react";
+import { FlatList, Keyboard, TouchableWithoutFeedback } from "react-native";
 import { height, width } from "../utils/dimensions";
 import { SafeAreaViewBox } from "../utils/restyle/SafeAreaView";
 import { ViewBox } from "../utils/restyle/ViewBox";
 
-import { Agenda, LocaleConfig } from "react-native-calendars";
+import { Agenda, DateData, LocaleConfig } from "react-native-calendars";
 import { colors } from "../theme/colors";
 import { radius } from "../theme/radius";
 import { ImageBox } from "../utils/restyle/ImageBox";
+import { TextBox } from "../utils/restyle/TextBox";
 
 LocaleConfig.locales["pt"] = {
   monthNames: [
@@ -52,7 +53,56 @@ LocaleConfig.locales["pt"] = {
 };
 LocaleConfig.defaultLocale = "pt";
 
+const items: any = {
+  "2024-09-13": [{ name: "Reunião com cliente", height: 60 }],
+  "2024-09-14": [
+    { name: "Almoço com equipe", height: 80 },
+    { name: "Revisão de código", height: 60 },
+  ],
+  "2024-09-15": [{ name: "Dia de folga", height: 50 }],
+  "2024-09-16": [
+    { name: "Planejamento do projeto", height: 70 },
+    { name: "Reunião de status", height: 60 },
+  ],
+  "2024-09-17": [{ name: "Treinamento de segurança", height: 80 }],
+  "2024-09-18": [
+    { name: "Revisão de sprint", height: 60 },
+    { name: "Reunião com fornecedores", height: 70 },
+  ],
+  "2024-09-19": [{ name: "Apresentação do projeto", height: 90 }],
+  "2024-09-20": [
+    { name: "Reunião de feedback", height: 60 },
+    { name: "Happy hour", height: 50 },
+  ],
+};
+
 export const Calendar = () => {
+  const [selectedDate, setSelectedDate] = useState<DateData | null>(null);
+
+  const renderEventItem = ({ item }: { item: any }) => (
+    <ViewBox
+      bg="gray"
+      padding="m"
+      marginVertical="s"
+      borderRadius={radius.m}
+      width="auto"
+      height={item.height}
+    >
+      <TextBox>{item.name}</TextBox>
+    </ViewBox>
+  );
+
+  const renderDateItem = ({ item }: { item: string }) => (
+    <ViewBox key={item}>
+      <TextBox>{item}</TextBox>
+      <FlatList
+        data={items[item]}
+        renderItem={renderEventItem}
+        keyExtractor={(event, index) => `${item}-${index}`}
+      />
+    </ViewBox>
+  );
+
   return (
     <SafeAreaViewBox flex={1}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -71,33 +121,13 @@ export const Calendar = () => {
           />
           <Agenda
             showClosingKnob
-            items={{
-              "2024-09-13": [{ name: "Reunião com cliente", height: 60 }],
-              "2024-09-14": [
-                { name: "Almoço com equipe", height: 80 },
-                { name: "Revisão de código", height: 60 },
-              ],
-              "2024-09-15": [{ name: "Dia de folga", height: 50 }],
-              "2024-09-16": [
-                { name: "Planejamento do projeto", height: 70 },
-                { name: "Reunião de status", height: 60 },
-              ],
-              "2024-09-17": [{ name: "Treinamento de segurança", height: 80 }],
-              "2024-09-18": [
-                { name: "Revisão de sprint", height: 60 },
-                { name: "Reunião com fornecedores", height: 70 },
-              ],
-              "2024-09-19": [{ name: "Apresentação do projeto", height: 90 }],
-              "2024-09-20": [
-                { name: "Reunião de feedback", height: 60 },
-                { name: "Happy hour", height: 50 },
-              ],
-            }}
+            items={items}
             onCalendarToggled={(calendarOpened: boolean) => {
               console.log(calendarOpened);
             }}
             onDayPress={(day: any) => {
-              console.log("day pressed");
+              setSelectedDate(day.date);
+              console.log("day pressed", day);
             }}
             onDayChange={(day: any) => {
               console.log("day changed");
@@ -112,41 +142,33 @@ export const Calendar = () => {
                   padding="m"
                   marginVertical="s"
                   borderRadius={radius.m}
+                  width="auto"
+                  height={item.height}
                 >
-                  {item.name}
+                  <TextBox>{item.name}</TextBox>
                 </ViewBox>
               );
-            }}
-            renderDay={(day: any, item: any) => {
-              return <ViewBox />;
             }}
             renderEmptyDate={() => {
               return <ViewBox />;
             }}
-            renderList={(listProps: any) => {
-              return <></>;
-            }}
             renderEmptyData={() => {
-              return <ViewBox />;
+              return (
+                <ViewBox>
+                  <TextBox>nada aqui</TextBox>
+                </ViewBox>
+              );
             }}
             rowHasChanged={(r1: { text: string }, r2: { text: string }) => {
               return r1.text !== r2.text;
-            }}
-            markedDates={{
-              "2024-09-13": { selected: true, selectedColor: colors.red },
-              "2024-09-14": { selected: true, selectedColor: colors.red },
-              "2024-09-15": { selected: true, selectedColor: colors.red },
-              "2024-09-16": { selected: true, selectedColor: colors.red },
-              "2024-09-17": { selected: true, selectedColor: colors.red },
-              "2024-09-18": { selected: true, selectedColor: colors.red },
-              "2024-09-19": { selected: true, selectedColor: colors.red },
-              "2024-09-20": { selected: true, selectedColor: colors.red },
             }}
             onRefresh={() => console.log("refreshing...")}
             refreshing={false}
             refreshControl={null}
             theme={{
-              backgroundColor: "#000",
+              selectedDayBackgroundColor: colors.red,
+              dotColor: colors.red,
+              todayTextColor: colors.red,
             }}
             style={{
               width: width * 0.92,
