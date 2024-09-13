@@ -1,5 +1,6 @@
 import { CustomButton } from "@/src/components/CustomButton/CustomButton";
 import { CustomTextInput } from "@/src/components/CustomTextInput/CustomTextInput";
+import { RootStackParamList } from "@/src/routes/Stack";
 import { loginSchema } from "@/src/schemas/forms";
 import { height, width } from "@/src/utils/dimensions";
 import { ImageBox } from "@/src/utils/restyle/ImageBox";
@@ -7,7 +8,7 @@ import { SafeAreaViewBox } from "@/src/utils/restyle/SafeAreaView";
 import { ViewBox } from "@/src/utils/restyle/ViewBox";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigation } from "@react-navigation/native";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import {
@@ -18,7 +19,7 @@ import {
 } from "react-native";
 
 export const Login = () => {
-  const { navigate } = useNavigation<any>();
+  const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
   const [showPassword, setShowPassword] = useState(false);
   const { control, handleSubmit } = useForm({
     resolver: zodResolver(loginSchema),

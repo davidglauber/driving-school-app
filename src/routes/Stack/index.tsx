@@ -5,7 +5,12 @@ import { NavigationContainer } from "@react-navigation/native";
 import { Login } from "@/src/screens/auth/Login";
 import Tabs from "@/src/routes/Tabs";
 
-const Stack = createStackNavigator();
+export type RootStackParamList = {
+  Login: undefined;
+  Tabs: undefined;
+};
+
+const Stack = createStackNavigator<RootStackParamList>();
 
 const MainNavigator = () => {
   return (
