@@ -1,26 +1,84 @@
 import { Home } from "@/src/screens/Home";
-import {
-  AnimatedTabBarNavigator,
-  DotSize,
-  TabElementDisplayOptions,
-} from "react-native-animated-nav-tab-bar";
+import { Settings } from "@/src/screens/Settings";
+import { Students } from "@/src/screens/Students";
+import { colors } from "@/src/theme/colors";
+import { height } from "@/src/utils/dimensions";
+import { FontAwesome6 } from "@expo/vector-icons";
+import { AnimatedTabBarNavigator } from "react-native-animated-nav-tab-bar";
+
+type TabBarIconProps = {
+  focused: boolean;
+  color: string;
+  size: number;
+};
 
 const Tabs = AnimatedTabBarNavigator();
+
 export default () => (
   <Tabs.Navigator
     initialRouteName="Home"
     tabBarOptions={{
       activeTintColor: "#ffffff",
       inactiveTintColor: "#223322",
-      activeBackgroundColor: "red",
+      activeBackgroundColor: colors.red,
+      tabStyle: {
+        height: height * 0.09,
+      },
+      labelStyle: {
+        fontFamily: "SFBold",
+        fontSize: 20,
+        alignSelf: "center",
+      },
     }}
     appearance={{
       shadow: true,
       floating: true,
-      whenActiveShow: TabElementDisplayOptions.ICON_ONLY,
-      dotSize: DotSize.SMALL,
     }}
   >
-    <Tabs.Screen name="Home" component={Home} />
+    <Tabs.Screen
+      name="Home"
+      component={Home}
+      options={{
+        title: "Início",
+        tabBarIcon: ({ focused, color, size }: TabBarIconProps) => (
+          <FontAwesome6
+            name="house"
+            size={size ? size : 24}
+            color={focused ? color : "#222222"}
+            focused={focused}
+          />
+        ),
+      }}
+    />
+    <Tabs.Screen
+      name="Settings"
+      component={Settings}
+      options={{
+        title: "Calendário",
+        tabBarIcon: ({ focused, color, size }: TabBarIconProps) => (
+          <FontAwesome6
+            name="calendar"
+            size={size ? size : 24}
+            color={focused ? color : "#222222"}
+            focused={focused}
+          />
+        ),
+      }}
+    />
+    <Tabs.Screen
+      name="Students"
+      component={Students}
+      options={{
+        title: "Alunos",
+        tabBarIcon: ({ focused, color, size }: TabBarIconProps) => (
+          <FontAwesome6
+            name="graduation-cap"
+            size={size ? size : 24}
+            color={focused ? color : "#222222"}
+            focused={focused}
+          />
+        ),
+      }}
+    />
   </Tabs.Navigator>
 );
