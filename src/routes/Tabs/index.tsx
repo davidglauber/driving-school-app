@@ -1,3 +1,4 @@
+import { Calendar } from "@/src/screens/Calendar";
 import { Home } from "@/src/screens/Home";
 import { Settings } from "@/src/screens/Settings";
 import { Students } from "@/src/screens/Students";
@@ -16,7 +17,7 @@ const Tabs = AnimatedTabBarNavigator();
 
 export default () => (
   <Tabs.Navigator
-    initialRouteName="Home"
+    initialRouteName="Calendar"
     tabBarOptions={{
       activeTintColor: "#ffffff",
       inactiveTintColor: "#223322",
@@ -36,23 +37,8 @@ export default () => (
     }}
   >
     <Tabs.Screen
-      name="Home"
-      component={Home}
-      options={{
-        title: "Início",
-        tabBarIcon: ({ focused, color, size }: TabBarIconProps) => (
-          <FontAwesome6
-            name="house"
-            size={size ? size : 24}
-            color={focused ? color : "#222222"}
-            focused={focused}
-          />
-        ),
-      }}
-    />
-    <Tabs.Screen
-      name="Settings"
-      component={Settings}
+      name="Calendar"
+      component={Calendar}
       options={{
         title: "Calendário",
         tabBarIcon: ({ focused, color, size }: TabBarIconProps) => (
@@ -73,6 +59,21 @@ export default () => (
         tabBarIcon: ({ focused, color, size }: TabBarIconProps) => (
           <FontAwesome6
             name="graduation-cap"
+            size={size ? size : 24}
+            color={focused ? color : "#222222"}
+            focused={focused}
+          />
+        ),
+      }}
+    />
+    <Tabs.Screen
+      name="Settings"
+      component={Settings}
+      options={{
+        title: "Config.",
+        tabBarIcon: ({ focused, color, size }: TabBarIconProps) => (
+          <FontAwesome6
+            name="gears"
             size={size ? size : 24}
             color={focused ? color : "#222222"}
             focused={focused}
