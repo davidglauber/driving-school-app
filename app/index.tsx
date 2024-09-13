@@ -7,6 +7,7 @@ import { SafeAreaViewBox } from "@/utils/restyle/SafeAreaView";
 import { ViewBox } from "@/utils/restyle/ViewBox";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import {
@@ -24,6 +25,7 @@ export default function Index() {
 
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
     // add database validation here
+    router.push("/home/dashboard");
     console.log(data);
   };
 
