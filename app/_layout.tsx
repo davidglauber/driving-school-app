@@ -35,7 +35,7 @@ export default function RootLayout() {
           headerShown: false,
         }}
       ></Stack>
-      <StatusBar backgroundColor="white" style="dark" />
+      <StatusBar backgroundColor="#FFFFFF" style="dark" />
     </ThemeProvider>
   );
 }

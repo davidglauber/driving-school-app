@@ -23,6 +23,7 @@ export default function Index() {
   });
 
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
+    // add database validation here
     console.log(data);
   };
 
@@ -48,11 +49,14 @@ export default function Index() {
               resizeMode="contain"
             />
             <CustomTextInput
+              // the autoCorrect prop fixes the flickering issue on iOS
+              autoCorrect={false}
               name="email"
               control={control}
               labelInput="Digite o seu email"
               placeholder="Email"
               keyboardType="email-address"
+              autoCapitalize="none"
             />
 
             <ViewBox marginBottom="m" />
