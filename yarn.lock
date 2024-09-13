@@ -3580,6 +3580,7 @@ __metadata:
     expo: ~51.0.28
     expo-constants: ~16.0.2
     expo-font: ~12.0.9
+    expo-haptics: ~13.0.1
     expo-linking: ~6.3.1
     expo-router: ~3.5.23
     expo-splash-screen: ~0.27.5
@@ -5560,6 +5561,15 @@ __metadata:
   peerDependencies:
     expo: "*"
   checksum: c8fdc046158d4c2d71d81fcd9ba115bc0e142bc0d637ae9b5fea04cd816c62c051f63e44685530109106565d29feca2035ef6123c56cf9c951d0a2775a8cd9a7
+  languageName: node
+  linkType: hard
+
+"expo-haptics@npm:~13.0.1":
+  version: 13.0.1
+  resolution: "expo-haptics@npm:13.0.1"
+  peerDependencies:
+    expo: "*"
+  checksum: 5419e6451d3718dde8fb099eb710d7c90448d75d00d44e8b42ec301ec45d52bdb52e6ef2959fd0f207abcbe090b0c851b8bd94aba90343053d5435e4e545a997
   languageName: node
   linkType: hard
 
