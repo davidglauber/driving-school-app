@@ -1,0 +1,45 @@
+import { radius } from "@/src/theme/radius";
+import { PressableBox } from "@/src/utils/restyle/PressableBox";
+import { TextBox } from "@/src/utils/restyle/TextBox";
+import * as Haptics from "expo-haptics";
+import React from "react";
+import { ActivityIndicator } from "react-native";
+import { ButtonInterface } from "./CustomButton.interface";
+
+export const CustomButton = ({
+  title,
+  titleColor,
+  color,
+  isLoading,
+  onPress,
+  ...props
+}: ButtonInterface) => {
+  const handlePress = async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
+    if (onPress) {
+      onPress();
+    }
+  };
+
+  return (
+    <PressableBox
+      onPress={handlePress}
+      width={"auto"}
+      backgroundColor={color || "black"}
+      padding="m"
+      borderRadius={radius.l}
+      justifyContent="center"
+      alignItems="center"
+      opacity={props.disabled ? 0.5 : 1}
+      {...props}
+    >
+      {isLoading ? (
+        <ActivityIndicator size="small" color="white" />
+      ) : (
+        <TextBox variant="titleButton" style={{ color: titleColor || "black" }}>
+          {title}
+        </TextBox>
+      )}
+    </PressableBox>
+  );
+};
