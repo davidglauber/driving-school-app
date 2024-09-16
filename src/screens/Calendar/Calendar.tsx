@@ -2,21 +2,20 @@ import React from "react";
 import { height, width } from "../../utils/dimensions";
 import { ViewBox } from "../../utils/restyle/ViewBox";
 
+import { CustomButton } from "@/src/components/CustomButton/CustomButton";
 import { CustomDivider } from "@/src/components/CustomDivider/CustomDivider";
 import { colors } from "@/src/theme/colors";
+import { TouchableOpacityBox } from "@/src/utils/restyle/TouchableOpacityBox";
 import { FontAwesome6 } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
-import { Agenda, LocaleConfig } from "react-native-calendars";
+import { Linking } from "react-native";
+import { Agenda, DateData, LocaleConfig } from "react-native-calendars";
 import { radius } from "../../theme/radius";
 import { calendarPT_BR } from "../../utils/localeCalendarConfig";
 import { ImageBox } from "../../utils/restyle/ImageBox";
 import { TextBox } from "../../utils/restyle/TextBox";
 import { CalendarItemType } from "./Calendar.interface";
 import { items, openMap, styleCalendar, themeCalendar } from "./Calendar.utils";
-import { PressableBox } from "@/src/utils/restyle/PressableBox";
-import { Linking } from "react-native";
-import { CustomButton } from "@/src/components/CustomButton/CustomButton";
-import { TouchableOpacityBox } from "@/src/utils/restyle/TouchableOpacityBox";
 
 LocaleConfig.locales["pt"] = calendarPT_BR;
 LocaleConfig.defaultLocale = "pt";
@@ -125,11 +124,11 @@ export const Calendar = () => {
         onCalendarToggled={(calendarOpened: boolean) => {
           console.log(calendarOpened);
         }}
-        onDayPress={(day: any) => {
+        onDayPress={(day: DateData) => {
           console.log("day pressed", day);
         }}
-        onDayChange={(day: any) => {
-          console.log("day changed");
+        onDayChange={(day: DateData) => {
+          console.log("day changed", day);
         }}
         pastScrollRange={24}
         futureScrollRange={24}
