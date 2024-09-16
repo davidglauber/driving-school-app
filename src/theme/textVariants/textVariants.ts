@@ -22,9 +22,9 @@ export const textVariants: TextVariantsInterface = {
         color: "red"
     },
     notFoundText: {
-        fontFamily: "SFRegular",
+        fontFamily: "SFMedium",
         fontSize: 24,
-        color: "black"
+        color: "red"
     },
     defaults: {
         fontFamily: "SFMedium",
