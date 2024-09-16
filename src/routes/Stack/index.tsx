@@ -16,7 +16,7 @@ const MainNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Login"
+        initialRouteName="Tabs"
         screenOptions={{
           headerShown: false,
         }}

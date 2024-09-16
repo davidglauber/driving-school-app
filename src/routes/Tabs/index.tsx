@@ -1,4 +1,4 @@
-import { Calendar } from "@/src/screens/Calendar";
+import { Calendar } from "@/src/screens/Calendar/Calendar";
 import { Home } from "@/src/screens/Home";
 import { Settings } from "@/src/screens/Settings";
 import { Students } from "@/src/screens/Students";
