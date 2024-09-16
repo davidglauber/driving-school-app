@@ -1,7 +1,11 @@
-type CalendarDayType = {
+export type CalendarItemType = {
     name: string;
-    height?: number;
+    classroomName: string;
+    enrollId: number;
+    phone: string;
+    address: string;
+    timeRange: string;
 };
 export interface CalendarItemInterface {
-    [key: string]: CalendarDayType[];
+    [key: string]: CalendarItemType[];
 }
