@@ -16,8 +16,12 @@ import { StudentsInterface } from "./Students.interface";
 import { students } from "./Students.utils";
 
 export const Students = () => {
-  const { control } = useForm();
+  const { control, watch } = useForm();
+  const searchText = watch("search", "");
 
+  const filteredStudents = students.filter((student) =>
+    student.name.toLowerCase().includes(searchText.toLowerCase())
+  );
   const renderItem = ({ item, index }: StudentsInterface) => {
     return (
       <ViewBox
@@ -77,7 +81,7 @@ export const Students = () => {
         resizeMode="contain"
       />
       <FlatList
-        data={students}
+        data={filteredStudents}
         renderItem={renderItem}
         contentContainerStyle={{ paddingBottom: height * 0.1 }}
         showsVerticalScrollIndicator={false}
