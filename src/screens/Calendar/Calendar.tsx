@@ -1,9 +1,9 @@
 import React from "react";
-import { FlatList, Keyboard, TouchableWithoutFeedback } from "react-native";
+import { FlatList } from "react-native";
 import { height, width } from "../../utils/dimensions";
-import { SafeAreaViewBox } from "../../utils/restyle/SafeAreaView";
 import { ViewBox } from "../../utils/restyle/ViewBox";
 
+import LottieView from "lottie-react-native";
 import { Agenda, LocaleConfig } from "react-native-calendars";
 import { colors } from "../../theme/colors";
 import { radius } from "../../theme/radius";
@@ -122,8 +122,20 @@ export const Calendar = () => {
         }}
         renderEmptyData={() => {
           return (
-            <ViewBox>
-              <TextBox>nada aqui</TextBox>
+            <ViewBox justifyContent="center" alignItems="center">
+              <LottieView
+                source={require("../../../assets/animations/notFoundCar.json")}
+                style={{ width: "100%", height: "80%" }}
+                autoPlay
+                loop
+              />
+              <TextBox
+                variant="notFoundText"
+                paddingHorizontal="m"
+                textAlign="center"
+              >
+                Corre pra marcar instrutor! {"\n"} Não tem alunos nessa data
+              </TextBox>
             </ViewBox>
           );
         }}
@@ -134,6 +146,7 @@ export const Calendar = () => {
           selectedDayBackgroundColor: colors.red,
           dotColor: colors.red,
           todayTextColor: colors.red,
+          agendaTodayColor: colors.red,
         }}
         style={{
           width: width * 0.92,

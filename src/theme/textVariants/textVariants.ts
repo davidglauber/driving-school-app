@@ -11,6 +11,11 @@ export const textVariants: TextVariantsInterface = {
         fontSize: 20,
         color: "black"
     },
+    notFoundText: {
+        fontFamily: "SFRegular",
+        fontSize: 24,
+        color: "black"
+    },
     defaults: {
         fontFamily: "SFMedium",
         fontSize: 16,
