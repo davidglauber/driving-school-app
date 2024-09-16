@@ -18,7 +18,7 @@ export default () => (
   <Tabs.Navigator
     initialRouteName="Calendar"
     tabBarOptions={{
-      activeTintColor: colors.black,
+      activeTintColor: colors.red,
       inactiveTintColor: colors.white,
       activeBackgroundColor: colors.white,
       tabStyle: {
