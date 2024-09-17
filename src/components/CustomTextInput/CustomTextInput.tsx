@@ -4,8 +4,8 @@ import { TextInputBox } from "@/src/utils/restyle/TextInputBox";
 import { ViewBox } from "@/src/utils/restyle/ViewBox";
 import React from "react";
 import { Controller } from "react-hook-form";
-import { TextInputInterface } from "./CustomTextInput.interface";
 import { TouchableOpacity } from "react-native";
+import { TextInputInterface } from "./CustomTextInput.interface";
 
 export const CustomTextInput = ({
   labelInput,
@@ -25,7 +25,10 @@ export const CustomTextInput = ({
         field: { onChange, onBlur, value },
         fieldState: { error },
       }) => (
-        <ViewBox width={"100%"} style={props.style}>
+        <ViewBox
+          width={"100%"}
+          style={[props.style, { opacity: props.editable !== false ? 1 : 0.5 }]}
+        >
           {labelInput && <TextBox variant="label">{labelInput}</TextBox>}
           <ViewBox
             flexDirection="row"
