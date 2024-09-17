@@ -22,6 +22,18 @@
       },
       "softwareKeyboardLayoutMode": "pan"
     },
-    "plugins": []
+    "plugins": [],
+    "extra": {
+      "eas": {
+        "projectId": "929cbb6f-a1da-4e39-aa40-b6a1964499fd"
+      }
+    },
+    "owner": "socialempire",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/929cbb6f-a1da-4e39-aa40-b6a1964499fd"
+    }
   }
 }
