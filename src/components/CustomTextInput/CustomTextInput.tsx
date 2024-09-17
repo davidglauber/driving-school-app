@@ -4,7 +4,7 @@ import { TextInputBox } from "@/src/utils/restyle/TextInputBox";
 import { ViewBox } from "@/src/utils/restyle/ViewBox";
 import React from "react";
 import { Controller } from "react-hook-form";
-import { TouchableOpacity } from "react-native";
+import { ActivityIndicator, TouchableOpacity } from "react-native";
 import { TextInputInterface } from "./CustomTextInput.interface";
 
 export const CustomTextInput = ({
@@ -15,6 +15,7 @@ export const CustomTextInput = ({
   rightIcon,
   onLeftIconPress,
   onRightIconPress,
+  isLoading,
   ...props
 }: TextInputInterface) => {
   return (
@@ -47,14 +48,18 @@ export const CustomTextInput = ({
                 {leftIcon}
               </TouchableOpacity>
             )}
-            <TextInputBox
-              {...props}
-              style={{ fontFamily: "SFMedium", flex: 1 }}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              value={value}
-              placeholderTextColor={"gray"}
-            />
+            {!isLoading ? (
+              <TextInputBox
+                {...props}
+                style={{ fontFamily: "SFMedium", flex: 1 }}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                value={value}
+                placeholderTextColor={"gray"}
+              />
+            ) : (
+              <ActivityIndicator size="small" color="gray" />
+            )}
             {rightIcon && (
               <TouchableOpacity
                 onPress={onRightIconPress}

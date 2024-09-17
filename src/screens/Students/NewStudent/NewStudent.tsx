@@ -8,17 +8,36 @@ import { height } from "@/src/utils/dimensions";
 import { ScrollViewBox } from "@/src/utils/restyle/ScrollViewBox";
 import { ViewBox } from "@/src/utils/restyle/ViewBox";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
-import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
+import React, { useEffect } from "react";
+import { FieldValues, SubmitHandler, useForm, useWatch } from "react-hook-form";
+import { useGetStudentLocation } from "./useGetStudentLocation/useGetStudentLocation";
 
 export const NewStudent = () => {
-  const { control, handleSubmit } = useForm({
+  const { control, setValue, handleSubmit } = useForm({
     resolver: zodResolver(registerStudentSchema),
   });
+  const cep = useWatch({ control, name: "cep" });
+  const { data, isLoading } = useGetStudentLocation({ cep });
+
+  useEffect(() => {
+    if (data) {
+      const { logradouro, bairro, localidade, uf } = data;
+
+      if (logradouro && bairro && localidade && uf) {
+        setValue(
+          "fullAddress",
+          `${logradouro}, ${bairro}, ${localidade} - ${uf}`
+        );
+      } else {
+        setValue("fullAddress", "Endereço não encontrado");
+      }
+    }
+  }, [data, setValue]);
 
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
     console.log("hook form data", data);
   };
+
   return (
     <ViewBox
       height={height}
@@ -39,6 +58,7 @@ export const NewStudent = () => {
           placeholder="Digite aqui"
           keyboardType="number-pad"
           maxLength={11}
+          isLoading={isLoading}
         />
         <ViewBox marginVertical="xs" />
 
