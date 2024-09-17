@@ -58,7 +58,6 @@ export const NewStudent = () => {
           placeholder="Digite aqui"
           keyboardType="number-pad"
           maxLength={11}
-          isLoading={isLoading}
         />
         <ViewBox marginVertical="xs" />
 
@@ -78,6 +77,7 @@ export const NewStudent = () => {
           placeholder="Digite aqui"
           keyboardType="number-pad"
           maxLength={8}
+          isLoading={isLoading}
         />
         <ViewBox marginVertical="xs" />
         <CustomTextInput
@@ -120,7 +120,7 @@ export const NewStudent = () => {
         <CustomTextInput
           name="psicolocicalEvaluationRequired"
           control={control}
-          labelInput="Consultas psicológicas necessárias"
+          labelInput="*Consultas psicológicas necessárias"
           placeholder="Digite aqui"
           keyboardType="number-pad"
           maxLength={3}
@@ -130,7 +130,7 @@ export const NewStudent = () => {
         <CustomTextInput
           name="psicolocicalEvaluationAcquired"
           control={control}
-          labelInput="Consultas psicológicas adquiridas"
+          labelInput="*Consultas psicológicas adquiridas"
           placeholder="Digite aqui"
           keyboardType="number-pad"
           maxLength={3}

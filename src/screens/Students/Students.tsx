@@ -1,22 +1,23 @@
 import { CustomButton } from "@/src/components/CustomButton/CustomButton";
 import { CustomDivider } from "@/src/components/CustomDivider/CustomDivider";
 import { CustomTextInput } from "@/src/components/CustomTextInput/CustomTextInput";
+import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
+import { RootStackParamList } from "@/src/routes/Stack";
+import { colors } from "@/src/theme/colors";
 import { radius } from "@/src/theme/radius";
 import { spacing } from "@/src/theme/spacing";
 import { height, width } from "@/src/utils/dimensions";
-import { ImageBox } from "@/src/utils/restyle/ImageBox";
 import { TextBox } from "@/src/utils/restyle/TextBox";
 import { ViewBox } from "@/src/utils/restyle/ViewBox";
 import { FontAwesome6 } from "@expo/vector-icons";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { FlatList, Linking } from "react-native";
+import ProgressBar from "react-native-progress/Bar";
 import { openMap } from "../Calendar/Calendar.utils";
 import { StudentsInterface } from "./Students.interface";
 import { students } from "./Students.utils";
-import { NavigationProp, useNavigation } from "@react-navigation/native";
-import { RootStackParamList } from "@/src/routes/Stack";
-import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
 
 export const Students = () => {
   const { control, watch } = useForm();
@@ -27,6 +28,8 @@ export const Students = () => {
     student.name.toLowerCase().includes(searchText.toLowerCase())
   );
   const renderItem = ({ item, index }: StudentsInterface) => {
+    const progress = item.classAcquireQtd / item.classesNeeded;
+
     return (
       <ViewBox
         key={index}
@@ -37,8 +40,18 @@ export const Students = () => {
       >
         <TextBox variant="titleCardCalendar">{item.name}</TextBox>
         <TextBox variant="textCardCalendar">
-          {item.classAcquireQtd} aulas - {item.enrollId}
+          {item.classAcquireQtd} de {item.classesNeeded} aulas concluídas -{" "}
+          {Math.round(progress * 100)}%
         </TextBox>
+
+        <ProgressBar
+          style={{ marginTop: spacing.s }}
+          color={colors.red}
+          unfilledColor={colors.white}
+          borderWidth={0}
+          progress={progress}
+          width={width * 0.8}
+        />
 
         <CustomDivider />
         <ViewBox mt="m" flexDirection="row" justifyContent="space-between">
@@ -56,7 +69,7 @@ export const Students = () => {
           />
           <CustomButton
             color="white"
-            onPress={() => console.log("not working yet")}
+            onPress={() => navigate("SeeStudent", { student: item })}
             title="Ver Detalhes"
             leftIcon={
               <FontAwesome6
@@ -107,7 +120,8 @@ export const Students = () => {
               color="red"
               titleColor="white"
               alignSelf="center"
-              marginTop="s"
+              mt="s"
+              height={"88%"}
               borderRadius={radius.m}
               leftIcon={
                 <FontAwesome6 name="user-plus" size={24} color="white" />

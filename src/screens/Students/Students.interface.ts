@@ -5,6 +5,7 @@ export type GenericStudentType = {
     phone: string;
     address: string;
     timeRange: string;
+    classesNeeded: number;
     classAcquireQtd: number;
 }
 export interface StudentsInterface {

@@ -7,6 +7,7 @@ export const students = [
         address: "Rua A, 123",
         timeRange: "09:00-10:00",
         classAcquireQtd: 5,
+        classesNeeded: 30
     },
     {
         name: "Maria Oliveira",
@@ -15,7 +16,9 @@ export const students = [
         phone: "234-567-8901",
         address: "Rua B, 456",
         timeRange: "12:00-13:00",
-        classAcquireQtd: 25
+        classAcquireQtd: 25,
+        classesNeeded: 40
+
     },
     {
         name: "Carlos Souza",
@@ -25,6 +28,7 @@ export const students = [
         address: "Rua C, 789",
         timeRange: "14:00-15:00",
         classAcquireQtd: 15,
+        classesNeeded: 28
     },
     {
         name: "Ana Pereira",
@@ -34,6 +38,7 @@ export const students = [
         address: "Rua D, 101",
         timeRange: "00:00-23:59",
         classAcquireQtd: 35,
+        classesNeeded: 36
     },
     {
         name: "Pedro Lima",
@@ -43,5 +48,6 @@ export const students = [
         address: "Rua E, 202",
         timeRange: "10:00-11:00",
         classAcquireQtd: 19,
+        classesNeeded: 20
     }
 ]
