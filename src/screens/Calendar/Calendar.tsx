@@ -16,6 +16,7 @@ import { ImageBox } from "../../utils/restyle/ImageBox";
 import { TextBox } from "../../utils/restyle/TextBox";
 import { CalendarItemType } from "./Calendar.interface";
 import { items, openMap, styleCalendar, themeCalendar } from "./Calendar.utils";
+import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
 
 LocaleConfig.locales["pt"] = calendarPT_BR;
 LocaleConfig.defaultLocale = "pt";
@@ -112,12 +113,7 @@ export const Calendar = () => {
       justifyContent="center"
       paddingBottom="xxl"
     >
-      <ImageBox
-        source={{ uri: "https://i.imgur.com/gGqRpo4.png" }}
-        style={{ width: width * 0.3, height: height * 0.1 }}
-        alignSelf="center"
-        resizeMode="contain"
-      />
+      <LogoHeader />
       <Agenda
         showClosingKnob
         items={items}

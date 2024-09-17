@@ -14,9 +14,13 @@ import { FlatList, Linking } from "react-native";
 import { openMap } from "../Calendar/Calendar.utils";
 import { StudentsInterface } from "./Students.interface";
 import { students } from "./Students.utils";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { RootStackParamList } from "@/src/routes/Stack";
+import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
 
 export const Students = () => {
   const { control, watch } = useForm();
+  const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
   const searchText = watch("search", "");
 
   const filteredStudents = students.filter((student) =>
@@ -74,26 +78,43 @@ export const Students = () => {
       paddingVertical="xl"
       paddingHorizontal="l"
     >
-      <ImageBox
-        source={{ uri: "https://i.imgur.com/gGqRpo4.png" }}
-        style={{ width: width * 0.3, height: height * 0.1 }}
-        alignSelf="center"
-        resizeMode="contain"
-      />
+      <LogoHeader />
       <FlatList
         data={filteredStudents}
         renderItem={renderItem}
         contentContainerStyle={{ paddingBottom: height * 0.1 }}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
-          <CustomTextInput
-            name="search"
-            control={control}
-            placeholder="Pesquise o aluno"
-            rightIcon={
-              <FontAwesome6 name={"magnifying-glass"} size={24} color="black" />
-            }
-          />
+          <ViewBox
+            flexDirection="row"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <CustomTextInput
+              name="search"
+              control={control}
+              placeholder="Pesquise o aluno"
+              rightIcon={
+                <FontAwesome6
+                  name={"magnifying-glass"}
+                  size={24}
+                  color="black"
+                />
+              }
+              style={{ width: width * 0.7 }}
+            />
+            <CustomButton
+              color="red"
+              titleColor="white"
+              alignSelf="center"
+              marginTop="s"
+              borderRadius={radius.m}
+              leftIcon={
+                <FontAwesome6 name="user-plus" size={24} color="white" />
+              }
+              onPress={() => navigate("NewStudent")}
+            />
+          </ViewBox>
         }
         ListHeaderComponentStyle={{ marginBottom: spacing.m }}
       />

@@ -25,7 +25,7 @@ export const CustomTextInput = ({
         field: { onChange, onBlur, value },
         fieldState: { error },
       }) => (
-        <ViewBox width={"auto"}>
+        <ViewBox width={"100%"} style={props.style}>
           {labelInput && <TextBox variant="label">{labelInput}</TextBox>}
           <ViewBox
             flexDirection="row"
