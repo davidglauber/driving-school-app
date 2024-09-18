@@ -1,10 +1,10 @@
-export type CalendarItemType = {
+import { GenericStudentType } from "../Students/Students.interface";
+
+export interface CalendarItemType extends Pick<GenericStudentType, 'classes'> {
     name: string;
-    classroomName: string;
     id: number;
     phone: string;
-    address: string;
-    timeRange: string;
+    fullAdress: string;
 };
 export interface CalendarItemInterface {
     [key: string]: CalendarItemType[];

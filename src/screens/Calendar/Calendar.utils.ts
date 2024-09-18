@@ -1,7 +1,7 @@
 import { colors } from "@/src/theme/colors";
 import { height, width } from "@/src/utils/dimensions";
-import { CalendarItemInterface } from "./Calendar.interface";
 import { Linking, Platform } from "react-native";
+import { CalendarItemInterface } from "./Calendar.interface";
 
 export const CALENDAR_WIDTH = width * 0.92;
 export const CALENDAR_MAX_HEIGHT = height * 0.7;
@@ -24,185 +24,239 @@ export const items: CalendarItemInterface = {
   "2024-09-13": [
     {
       name: "João Silva",
-      classroomName: "Aula de Direção Básica",
       id: 1001,
       phone: "123-456-7890",
-      address: "Rua A, 123",
-      timeRange: "09:00-10:00",
+      fullAdress: "Rua A, 123",
+      classes: [
+        {
+          classStartTime: "09:00",
+          classEndTime: "10:00",
+          classDate: "2024-09-13",
+          chosenClass: { label: "Aula de Direção Básica", value: "1001" },
+        },
+      ],
     },
   ],
   "2024-09-14": [
     {
       name: "Maria Oliveira",
-      classroomName: "Aula de Direção Avançada",
       id: 1002,
       phone: "234-567-8901",
-      address: "Rua B, 456",
-      timeRange: "12:00-13:00",
+      fullAdress: "Rua B, 456",
+      classes: [
+        {
+          classStartTime: "12:00",
+          classEndTime: "13:00",
+          classDate: "2024-09-14",
+          chosenClass: { label: "Aula de Direção Avançada", value: "1002" },
+        },
+      ],
     },
     {
       name: "Carlos Souza",
-      classroomName: "Aula de Estacionamento",
       id: 1003,
       phone: "345-678-9012",
-      address: "Rua C, 789",
-      timeRange: "14:00-15:00",
+      fullAdress: "Rua C, 789",
+      classes: [
+        {
+          classStartTime: "14:00",
+          classEndTime: "15:00",
+          classDate: "2024-09-14",
+          chosenClass: { label: "Aula de Estacionamento", value: "1003" },
+        },
+      ],
     },
   ],
   "2024-09-15": [
     {
       name: "Ana Pereira",
-      classroomName: "Aula de Direção Noturna",
       id: 1004,
       phone: "456-789-0123",
-      address: "Rua D, 101",
-      timeRange: "00:00-23:59",
+      fullAdress: "Rua D, 101",
+      classes: [
+        {
+          classStartTime: "00:00",
+          classEndTime: "23:59",
+          classDate: "2024-09-15",
+          chosenClass: { label: "Aula de Direção Noturna", value: "1004" },
+        },
+      ],
     },
   ],
   "2024-09-16": [
     {
       name: "Pedro Lima da Silva Souza Rodrigues",
-      classroomName: "Aula de Direção em Rodovia",
       id: 1005,
       phone: "567-890-1234",
-      address: "Rua E, 202",
-      timeRange: "10:00-11:00",
+      fullAdress: "Rua E, 202",
+      classes: [
+        {
+          classStartTime: "10:00",
+          classEndTime: "11:00",
+          classDate: "2024-09-16",
+          chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" },
+        },
+      ],
     },
     {
       name: "Fernanda Costa",
-      classroomName: "Aula de Direção em Trânsito",
       id: 1006,
       phone: "678-901-2345",
-      address: "Rua F, 303",
-      timeRange: "11:00-12:00",
+      fullAdress: "Rua F, 303",
+      classes: [
+        {
+          classStartTime: "11:00",
+          classEndTime: "12:00",
+          classDate: "2024-09-16",
+          chosenClass: { label: "Aula de Direção em Trânsito", value: "1006" },
+        },
+      ],
     },
   ],
   "2024-09-17": [
     {
       name: "Lucas Almeida",
-      classroomName: "Aula de Direção Básica",
       id: 1007,
       phone: "789-012-3456",
-      address: "Rua G, 404",
-      timeRange: "09:00-10:00",
-    },
-    {
-      name: "Lucas Almeida",
-      classroomName: "Aula de Direção Básica",
-      id: 1008,
-      phone: "789-012-3456",
-      address: "Rua G, 404",
-      timeRange: "10:00-11:00",
-    },
-    {
-      name: "Lucas Almeida",
-      classroomName: "Aula de Direção Básica",
-      id: 1009,
-      phone: "789-012-3456",
-      address: "Rua G, 404",
-      timeRange: "11:00-12:00",
-    },
-    {
-      name: "Lucas Almeida",
-      classroomName: "Aula de Direção Básica",
-      id: 1010,
-      phone: "789-012-3456",
-      address: "Rua G, 404",
-      timeRange: "12:00-13:00",
-    },
-    {
-      name: "Lucas Almeida",
-      classroomName: "Aula de Direção Básica",
-      id: 1011,
-      phone: "789-012-3456",
-      address: "Rua G, 404",
-      timeRange: "13:00-14:00",
-    },
-    {
-      name: "Lucas Almeida",
-      classroomName: "Aula de Direção Básica",
-      id: 1012,
-      phone: "789-012-3456",
-      address: "Rua G, 404",
-      timeRange: "14:00-15:00",
-    },
-    {
-      name: "Lucas Almeida",
-      classroomName: "Aula de Direção Básica",
-      id: 1013,
-      phone: "789-012-3456",
-      address: "Rua G, 404",
-      timeRange: "15:00-16:00",
-    },
-    {
-      name: "Lucas Almeida",
-      classroomName: "Aula de Direção Básica",
-      id: 1014,
-      phone: "789-012-3456",
-      address: "Rua G, 404",
-      timeRange: "16:00-17:00",
-    },
-    {
-      name: "Lucas Almeida",
-      classroomName: "Aula de Direção Básica",
-      id: 1015,
-      phone: "789-012-3456",
-      address: "Rua G, 404",
-      timeRange: "17:00-18:00",
-    },
-    {
-      name: "Lucas Almeida",
-      classroomName: "Aula de Direção Básica",
-      id: 1016,
-      phone: "789-012-3456",
-      address: "Rua G, 404",
-      timeRange: "18:00-19:00",
+      fullAdress: "Rua G, 404",
+      classes: [
+        {
+          classStartTime: "09:00",
+          classEndTime: "10:00",
+          classDate: "2024-09-17",
+          chosenClass: { label: "Aula de Direção Básica", value: "1007" },
+        },
+        {
+          classStartTime: "10:00",
+          classEndTime: "11:00",
+          classDate: "2024-09-17",
+          chosenClass: { label: "Aula de Direção Básica", value: "1008" },
+        },
+        {
+          classStartTime: "11:00",
+          classEndTime: "12:00",
+          classDate: "2024-09-17",
+          chosenClass: { label: "Aula de Direção Básica", value: "1009" },
+        },
+        {
+          classStartTime: "12:00",
+          classEndTime: "13:00",
+          classDate: "2024-09-17",
+          chosenClass: { label: "Aula de Direção Básica", value: "1010" },
+        },
+        {
+          classStartTime: "13:00",
+          classEndTime: "14:00",
+          classDate: "2024-09-17",
+          chosenClass: { label: "Aula de Direção Básica", value: "1011" },
+        },
+        {
+          classStartTime: "14:00",
+          classEndTime: "15:00",
+          classDate: "2024-09-17",
+          chosenClass: { label: "Aula de Direção Básica", value: "1012" },
+        },
+        {
+          classStartTime: "15:00",
+          classEndTime: "16:00",
+          classDate: "2024-09-17",
+          chosenClass: { label: "Aula de Direção Básica", value: "1013" },
+        },
+        {
+          classStartTime: "16:00",
+          classEndTime: "17:00",
+          classDate: "2024-09-17",
+          chosenClass: { label: "Aula de Direção Básica", value: "1014" },
+        },
+        {
+          classStartTime: "17:00",
+          classEndTime: "18:00",
+          classDate: "2024-09-17",
+          chosenClass: { label: "Aula de Direção Básica", value: "1015" },
+        },
+        {
+          classStartTime: "18:00",
+          classEndTime: "19:00",
+          classDate: "2024-09-17",
+          chosenClass: { label: "Aula de Direção Básica", value: "1016" },
+        },
+      ],
     },
   ],
   "2024-09-18": [
     {
       name: "Juliana Martins",
-      classroomName: "Aula de Direção Avançada",
       id: 1017,
       phone: "890-123-4567",
-      address: "Rua H, 505",
-      timeRange: "09:00-10:00",
+      fullAdress: "Rua H, 505",
+      classes: [
+        {
+          classStartTime: "09:00",
+          classEndTime: "10:00",
+          classDate: "2024-09-18",
+          chosenClass: { label: "Aula de Direção Avançada", value: "1017" },
+        },
+      ],
     },
     {
       name: "Roberto Fernandes",
-      classroomName: "Aula de Direção em Trânsito",
       id: 1018,
       phone: "901-234-5678",
-      address: "Rua I, 606",
-      timeRange: "10:00-11:00",
+      fullAdress: "Rua I, 606",
+      classes: [
+        {
+          classStartTime: "10:00",
+          classEndTime: "11:00",
+          classDate: "2024-09-18",
+          chosenClass: { label: "Aula de Direção em Trânsito", value: "1018" },
+        },
+      ],
     },
   ],
   "2024-09-19": [
     {
       name: "Patrícia Rodrigues",
-      classroomName: "Aula de Direção em Rodovia",
       id: 1019,
       phone: "012-345-6789",
-      address: "Rua J, 707",
-      timeRange: "14:00-15:30",
+      fullAdress: "Rua J, 707",
+      classes: [
+        {
+          classStartTime: "14:00",
+          classEndTime: "15:30",
+          classDate: "2024-09-19",
+          chosenClass: { label: "Aula de Direção em Rodovia", value: "1019" },
+        },
+      ],
     },
   ],
   "2024-09-20": [
     {
       name: "Ricardo Santos",
-      classroomName: "Aula de Direção Noturna",
       id: 1020,
       phone: "123-456-7890",
-      address: "Rua K, 808",
-      timeRange: "10:00-11:00",
+      fullAdress: "Rua K, 808",
+      classes: [
+        {
+          classStartTime: "10:00",
+          classEndTime: "11:00",
+          classDate: "2024-09-20",
+          chosenClass: { label: "Aula de Direção Noturna", value: "1020" },
+        },
+      ],
     },
     {
       name: "Beatriz Lima",
-      classroomName: "Aula de Estacionamento",
       id: 1021,
       phone: "234-567-8901",
-      address: "Rua L, 909",
-      timeRange: "18:00-19:00",
+      fullAdress: "Rua L, 909",
+      classes: [
+        {
+          classStartTime: "18:00",
+          classEndTime: "19:00",
+          classDate: "2024-09-20",
+          chosenClass: { label: "Aula de Estacionamento", value: "1021" },
+        },
+      ],
     },
   ],
 };

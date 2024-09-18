@@ -1,9 +1,10 @@
-import React from "react";
-import { height, width } from "../../utils/dimensions";
+import React, { useState } from "react";
+import { height } from "../../utils/dimensions";
 import { ViewBox } from "../../utils/restyle/ViewBox";
 
 import { CustomButton } from "@/src/components/CustomButton/CustomButton";
 import { CustomDivider } from "@/src/components/CustomDivider/CustomDivider";
+import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
 import { colors } from "@/src/theme/colors";
 import { TouchableOpacityBox } from "@/src/utils/restyle/TouchableOpacityBox";
 import { FontAwesome6 } from "@expo/vector-icons";
@@ -12,16 +13,16 @@ import { Linking } from "react-native";
 import { Agenda, DateData, LocaleConfig } from "react-native-calendars";
 import { radius } from "../../theme/radius";
 import { calendarPT_BR } from "../../utils/localeCalendarConfig";
-import { ImageBox } from "../../utils/restyle/ImageBox";
 import { TextBox } from "../../utils/restyle/TextBox";
 import { CalendarItemType } from "./Calendar.interface";
 import { items, openMap, styleCalendar, themeCalendar } from "./Calendar.utils";
-import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
 
 LocaleConfig.locales["pt"] = calendarPT_BR;
 LocaleConfig.defaultLocale = "pt";
 
 export const Calendar = () => {
+  const [selectedDay, setSelectedDay] = useState<DateData | null>(null);
+
   const renderItem = ({
     item,
     index,
@@ -38,26 +39,30 @@ export const Calendar = () => {
       borderRadius={radius.m}
     >
       <TextBox variant="titleCardCalendar">{item.name}</TextBox>
-      <TextBox>{item.classroomName}</TextBox>
-
-      <ViewBox
-        flexDirection="row"
-        columnGap="xs"
-        mt="l"
-        justifyContent="space-between"
-      >
-        <FontAwesome6 name="clock" size={22} color={colors.red} />
-        <TextBox variant="textCardCalendar">{item.timeRange}</TextBox>
-      </ViewBox>
+      {item.classes &&
+        item.classes.map((classItem, classIndex) => (
+          <ViewBox key={classIndex}>
+            <TextBox>{classItem.chosenClass.label}</TextBox>
+            <ViewBox
+              flexDirection="row"
+              columnGap="xs"
+              mt="l"
+              justifyContent="space-between"
+            >
+              <FontAwesome6 name="clock" size={22} color={colors.red} />
+              <TextBox variant="textCardCalendar">{`${classItem.classStartTime} - ${classItem.classEndTime}`}</TextBox>
+            </ViewBox>
+          </ViewBox>
+        ))}
       <TouchableOpacityBox
         flexDirection="row"
         columnGap="xs"
         mt="s"
         justifyContent="space-between"
-        onPress={() => openMap(item.address)}
+        onPress={() => openMap(item.fullAdress)}
       >
         <FontAwesome6 name="location-dot" size={22} color={colors.red} />
-        <TextBox variant="textCardCalendar">{item.address}</TextBox>
+        <TextBox variant="textCardCalendar">{item.fullAdress}</TextBox>
       </TouchableOpacityBox>
 
       <CustomDivider />
@@ -121,9 +126,11 @@ export const Calendar = () => {
           console.log(calendarOpened);
         }}
         onDayPress={(day: DateData) => {
+          setSelectedDay(day);
           console.log("day pressed", day);
         }}
         onDayChange={(day: DateData) => {
+          setSelectedDay(day);
           console.log("day changed", day);
         }}
         pastScrollRange={24}
