@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { height } from "../../utils/dimensions";
 import { ViewBox } from "../../utils/restyle/ViewBox";
 
@@ -21,81 +21,78 @@ LocaleConfig.locales["pt"] = calendarPT_BR;
 LocaleConfig.defaultLocale = "pt";
 
 export const Calendar = () => {
-  const [selectedDay, setSelectedDay] = useState<DateData | null>(null);
-
   const renderItem = ({
     item,
     index,
   }: {
     item: CalendarItemType;
     index: number;
-  }) => (
-    <ViewBox
-      width="95%"
-      key={index}
-      bg="white"
-      padding="m"
-      marginVertical="s"
-      borderRadius={radius.m}
-    >
-      <TextBox variant="titleCardCalendar">{item.name}</TextBox>
-      {item.classes &&
-        item.classes.map((classItem, classIndex) => (
-          <ViewBox key={classIndex}>
-            <TextBox>{classItem.chosenClass.label}</TextBox>
-            <ViewBox
-              flexDirection="row"
-              columnGap="xs"
-              mt="l"
-              justifyContent="space-between"
-            >
-              <FontAwesome6 name="clock" size={22} color={colors.red} />
-              <TextBox variant="textCardCalendar">{`${classItem.classStartTime} - ${classItem.classEndTime}`}</TextBox>
-            </ViewBox>
-          </ViewBox>
-        ))}
-      <TouchableOpacityBox
-        flexDirection="row"
-        columnGap="xs"
-        mt="s"
-        justifyContent="space-between"
-        onPress={() => openMap(item.fullAdress)}
+  }) =>
+    item.classes &&
+    item.classes.map((classItem, classIndex) => (
+      <ViewBox
+        width="95%"
+        key={`${index}-${classIndex}`}
+        bg="white"
+        padding="m"
+        marginVertical="s"
+        borderRadius={radius.m}
       >
-        <FontAwesome6 name="location-dot" size={22} color={colors.red} />
-        <TextBox variant="textCardCalendar">{item.fullAdress}</TextBox>
-      </TouchableOpacityBox>
-
-      <CustomDivider />
-
-      <ViewBox marginTop="l" rowGap="s">
+        <TextBox variant="titleCardCalendar">{item.name}</TextBox>
+        <ViewBox>
+          <TextBox>{classItem.chosenClass.label}</TextBox>
+          <ViewBox
+            flexDirection="row"
+            columnGap="xs"
+            mt="l"
+            justifyContent="space-between"
+          >
+            <FontAwesome6 name="clock" size={22} color={colors.red} />
+            <TextBox variant="textCardCalendar">{`${classItem.classStartTime} - ${classItem.classEndTime}`}</TextBox>
+          </ViewBox>
+        </ViewBox>
         <TouchableOpacityBox
           flexDirection="row"
           columnGap="xs"
+          mt="s"
           justifyContent="space-between"
-          onPress={() => Linking.openURL(`tel:${item.phone}`)}
+          onPress={() => openMap(item.fullAdress)}
         >
-          <FontAwesome6 name="phone" size={18} color={colors.red} />
-          <TextBox variant="textCardCalendar">{item.phone}</TextBox>
+          <FontAwesome6 name="location-dot" size={22} color={colors.red} />
+          <TextBox variant="textCardCalendar">{item.fullAdress}</TextBox>
         </TouchableOpacityBox>
 
-        <ViewBox
-          flexDirection="row"
-          columnGap="xs"
-          justifyContent="space-between"
-        >
-          <FontAwesome6 name="id-card-clip" size={18} color={colors.red} />
-          <TextBox variant="textCardCalendar">{item.id}</TextBox>
-        </ViewBox>
+        <CustomDivider />
 
-        <CustomButton
-          color="red"
-          titleColor="white"
-          title="Ver Perfil"
-          onPress={() => console.log("ver perfil")}
-        />
+        <ViewBox marginTop="l" rowGap="s">
+          <TouchableOpacityBox
+            flexDirection="row"
+            columnGap="xs"
+            justifyContent="space-between"
+            onPress={() => Linking.openURL(`tel:${item.phone}`)}
+          >
+            <FontAwesome6 name="phone" size={18} color={colors.red} />
+            <TextBox variant="textCardCalendar">{item.phone}</TextBox>
+          </TouchableOpacityBox>
+
+          <ViewBox
+            flexDirection="row"
+            columnGap="xs"
+            justifyContent="space-between"
+          >
+            <FontAwesome6 name="id-card-clip" size={18} color={colors.red} />
+            <TextBox variant="textCardCalendar">{item.id}</TextBox>
+          </ViewBox>
+
+          <CustomButton
+            color="red"
+            titleColor="white"
+            title="Ver Perfil"
+            onPress={() => console.log("ver perfil")}
+          />
+        </ViewBox>
       </ViewBox>
-    </ViewBox>
-  );
+    ));
 
   const renderEmptyData = () => (
     <ViewBox justifyContent="center" alignItems="center">
@@ -126,11 +123,9 @@ export const Calendar = () => {
           console.log(calendarOpened);
         }}
         onDayPress={(day: DateData) => {
-          setSelectedDay(day);
           console.log("day pressed", day);
         }}
         onDayChange={(day: DateData) => {
-          setSelectedDay(day);
           console.log("day changed", day);
         }}
         pastScrollRange={24}
