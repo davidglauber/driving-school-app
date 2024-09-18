@@ -28,7 +28,7 @@ export const Students = () => {
     student.name.toLowerCase().includes(searchText.toLowerCase())
   );
   const renderItem = ({ item, index }: StudentsInterface) => {
-    const progress = item.classAcquireQtd / item.classesNeeded;
+    const progress = item.classesAcquired / item.classesNeeded;
 
     return (
       <ViewBox
@@ -40,7 +40,7 @@ export const Students = () => {
       >
         <TextBox variant="titleCardCalendar">{item.name}</TextBox>
         <TextBox variant="textCardCalendar">
-          {item.classAcquireQtd} de {item.classesNeeded} aulas concluídas -{" "}
+          {item.classesAcquired} de {item.classesNeeded} aulas concluídas -{" "}
           {Math.round(progress * 100)}%
         </TextBox>
 
@@ -57,7 +57,7 @@ export const Students = () => {
         <ViewBox mt="m" flexDirection="row" justifyContent="space-between">
           <CustomButton
             color="white"
-            onPress={() => openMap(item.address)}
+            onPress={() => openMap(item.fullAddress)}
             leftIcon={
               <FontAwesome6 name="map-location-dot" size={24} color="black" />
             }

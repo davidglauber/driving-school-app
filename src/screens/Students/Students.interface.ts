@@ -5,14 +5,15 @@ export type StudentClass = {
     chosenClass: {label: string, value: string};
 }
 export type GenericStudentType = {
+    id: string;
+    cpf: string;
     name: string;
-    classroomName: string;
-    enrollId: number;
+    cep: string;
     phone: string;
-    address: string;
-    timeRange: string;
+    fullAddress: string;
+    feelingDriving: string;
     classesNeeded: number;
-    classAcquireQtd: number;
+    classesAcquired: number;
     psicolocicalEvaluationRequired: number;
     psicolocicalEvaluationAcquired: number;
     classes?: StudentClass[];

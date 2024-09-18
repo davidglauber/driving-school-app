@@ -1,7 +1,7 @@
 export type CalendarItemType = {
     name: string;
     classroomName: string;
-    enrollId: number;
+    id: number;
     phone: string;
     address: string;
     timeRange: string;

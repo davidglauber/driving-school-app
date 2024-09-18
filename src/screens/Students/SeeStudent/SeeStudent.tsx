@@ -52,7 +52,7 @@ const ClassesList = ({ classes }: Pick<GenericStudentType, "classes">) => {
 export const SeeStudent = () => {
   const { params }: RouteProp<RootStackParamList, "SeeStudent"> = useRoute();
   const student = params.student;
-  const progress = student.classAcquireQtd / student.classesNeeded;
+  const progress = student.classesAcquired / student.classesNeeded;
 
   return (
     <ViewBox height={height} bg="white" paddingHorizontal="l">
@@ -94,17 +94,13 @@ export const SeeStudent = () => {
           <ClassesList classes={student.classes} />
           <CustomDivider />
 
-          <CustomLabelText
-            label="ID de Matrícula"
-            text={student.enrollId}
-            mb="s"
-          />
+          <CustomLabelText label="ID de Matrícula" text={student.id} mb="s" />
           <PressableBox onPress={() => Linking.openURL(`tel:${student.phone}`)}>
             <CustomLabelText label="Telefone" text={student.phone} mb="s" />
           </PressableBox>
 
-          <PressableBox onPress={() => openMap(student.address)}>
-            <CustomLabelText label="Endereço" text={student.address} />
+          <PressableBox onPress={() => openMap(student.fullAddress)}>
+            <CustomLabelText label="Endereço" text={student.fullAddress} />
           </PressableBox>
 
           <CustomDivider />
@@ -116,16 +112,16 @@ export const SeeStudent = () => {
           />
           <CustomLabelText
             label="Aulas Adquiridas"
-            text={student.classAcquireQtd}
+            text={student.classesAcquired}
             mb="s"
           />
           <CustomLabelText
-            label="Availiações Psicológicas Necessárias"
+            label="Avaliações Psicológicas Necessárias"
             text={student.psicolocicalEvaluationRequired}
             mb="s"
           />
           <CustomLabelText
-            label="Availiações Psicológicas Adquiridas"
+            label="Avaliações Psicológicas Adquiridas"
             text={student.psicolocicalEvaluationAcquired}
           />
 

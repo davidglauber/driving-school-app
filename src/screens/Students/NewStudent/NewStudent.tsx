@@ -4,7 +4,6 @@ import { CustomTextInput } from "@/src/components/CustomTextInput/CustomTextInpu
 import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
 import { registerStudentSchema } from "@/src/schemas/forms";
 import { spacing } from "@/src/theme/spacing";
-import { height } from "@/src/utils/dimensions";
 import { ScrollViewBox } from "@/src/utils/restyle/ScrollViewBox";
 import { ViewBox } from "@/src/utils/restyle/ViewBox";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,7 +35,11 @@ export const NewStudent = () => {
   }, [data, setValue]);
 
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    console.log("hook form data", data);
+    const dataToSend = {
+      id: Math.random(), //it will come from firebase automatically
+      ...data,
+    };
+    console.log("hook form data", dataToSend);
   };
 
   return (
@@ -72,6 +75,14 @@ export const NewStudent = () => {
           <ViewBox marginVertical="xs" />
 
           <CustomTextInput
+            name="phone"
+            control={control}
+            labelInput="*Número de Telefone"
+            placeholder="Digite aqui"
+            keyboardType="number-pad"
+          />
+          <ViewBox marginVertical="xs" />
+          <CustomTextInput
             name="cep"
             control={control}
             labelInput="*CEP"
@@ -99,7 +110,7 @@ export const NewStudent = () => {
           <ViewBox marginVertical="xs" />
 
           <CustomTextInput
-            name="necessaryClasses"
+            name="classesNeeded"
             control={control}
             labelInput="*Aulas necessárias"
             placeholder="Digite aqui"
@@ -109,7 +120,7 @@ export const NewStudent = () => {
           <ViewBox marginVertical="xs" />
 
           <CustomTextInput
-            name="boughtClasses"
+            name="classesAcquired"
             control={control}
             labelInput="*Aulas adquiridas"
             placeholder="Digite aqui"

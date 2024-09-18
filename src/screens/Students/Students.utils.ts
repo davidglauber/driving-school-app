@@ -2,28 +2,31 @@ import { GenericStudentType } from "./Students.interface";
 
 export const students: GenericStudentType[] = [
     {
+        id: "1001",
+        cpf: "123.456.789-00",
         name: "João Silva",
-        classroomName: "Aula de Direção Básica",
-        enrollId: 1001,
+        cep: "12345-678",
         phone: "123-456-7890",
-        address: "Rua A, 123",
-        timeRange: "09:00-10:00",
-        classAcquireQtd: 5,
+        fullAddress: "Rua A, 123",
+        feelingDriving: "Confiante",
         classesNeeded: 30,
-        psicolocicalEvaluationAcquired: 10,
+        classesAcquired: 5,
         psicolocicalEvaluationRequired: 15,
+        psicolocicalEvaluationAcquired: 10,
+        classes: []
     },
     {
+        id: "1002",
+        cpf: "234.567.890-11",
         name: "Maria Oliveira",
-        classroomName: "Aula de Direção Avançada",
-        enrollId: 1002,
+        cep: "23456-789",
         phone: "234-567-8901",
-        address: "Rua B, 456",
-        timeRange: "12:00-13:00",
-        classAcquireQtd: 25,
+        fullAddress: "Rua B, 456",
+        feelingDriving: "Ansiosa",
         classesNeeded: 40,
-        psicolocicalEvaluationAcquired: 10,
+        classesAcquired: 25,
         psicolocicalEvaluationRequired: 15,
+        psicolocicalEvaluationAcquired: 10,
         classes: [
             {
                 classStartTime: "10:00",
@@ -70,16 +73,17 @@ export const students: GenericStudentType[] = [
         ]
     },
     {
+        id: "1003",
+        cpf: "345.678.901-22",
         name: "Carlos Souza",
-        classroomName: "Aula de Estacionamento",
-        enrollId: 1003,
+        cep: "34567-890",
         phone: "345-678-9012",
-        address: "Rua C, 789",
-        timeRange: "14:00-15:00",
-        classAcquireQtd: 15,
+        fullAddress: "Rua C, 789",
+        feelingDriving: "Calmo",
         classesNeeded: 28,
-        psicolocicalEvaluationAcquired: 10,
+        classesAcquired: 15,
         psicolocicalEvaluationRequired: 15,
+        psicolocicalEvaluationAcquired: 10,
         classes: [
             {
                 classStartTime: "10:00",
@@ -126,16 +130,17 @@ export const students: GenericStudentType[] = [
         ]
     },
     {
+        id: "1004",
+        cpf: "456.789.012-33",
         name: "Ana Pereira",
-        classroomName: "Aula de Direção Noturna",
-        enrollId: 1004,
+        cep: "45678-901",
         phone: "456-789-0123",
-        address: "Rua D, 101",
-        timeRange: "00:00-23:59",
-        classAcquireQtd: 35,
+        fullAddress: "Rua D, 101",
+        feelingDriving: "Confiante",
         classesNeeded: 36,
-        psicolocicalEvaluationAcquired: 10,
+        classesAcquired: 35,
         psicolocicalEvaluationRequired: 15,
+        psicolocicalEvaluationAcquired: 10,
         classes: [
             {
                 classStartTime: "10:00",
@@ -182,16 +187,17 @@ export const students: GenericStudentType[] = [
         ]
     },
     {
+        id: "1005",
+        cpf: "567.890.123-44",
         name: "Pedro Lima da Silva Souza Rodrigues",
-        classroomName: "Aula de Direção em Rodovia",
-        enrollId: 1005,
+        cep: "56789-012",
         phone: "567-890-1234",
-        address: "Rua E, 202",
-        timeRange: "10:00-11:00",
-        classAcquireQtd: 19,
+        fullAddress: "Rua E, 202",
+        feelingDriving: "Nervoso",
         classesNeeded: 20,
-        psicolocicalEvaluationAcquired: 10,
+        classesAcquired: 19,
         psicolocicalEvaluationRequired: 15,
+        psicolocicalEvaluationAcquired: 10,
         classes: [
             {
                 classStartTime: "10:00",
@@ -237,4 +243,4 @@ export const students: GenericStudentType[] = [
             },
         ]
     }
-]
+];

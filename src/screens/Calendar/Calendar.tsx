@@ -79,7 +79,7 @@ export const Calendar = () => {
           justifyContent="space-between"
         >
           <FontAwesome6 name="id-card-clip" size={18} color={colors.red} />
-          <TextBox variant="textCardCalendar">{item.enrollId}</TextBox>
+          <TextBox variant="textCardCalendar">{item.id}</TextBox>
         </ViewBox>
 
         <CustomButton
