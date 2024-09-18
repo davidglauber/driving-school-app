@@ -71,7 +71,11 @@ export const SeeStudent = () => {
             {student.name}
           </TextBox>
 
-          <ViewBox flexDirection="row" alignItems="center">
+          <ViewBox
+            flexDirection="row"
+            alignItems="center"
+            justifyContent="space-between"
+          >
             <ProgressBar
               style={{ marginRight: spacing.s }}
               color={colors.red}
