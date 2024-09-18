@@ -37,6 +37,7 @@ export const NewStudent = () => {
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
     const dataToSend = {
       id: Math.random(), //it will come from firebase automatically
+      instructor: "/instructor/idofinstructor", // it will come from the firebase collection reference
       ...data,
     };
     console.log("hook form data", dataToSend);
