@@ -16,15 +16,20 @@ export const textVariants: TextVariantsInterface = {
         fontSize: 22,
         color: "black"
     },
+    titleDateUserCard: {
+        fontFamily: "SFBold",
+        fontSize: 18,
+        color: "black"
+    },
     textCardCalendar: {
         fontFamily: "SFBold",
         fontSize: 16,
         color: "red"
     },
     notFoundText: {
-        fontFamily: "SFRegular",
+        fontFamily: "SFMedium",
         fontSize: 24,
-        color: "black"
+        color: "red"
     },
     defaults: {
         fontFamily: "SFMedium",

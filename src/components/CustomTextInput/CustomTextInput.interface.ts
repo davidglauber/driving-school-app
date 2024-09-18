@@ -9,4 +9,5 @@ export interface TextInputInterface extends Omit<TextInputProps, 'value'> {
     rightIcon?: React.ReactNode;
     onLeftIconPress?: () => void;
     onRightIconPress?: () => void;
+    isLoading?: boolean;
 }

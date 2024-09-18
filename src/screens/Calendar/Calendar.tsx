@@ -1,9 +1,10 @@
 import React from "react";
-import { height, width } from "../../utils/dimensions";
+import { height } from "../../utils/dimensions";
 import { ViewBox } from "../../utils/restyle/ViewBox";
 
 import { CustomButton } from "@/src/components/CustomButton/CustomButton";
 import { CustomDivider } from "@/src/components/CustomDivider/CustomDivider";
+import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
 import { colors } from "@/src/theme/colors";
 import { TouchableOpacityBox } from "@/src/utils/restyle/TouchableOpacityBox";
 import { FontAwesome6 } from "@expo/vector-icons";
@@ -12,7 +13,6 @@ import { Linking } from "react-native";
 import { Agenda, DateData, LocaleConfig } from "react-native-calendars";
 import { radius } from "../../theme/radius";
 import { calendarPT_BR } from "../../utils/localeCalendarConfig";
-import { ImageBox } from "../../utils/restyle/ImageBox";
 import { TextBox } from "../../utils/restyle/TextBox";
 import { CalendarItemType } from "./Calendar.interface";
 import { items, openMap, styleCalendar, themeCalendar } from "./Calendar.utils";
@@ -27,69 +27,72 @@ export const Calendar = () => {
   }: {
     item: CalendarItemType;
     index: number;
-  }) => (
-    <ViewBox
-      width="95%"
-      key={index}
-      bg="white"
-      padding="m"
-      marginVertical="s"
-      borderRadius={radius.m}
-    >
-      <TextBox variant="titleCardCalendar">{item.name}</TextBox>
-      <TextBox>{item.classroomName}</TextBox>
-
+  }) =>
+    item.classes &&
+    item.classes.map((classItem, classIndex) => (
       <ViewBox
-        flexDirection="row"
-        columnGap="xs"
-        mt="l"
-        justifyContent="space-between"
+        width="95%"
+        key={`${index}-${classIndex}`}
+        bg="white"
+        padding="m"
+        marginVertical="s"
+        borderRadius={radius.m}
       >
-        <FontAwesome6 name="clock" size={22} color={colors.red} />
-        <TextBox variant="textCardCalendar">{item.timeRange}</TextBox>
-      </ViewBox>
-      <TouchableOpacityBox
-        flexDirection="row"
-        columnGap="xs"
-        mt="s"
-        justifyContent="space-between"
-        onPress={() => openMap(item.address)}
-      >
-        <FontAwesome6 name="location-dot" size={22} color={colors.red} />
-        <TextBox variant="textCardCalendar">{item.address}</TextBox>
-      </TouchableOpacityBox>
-
-      <CustomDivider />
-
-      <ViewBox marginTop="l" rowGap="s">
+        <TextBox variant="titleCardCalendar">{item.name}</TextBox>
+        <ViewBox>
+          <TextBox>{classItem.chosenClass.label}</TextBox>
+          <ViewBox
+            flexDirection="row"
+            columnGap="xs"
+            mt="l"
+            justifyContent="space-between"
+          >
+            <FontAwesome6 name="clock" size={22} color={colors.red} />
+            <TextBox variant="textCardCalendar">{`${classItem.classStartTime} - ${classItem.classEndTime}`}</TextBox>
+          </ViewBox>
+        </ViewBox>
         <TouchableOpacityBox
           flexDirection="row"
           columnGap="xs"
+          mt="s"
           justifyContent="space-between"
-          onPress={() => Linking.openURL(`tel:${item.phone}`)}
+          onPress={() => openMap(item.fullAdress)}
         >
-          <FontAwesome6 name="phone" size={18} color={colors.red} />
-          <TextBox variant="textCardCalendar">{item.phone}</TextBox>
+          <FontAwesome6 name="location-dot" size={22} color={colors.red} />
+          <TextBox variant="textCardCalendar">{item.fullAdress}</TextBox>
         </TouchableOpacityBox>
 
-        <ViewBox
-          flexDirection="row"
-          columnGap="xs"
-          justifyContent="space-between"
-        >
-          <FontAwesome6 name="id-card-clip" size={18} color={colors.red} />
-          <TextBox variant="textCardCalendar">{item.enrollId}</TextBox>
-        </ViewBox>
+        <CustomDivider />
 
-        <CustomButton
-          color="red"
-          titleColor="white"
-          title="Ver Perfil"
-          onPress={() => console.log("ver perfil")}
-        />
+        <ViewBox marginTop="l" rowGap="s">
+          <TouchableOpacityBox
+            flexDirection="row"
+            columnGap="xs"
+            justifyContent="space-between"
+            onPress={() => Linking.openURL(`tel:${item.phone}`)}
+          >
+            <FontAwesome6 name="phone" size={18} color={colors.red} />
+            <TextBox variant="textCardCalendar">{item.phone}</TextBox>
+          </TouchableOpacityBox>
+
+          <ViewBox
+            flexDirection="row"
+            columnGap="xs"
+            justifyContent="space-between"
+          >
+            <FontAwesome6 name="id-card-clip" size={18} color={colors.red} />
+            <TextBox variant="textCardCalendar">{item.id}</TextBox>
+          </ViewBox>
+
+          <CustomButton
+            color="red"
+            titleColor="white"
+            title="Ver Perfil"
+            onPress={() => console.log("ver perfil")}
+          />
+        </ViewBox>
       </ViewBox>
-    </ViewBox>
-  );
+    ));
 
   const renderEmptyData = () => (
     <ViewBox justifyContent="center" alignItems="center">
@@ -112,12 +115,7 @@ export const Calendar = () => {
       justifyContent="center"
       paddingBottom="xxl"
     >
-      <ImageBox
-        source={{ uri: "https://i.imgur.com/gGqRpo4.png" }}
-        style={{ width: width * 0.3, height: height * 0.1 }}
-        alignSelf="center"
-        resizeMode="contain"
-      />
+      <LogoHeader />
       <Agenda
         showClosingKnob
         items={items}

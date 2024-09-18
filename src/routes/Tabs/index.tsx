@@ -1,7 +1,6 @@
 import { Calendar } from "@/src/screens/Calendar/Calendar";
-import { Home } from "@/src/screens/Home";
 import { Settings } from "@/src/screens/Settings";
-import { Students } from "@/src/screens/Students";
+import { Students } from "@/src/screens/Students/Students";
 import { colors } from "@/src/theme/colors";
 import { height } from "@/src/utils/dimensions";
 import { FontAwesome6 } from "@expo/vector-icons";
@@ -19,11 +18,12 @@ export default () => (
   <Tabs.Navigator
     initialRouteName="Calendar"
     tabBarOptions={{
-      activeTintColor: "#ffffff",
-      inactiveTintColor: "#223322",
-      activeBackgroundColor: colors.red,
+      activeTintColor: colors.red,
+      inactiveTintColor: colors.white,
+      activeBackgroundColor: colors.white,
       tabStyle: {
         height: height * 0.09,
+        backgroundColor: colors.red,
       },
       labelStyle: {
         fontFamily: "SFBold",
@@ -45,7 +45,7 @@ export default () => (
           <FontAwesome6
             name="calendar"
             size={size ? size : 24}
-            color={focused ? color : "#222222"}
+            color={focused ? color : "#FFF"}
             focused={focused}
           />
         ),
@@ -60,7 +60,7 @@ export default () => (
           <FontAwesome6
             name="graduation-cap"
             size={size ? size : 24}
-            color={focused ? color : "#222222"}
+            color={focused ? color : "#FFF"}
             focused={focused}
           />
         ),
@@ -75,7 +75,7 @@ export default () => (
           <FontAwesome6
             name="gears"
             size={size ? size : 24}
-            color={focused ? color : "#222222"}
+            color={focused ? color : "#FFF"}
             focused={focused}
           />
         ),

@@ -5,14 +5,15 @@ import { CustomDividerInterface } from "./CustomDivider.interface";
 
 export const CustomDivider = ({
   borderColor,
-  marginTop,
+  marginVertical,
 }: CustomDividerInterface) => {
   return (
     <ViewBox
+      width={"100%"}
       borderWidth={1}
       borderColor={borderColor || "gray"}
       borderRadius={radius.m}
-      mt={marginTop || "m"}
+      marginVertical={marginVertical || "m"}
     />
   );
 };
