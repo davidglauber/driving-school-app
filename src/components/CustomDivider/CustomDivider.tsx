@@ -9,6 +9,7 @@ export const CustomDivider = ({
 }: CustomDividerInterface) => {
   return (
     <ViewBox
+      width={"100%"}
       borderWidth={1}
       borderColor={borderColor || "gray"}
       borderRadius={radius.m}

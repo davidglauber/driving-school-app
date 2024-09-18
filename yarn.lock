@@ -3542,6 +3542,7 @@ __metadata:
     "@types/react-native": ^0.73.0
     "@types/react-test-renderer": ^18.0.7
     axios: ^1.7.7
+    dayjs: ^1.11.13
     expo: ~51.0.28
     expo-constants: ~16.0.2
     expo-font: ~12.0.9
@@ -4859,7 +4860,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dayjs@npm:^1.8.15":
+"dayjs@npm:^1.11.13, dayjs@npm:^1.8.15":
   version: 1.11.13
   resolution: "dayjs@npm:1.11.13"
   checksum: f388db88a6aa93956c1f6121644e783391c7b738b73dbc54485578736565c8931bdfba4bb94e9b1535c6e509c97d5deb918bbe1ae6b34358d994de735055cca9

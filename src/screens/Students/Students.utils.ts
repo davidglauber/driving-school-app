@@ -1,4 +1,6 @@
-export const students = [
+import { GenericStudentType } from "./Students.interface";
+
+export const students: GenericStudentType[] = [
     {
         name: "João Silva",
         classroomName: "Aula de Direção Básica",
@@ -7,7 +9,9 @@ export const students = [
         address: "Rua A, 123",
         timeRange: "09:00-10:00",
         classAcquireQtd: 5,
-        classesNeeded: 30
+        classesNeeded: 30,
+        psicolocicalEvaluationAcquired: 10,
+        psicolocicalEvaluationRequired: 15,
     },
     {
         name: "Maria Oliveira",
@@ -17,8 +21,53 @@ export const students = [
         address: "Rua B, 456",
         timeRange: "12:00-13:00",
         classAcquireQtd: 25,
-        classesNeeded: 40
-
+        classesNeeded: 40,
+        psicolocicalEvaluationAcquired: 10,
+        psicolocicalEvaluationRequired: 15,
+        classes: [
+            {
+                classStartTime: "10:00",
+                classEndTime: "11:00",
+                classDate: "2024-09-18",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+            {
+                classStartTime: "13:00",
+                classEndTime: "15:00",
+                classDate: "2024-09-18",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+            {
+                classStartTime: "13:00",
+                classEndTime: "15:00",
+                classDate: "2024-09-19",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+            {
+                classStartTime: "13:00",
+                classEndTime: "15:00",
+                classDate: "2024-09-20",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+            {
+                classStartTime: "13:00",
+                classEndTime: "15:00",
+                classDate: "2024-09-21",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+            {
+                classStartTime: "15:00",
+                classEndTime: "16:00",
+                classDate: "2024-09-22",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+            {
+                classStartTime: "16:00",
+                classEndTime: "18:00",
+                classDate: "2024-09-22",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+        ]
     },
     {
         name: "Carlos Souza",
@@ -28,7 +77,53 @@ export const students = [
         address: "Rua C, 789",
         timeRange: "14:00-15:00",
         classAcquireQtd: 15,
-        classesNeeded: 28
+        classesNeeded: 28,
+        psicolocicalEvaluationAcquired: 10,
+        psicolocicalEvaluationRequired: 15,
+        classes: [
+            {
+                classStartTime: "10:00",
+                classEndTime: "11:00",
+                classDate: "2024-09-18",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+            {
+                classStartTime: "13:00",
+                classEndTime: "15:00",
+                classDate: "2024-09-18",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+            {
+                classStartTime: "13:00",
+                classEndTime: "15:00",
+                classDate: "2024-09-19",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+            {
+                classStartTime: "13:00",
+                classEndTime: "15:00",
+                classDate: "2024-09-20",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+            {
+                classStartTime: "13:00",
+                classEndTime: "15:00",
+                classDate: "2024-09-21",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+            {
+                classStartTime: "15:00",
+                classEndTime: "16:00",
+                classDate: "2024-09-22",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+            {
+                classStartTime: "16:00",
+                classEndTime: "18:00",
+                classDate: "2024-09-22",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+        ]
     },
     {
         name: "Ana Pereira",
@@ -38,16 +133,108 @@ export const students = [
         address: "Rua D, 101",
         timeRange: "00:00-23:59",
         classAcquireQtd: 35,
-        classesNeeded: 36
+        classesNeeded: 36,
+        psicolocicalEvaluationAcquired: 10,
+        psicolocicalEvaluationRequired: 15,
+        classes: [
+            {
+                classStartTime: "10:00",
+                classEndTime: "11:00",
+                classDate: "2024-09-18",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+            {
+                classStartTime: "13:00",
+                classEndTime: "15:00",
+                classDate: "2024-09-18",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+            {
+                classStartTime: "13:00",
+                classEndTime: "15:00",
+                classDate: "2024-09-19",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+            {
+                classStartTime: "13:00",
+                classEndTime: "15:00",
+                classDate: "2024-09-20",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+            {
+                classStartTime: "13:00",
+                classEndTime: "15:00",
+                classDate: "2024-09-21",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+            {
+                classStartTime: "15:00",
+                classEndTime: "16:00",
+                classDate: "2024-09-22",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+            {
+                classStartTime: "16:00",
+                classEndTime: "18:00",
+                classDate: "2024-09-22",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+        ]
     },
     {
-        name: "Pedro Lima",
+        name: "Pedro Lima da Silva Souza Rodrigues",
         classroomName: "Aula de Direção em Rodovia",
         enrollId: 1005,
         phone: "567-890-1234",
         address: "Rua E, 202",
         timeRange: "10:00-11:00",
         classAcquireQtd: 19,
-        classesNeeded: 20
+        classesNeeded: 20,
+        psicolocicalEvaluationAcquired: 10,
+        psicolocicalEvaluationRequired: 15,
+        classes: [
+            {
+                classStartTime: "10:00",
+                classEndTime: "11:00",
+                classDate: "2024-09-18",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+            {
+                classStartTime: "13:00",
+                classEndTime: "15:00",
+                classDate: "2024-09-18",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+            {
+                classStartTime: "13:00",
+                classEndTime: "15:00",
+                classDate: "2024-09-19",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+            {
+                classStartTime: "13:00",
+                classEndTime: "15:00",
+                classDate: "2024-09-20",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+            {
+                classStartTime: "13:00",
+                classEndTime: "15:00",
+                classDate: "2024-09-21",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+            {
+                classStartTime: "15:00",
+                classEndTime: "16:00",
+                classDate: "2024-09-22",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+            {
+                classStartTime: "16:00",
+                classEndTime: "18:00",
+                classDate: "2024-09-22",
+                chosenClass: { label: "Aula de Direção em Rodovia", value: "1005" }
+            },
+        ]
     }
 ]

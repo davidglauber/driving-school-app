@@ -61,7 +61,7 @@ export const items: CalendarItemInterface = {
   ],
   "2024-09-16": [
     {
-      name: "Pedro Lima",
+      name: "Pedro Lima da Silva Souza Rodrigues",
       classroomName: "Aula de Direção em Rodovia",
       enrollId: 1005,
       phone: "567-890-1234",
