@@ -6,6 +6,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import "react-native-reanimated";
+import Toast from "react-native-toast-message";
 import MainNavigator from "./src/routes/Stack";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -36,6 +37,7 @@ export default function RootLayout() {
         <MainNavigator />
         <StatusBar backgroundColor="#FFFFFF" style="dark" />
       </ThemeProvider>
+      <Toast />
     </QueryClientProvider>
   );
 }

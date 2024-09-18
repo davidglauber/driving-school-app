@@ -1,14 +1,18 @@
 import { CustomButton } from "@/src/components/CustomButton/CustomButton";
 import { CustomTextInput } from "@/src/components/CustomTextInput/CustomTextInput";
+import { auth } from "@/src/config/firebaseConfig";
 import { RootStackParamList } from "@/src/routes/Stack";
 import { loginSchema } from "@/src/schemas/forms";
 import { height, width } from "@/src/utils/dimensions";
+import { errorMessages } from "@/src/utils/errorMessages";
 import { ImageBox } from "@/src/utils/restyle/ImageBox";
 import { SafeAreaViewBox } from "@/src/utils/restyle/SafeAreaView";
 import { ViewBox } from "@/src/utils/restyle/ViewBox";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { FirebaseError } from "firebase/app";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import React, { useState } from "react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import {
@@ -17,6 +21,7 @@ import {
   Platform,
   TouchableWithoutFeedback,
 } from "react-native";
+import Toast from "react-native-toast-message";
 
 export const Login = () => {
   const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
@@ -25,10 +30,26 @@ export const Login = () => {
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    // add database validation here
-    navigate("Tabs");
-    console.log(data);
+  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        data.email,
+        data.password
+      );
+      console.log("User logged in:", userCredential.user);
+      navigate("Tabs");
+    } catch (error) {
+      const firebaseError = error as FirebaseError;
+      const errorMessage =
+        errorMessages[firebaseError.code] || "Erro desconhecido";
+      Toast.show({
+        type: "error",
+        text1: "Erro!",
+        text2: errorMessage,
+        position: "bottom",
+      });
+    }
   };
 
   return (
