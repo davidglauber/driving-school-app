@@ -12,7 +12,7 @@ import { ViewBox } from "@/src/utils/restyle/ViewBox";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { ActivityIndicator, FlatList, Linking } from "react-native";
 import ProgressBar from "react-native-progress/Bar";
@@ -24,16 +24,29 @@ export const Students = () => {
   const { control, watch } = useForm();
   const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
   const searchText = watch("search", "");
-  const { data: students, isLoading } = useQuery({
+  const {
+    data: students,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["students"],
     queryFn: () => getStudentsByInstructor(),
   });
+  const [refreshing, setRefreshing] = useState(false);
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  };
   const filteredStudents =
     students &&
-    students.filter((student) =>
-      student.name.toLowerCase().includes(searchText.toLowerCase())
-    );
+    students
+      .filter((student) =>
+        student.name.toLowerCase().includes(searchText.toLowerCase())
+      )
+      .sort((a, b) => a.name.localeCompare(b.name));
+
   const renderItem = ({ item, index }: StudentsInterface) => {
     const progress = item.classesAcquired / item.classesNeeded;
 
@@ -107,6 +120,8 @@ export const Students = () => {
           renderItem={renderItem}
           contentContainerStyle={{ paddingBottom: height * 0.1 }}
           showsVerticalScrollIndicator={false}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
           ListHeaderComponent={
             <ViewBox
               flexDirection="row"
