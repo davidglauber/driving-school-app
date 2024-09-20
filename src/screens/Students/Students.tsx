@@ -156,6 +156,11 @@ export const Students = () => {
             </ViewBox>
           }
           ListHeaderComponentStyle={{ marginBottom: spacing.m }}
+          keyExtractor={(_, index) => index.toExponential()}
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          updateCellsBatchingPeriod={50}
+          removeClippedSubviews
         />
       )}
     </ViewBox>
