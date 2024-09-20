@@ -12,7 +12,7 @@ export const LogoHeader = ({
   return (
     <ImageBox
       source={{ uri: "https://i.imgur.com/gGqRpo4.png" }}
-      style={[logo_header_styles.image, { width, height }]}
+      style={[{ width, height }, logo_header_styles.image]}
       alignSelf="center"
       resizeMode="contain"
     />

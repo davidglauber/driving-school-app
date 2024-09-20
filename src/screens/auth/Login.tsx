@@ -37,7 +37,11 @@ export const Login = () => {
         data.email,
         data.password
       );
-      console.log("User logged in:", userCredential.user);
+      Toast.show({
+        type: "customSuccessToast",
+        text1: "Sucesso!",
+        text2: `Bem-vindo(a), ${userCredential.user.email}`,
+      });
       navigate("Tabs");
     } catch (error) {
       const firebaseError = error as FirebaseError;
