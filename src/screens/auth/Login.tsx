@@ -44,10 +44,9 @@ export const Login = () => {
       const errorMessage =
         errorMessages[firebaseError.code] || "Erro desconhecido";
       Toast.show({
-        type: "error",
+        type: "customErrorToast",
         text1: "Erro!",
         text2: errorMessage,
-        position: "bottom",
       });
     }
   };

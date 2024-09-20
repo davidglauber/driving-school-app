@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import "react-native-reanimated";
 import Toast from "react-native-toast-message";
 import MainNavigator from "./src/routes/Stack";
+import { toastConfig } from "./src/components/CustomToast/CustomToast";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -37,7 +38,7 @@ export default function RootLayout() {
         <MainNavigator />
         <StatusBar backgroundColor="#FFFFFF" style="dark" />
       </ThemeProvider>
-      <Toast />
+      <Toast config={toastConfig} />
     </QueryClientProvider>
   );
 }
