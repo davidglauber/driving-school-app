@@ -46,19 +46,19 @@ export const custom_toast_styles = StyleSheet.create({
     title: {
         fontFamily: "SFBold",
         fontSize: 18,
-        maxWidth: "80%",
+        maxWidth: "90%",
         color: colors.green
     },
     titleError: {
         fontFamily: "SFBold",
         fontSize: 18,
-        maxWidth: "80%",
+        maxWidth: "90%",
         color: colors.red
     },
     titleInfo: {
         fontFamily: "SFBold",
         fontSize: 18,
-        maxWidth: "80%",
+        maxWidth: "90%",
         color: colors.lightBlue
     },
     subtitle: {
