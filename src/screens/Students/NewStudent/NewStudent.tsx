@@ -2,25 +2,19 @@ import { CustomButton } from "@/src/components/CustomButton/CustomButton";
 import { CustomDivider } from "@/src/components/CustomDivider/CustomDivider";
 import { CustomTextInput } from "@/src/components/CustomTextInput/CustomTextInput";
 import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
-import { auth } from "@/src/config/firebaseConfig";
 import { registerStudentSchema } from "@/src/schemas/forms";
 import { spacing } from "@/src/theme/spacing";
 import { ScrollViewBox } from "@/src/utils/restyle/ScrollViewBox";
 import { ViewBox } from "@/src/utils/restyle/ViewBox";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  addDoc,
-  collection,
-  doc,
-  getFirestore,
-  updateDoc,
-} from "firebase/firestore";
+import { useNavigation } from "@react-navigation/native";
+import { useMutation } from "@tanstack/react-query";
 import React, { useEffect } from "react";
 import { FieldValues, SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { KeyboardAvoidingView, Platform } from "react-native";
-import { useGetStudentLocation } from "./useGetStudentLocation/useGetStudentLocation";
 import Toast from "react-native-toast-message";
-import { useNavigation } from "@react-navigation/native";
+import { createUser } from "./NewStudent.utils";
+import { useGetStudentLocation } from "./useGetStudentLocation/useGetStudentLocation";
 
 export const NewStudent = () => {
   const { control, setValue, handleSubmit } = useForm({
@@ -29,6 +23,10 @@ export const NewStudent = () => {
   const cep = useWatch({ control, name: "cep" });
   const { goBack } = useNavigation();
   const { data, isLoading } = useGetStudentLocation({ cep });
+  const { mutateAsync: createNewUser, isPending } = useMutation({
+    mutationKey: ["createNewUser"],
+    mutationFn: (data: FieldValues) => createUser(data),
+  });
 
   useEffect(() => {
     if (data) {
@@ -46,29 +44,25 @@ export const NewStudent = () => {
   }, [data, setValue]);
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
-    try {
-      const firestore = getFirestore();
-      const currentUser = auth.currentUser;
-      const instructorRef = doc(firestore, `instructors/${currentUser?.uid}`);
-      const dataToSend = {
-        instructor: instructorRef,
-        ...data,
-      };
-
-      const docRef = await addDoc(
-        collection(firestore, "students"),
-        dataToSend
-      );
-      await updateDoc(docRef, { id: docRef.id });
-      Toast.show({
-        type: "customSuccessToast",
-        text1: "Sucesso!",
-        text2: "Aluno criado.",
+    await createNewUser(data)
+      .then(() => {
+        Toast.show({
+          type: "customSuccessToast",
+          text1: "Sucesso!",
+          text2: "Aluno criado.",
+          position: "bottom",
+        });
+        goBack();
+      })
+      .catch((error) => {
+        Toast.show({
+          type: "customErrorToast",
+          text1: "Erro!",
+          text2: "Erro ao criar aluno",
+          position: "bottom",
+        });
+        console.error("Erro ao criar aluno", error);
       });
-      goBack();
-    } catch (error) {
-      console.error("Erro ao criar aluno", error);
-    }
   };
 
   return (
@@ -183,6 +177,7 @@ export const NewStudent = () => {
             marginTop="xl"
             title="Salvar"
             onPress={handleSubmit(onSubmit)}
+            isLoading={isPending}
           />
         </ScrollViewBox>
       </ViewBox>

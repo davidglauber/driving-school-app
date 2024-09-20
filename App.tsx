@@ -19,10 +19,9 @@ import { Login } from "./src/screens/auth/Login";
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const queryClient = new QueryClient();
   const [user, setUser] = useState<User | null>(null);
   const [initializing, setInitializing] = useState(true);
-
-  const queryClient = new QueryClient();
   const [loaded] = useFonts({
     SFBold: require("./assets/fonts/SFProBold.otf"),
     SFLightItalic: require("./assets/fonts/SFProLightItalic.otf"),
