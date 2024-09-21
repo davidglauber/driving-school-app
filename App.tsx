@@ -1,4 +1,5 @@
 import { theme } from "@/src/theme";
+import { NavigationContainer } from "@react-navigation/native";
 import { ThemeProvider } from "@shopify/restyle";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
@@ -12,8 +13,8 @@ import Toast from "react-native-toast-message";
 import { toastConfig } from "./src/components/CustomToast/CustomToast";
 import { auth } from "./src/config/firebaseConfig";
 import MainNavigator from "./src/routes/Stack";
-import { ViewBox } from "./src/utils/restyle/ViewBox";
 import { Login } from "./src/screens/auth/Login";
+import { ViewBox } from "./src/utils/restyle/ViewBox";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -59,7 +60,13 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
-        {user ? <MainNavigator /> : <Login />}
+        {user ? (
+          <MainNavigator />
+        ) : (
+          <NavigationContainer>
+            <Login />
+          </NavigationContainer>
+        )}
         <StatusBar backgroundColor="#FFFFFF" style="dark" />
       </ThemeProvider>
       <Toast config={toastConfig} />
