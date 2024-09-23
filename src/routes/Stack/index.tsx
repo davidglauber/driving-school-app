@@ -1,10 +1,8 @@
 // src/routes/Stack/StackNavigator.tsx
 import Tabs from "@/src/routes/Tabs";
-import { Login } from "@/src/screens/auth/Login";
 import { NewStudent } from "@/src/screens/Students/NewStudent/NewStudent";
 import { AddClasses } from "@/src/screens/Students/SeeStudent/AddClasses/AddClasses";
 import { SeeStudent } from "@/src/screens/Students/SeeStudent/SeeStudent";
-import { GenericStudentType } from "@/src/screens/Students/Students.interface";
 import { colors } from "@/src/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { NavigationContainer } from "@react-navigation/native";
