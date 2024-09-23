@@ -94,7 +94,6 @@ export const SeeStudent = () => {
           <ClassesList classes={student.classes} />
           <CustomDivider />
 
-          <CustomLabelText label="ID de Matrícula" text={student.id} mb="s" />
           <PressableBox onPress={() => Linking.openURL(`tel:${student.phone}`)}>
             <CustomLabelText label="Telefone" text={student.phone} mb="s" />
           </PressableBox>

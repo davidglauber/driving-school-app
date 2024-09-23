@@ -14,7 +14,7 @@ export type GenericStudentType = {
     feelingDriving: string;
     classesNeeded: number;
     classesAcquired: number;
-    instructor: any;
+    instructor?: any;
     psicolocicalEvaluationRequired: number;
     psicolocicalEvaluationAcquired: number;
     classes?: StudentClass[];

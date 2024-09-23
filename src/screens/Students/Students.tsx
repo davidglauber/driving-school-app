@@ -17,7 +17,7 @@ import { useForm } from "react-hook-form";
 import { ActivityIndicator, FlatList, Linking } from "react-native";
 import ProgressBar from "react-native-progress/Bar";
 import { openMap } from "../Calendar/Calendar.utils";
-import { StudentsInterface } from "./Students.interface";
+import { GenericStudentType, StudentsInterface } from "./Students.interface";
 import { getStudentsByInstructor } from "./Students.utils";
 
 export const Students = () => {
@@ -46,6 +46,11 @@ export const Students = () => {
         student.name.toLowerCase().includes(searchText.toLowerCase())
       )
       .sort((a, b) => a.name.localeCompare(b.name));
+
+  const handleNavigate = (item: GenericStudentType) => {
+    const { instructor, ...serializableStudent } = item;
+    navigate("SeeStudent", { student: serializableStudent });
+  };
 
   const renderItem = ({ item, index }: StudentsInterface) => {
     const progress = item.classesAcquired / item.classesNeeded;
@@ -89,7 +94,7 @@ export const Students = () => {
           />
           <CustomButton
             color="white"
-            onPress={() => navigate("SeeStudent", { student: item })}
+            onPress={() => handleNavigate(item)}
             title="Ver Detalhes"
             leftIcon={
               <FontAwesome6
