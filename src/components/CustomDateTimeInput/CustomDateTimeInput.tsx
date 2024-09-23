@@ -6,18 +6,9 @@ import { ViewBox } from "@/src/utils/restyle/ViewBox";
 import { FontAwesome6 } from "@expo/vector-icons";
 import dayjs from "dayjs";
 import React, { useState } from "react";
-import { Controller, UseFormReturn } from "react-hook-form";
-import { TextInputProps } from "react-native";
-import DateTimePickerModal, {
-  DateTimePickerProps,
-} from "react-native-modal-datetime-picker";
-
-interface ICustomDateTimeInput extends Omit<TextInputProps, "value"> {
-  labelInput?: string;
-  name: string;
-  control: UseFormReturn["control"];
-  mode?: DateTimePickerProps["mode"];
-}
+import { Controller } from "react-hook-form";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { ICustomDateTimeInput } from "./CustomDateTimeInput.interface";
 
 export const CustomDateTimeInput = ({
   labelInput,

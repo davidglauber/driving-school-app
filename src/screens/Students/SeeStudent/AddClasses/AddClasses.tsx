@@ -1,6 +1,8 @@
 import { CustomButton } from "@/src/components/CustomButton/CustomButton";
 import { CustomDateTimeInput } from "@/src/components/CustomDateTimeInput/CustomDateTimeInput";
+import { CustomPickerInput } from "@/src/components/CustomPickerInput/CustomPickerInput";
 import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
+import { spacing } from "@/src/theme/spacing";
 import { ScrollViewBox } from "@/src/utils/restyle/ScrollViewBox";
 import { ViewBox } from "@/src/utils/restyle/ViewBox";
 import React from "react";
@@ -24,7 +26,7 @@ export const AddClasses = () => {
         <LogoHeader />
 
         <ScrollViewBox
-          contentContainerStyle={{ height: "100%" }}
+          contentContainerStyle={{ paddingBottom: spacing.xxl * 1.5 }}
           showsVerticalScrollIndicator={false}
         >
           <CustomDateTimeInput
@@ -47,6 +49,18 @@ export const AddClasses = () => {
             mode="time"
             labelInput="Horário do Fim"
             control={control}
+          />
+
+          <ViewBox marginTop="s" />
+          <CustomPickerInput
+            labelInput="Modalidades de Aulas"
+            name="chosenClass"
+            control={control}
+            items={[
+              { label: "Aula de Trânisto", value: "brt" },
+              { label: "Aula de Trânisto2", value: "brt2" },
+              { label: "Aula de Trânisto3", value: "brt3" },
+            ]}
           />
 
           <CustomButton

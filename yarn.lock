@@ -3163,6 +3163,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-picker/picker@npm:2.7.5":
+  version: 2.7.5
+  resolution: "@react-native-picker/picker@npm:2.7.5"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 7c968bc2886e63aa9ddfd9115c4f7f5523e6e19c21427a72dadc68eff09d33acd04c3b8b6332108b7e3e608a31c79a81a7a897ab44ee31ca22743f5bffc5908a
+  languageName: node
+  linkType: hard
+
 "@react-native/assets-registry@npm:0.74.87":
   version: 0.74.87
   resolution: "@react-native/assets-registry@npm:0.74.87"
@@ -4195,6 +4205,7 @@ __metadata:
     "@hookform/resolvers": ^3.9.0
     "@react-native-async-storage/async-storage": 1.23.1
     "@react-native-community/datetimepicker": 8.0.1
+    "@react-native-picker/picker": 2.7.5
     "@react-navigation/native": ^6.0.2
     "@react-navigation/stack": ^6.4.1
     "@shopify/restyle": ^2.4.4
