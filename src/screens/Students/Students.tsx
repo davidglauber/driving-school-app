@@ -3,6 +3,7 @@ import { CustomDivider } from "@/src/components/CustomDivider/CustomDivider";
 import { CustomTextInput } from "@/src/components/CustomTextInput/CustomTextInput";
 import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
 import { RootStackParamList } from "@/src/routes/Stack";
+import { useStudentStore } from "@/src/store/useStudentStore";
 import { colors } from "@/src/theme/colors";
 import { radius } from "@/src/theme/radius";
 import { spacing } from "@/src/theme/spacing";
@@ -22,6 +23,7 @@ import { getStudentsByInstructor } from "./Students.utils";
 
 export const Students = () => {
   const { control, watch } = useForm();
+  const { setStudent } = useStudentStore();
   const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
   const searchText = watch("search", "");
   const {
@@ -48,13 +50,12 @@ export const Students = () => {
       .sort((a, b) => a.name.localeCompare(b.name));
 
   const handleNavigate = (item: GenericStudentType) => {
-    const { instructor, ...serializableStudent } = item;
-    navigate("SeeStudent", { student: serializableStudent });
+    setStudent(item);
+    navigate("SeeStudent");
   };
 
   const renderItem = ({ item, index }: StudentsInterface) => {
     const progress = item.classesAcquired / item.classesNeeded;
-
     return (
       <ViewBox
         key={index}

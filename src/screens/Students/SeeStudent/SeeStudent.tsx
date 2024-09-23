@@ -3,6 +3,7 @@ import { CustomDivider } from "@/src/components/CustomDivider/CustomDivider";
 import { CustomLabelText } from "@/src/components/CustomLabelText/CustomLabelText";
 import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
 import { RootStackParamList } from "@/src/routes/Stack";
+import { useStudentStore } from "@/src/store/useStudentStore";
 import { colors } from "@/src/theme/colors";
 import { radius } from "@/src/theme/radius";
 import { spacing } from "@/src/theme/spacing";
@@ -11,7 +12,7 @@ import { PressableBox } from "@/src/utils/restyle/PressableBox";
 import { ScrollViewBox } from "@/src/utils/restyle/ScrollViewBox";
 import { TextBox } from "@/src/utils/restyle/TextBox";
 import { ViewBox } from "@/src/utils/restyle/ViewBox";
-import { RouteProp, useRoute } from "@react-navigation/native";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
 import dayjs from "dayjs";
 import React from "react";
 import { FlatList, Linking } from "react-native";
@@ -50,8 +51,11 @@ const ClassesList = ({ classes }: Pick<GenericStudentType, "classes">) => {
   );
 };
 export const SeeStudent = () => {
-  const { params }: RouteProp<RootStackParamList, "SeeStudent"> = useRoute();
-  const student = params.student;
+  const { student } = useStudentStore();
+  const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
+
+  if (!student) return null;
+
   const progress = student.classesAcquired / student.classesNeeded;
 
   return (
@@ -129,7 +133,7 @@ export const SeeStudent = () => {
             titleColor="white"
             title="Adicionar Aulas"
             mt="l"
-            onPress={() => console.log("not working yet")}
+            onPress={() => navigate("AddClasses")}
           />
         </ViewBox>
       </ScrollViewBox>

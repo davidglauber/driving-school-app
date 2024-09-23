@@ -2,6 +2,7 @@
 import Tabs from "@/src/routes/Tabs";
 import { Login } from "@/src/screens/auth/Login";
 import { NewStudent } from "@/src/screens/Students/NewStudent/NewStudent";
+import { AddClasses } from "@/src/screens/Students/SeeStudent/AddClasses/AddClasses";
 import { SeeStudent } from "@/src/screens/Students/SeeStudent/SeeStudent";
 import { GenericStudentType } from "@/src/screens/Students/Students.interface";
 import { colors } from "@/src/theme/colors";
@@ -15,7 +16,8 @@ export type RootStackParamList = {
   Login: undefined;
   Tabs: undefined;
   NewStudent: undefined;
-  SeeStudent: { student: GenericStudentType };
+  SeeStudent: undefined;
+  AddClasses: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -35,6 +37,30 @@ const MainNavigator = () => {
           options={({ navigation }) => ({
             headerShown: true,
             title: "Cadastrar Aluno",
+            headerTintColor: colors.red,
+            headerTitleStyle: {
+              fontWeight: "bold",
+              fontFamily: "SFBold",
+              fontSize: 20,
+            },
+            headerLeft: () => (
+              <TouchableOpacity onPress={() => navigation.goBack()}>
+                <Ionicons
+                  name="arrow-back"
+                  size={24}
+                  color={colors.red}
+                  style={{ marginLeft: 15 }}
+                />
+              </TouchableOpacity>
+            ),
+          })}
+        />
+        <Stack.Screen
+          name="AddClasses"
+          component={AddClasses}
+          options={({ navigation }) => ({
+            headerShown: true,
+            title: "Adicionar Aulas",
             headerTintColor: colors.red,
             headerTitleStyle: {
               fontWeight: "bold",
