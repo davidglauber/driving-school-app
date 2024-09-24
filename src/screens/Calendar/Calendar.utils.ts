@@ -39,7 +39,11 @@ const getClassesByInstructor = async (): Promise<CalendarItemInterface> => {
 
   querySnapshot.docs.forEach(doc => {
     const student = doc.data() as GenericStudentType;
-    student.classes?.forEach(studentClass => {
+    student.classes?.sort((a, b) => {
+      const startTimeA = dayjs(a.classStartTime, "HH:mm");
+      const startTimeB = dayjs(b.classStartTime, "HH:mm");
+      return startTimeA.isBefore(startTimeB) ? -1 : 1;
+    }).forEach(studentClass => {
       const { classDate, ...restClass } = studentClass;
       const formattedDate = dayjs(classDate, "DD/MM/YYYY").format("YYYY-MM-DD");
       if (!calendarItems[formattedDate]) {
