@@ -5,7 +5,7 @@ export type StudentClass = {
     chosenClass: {label: string, value: string};
 }
 export type GenericStudentType = {
-    id: string;
+    id: number;
     cpf: string;
     name: string;
     cep: string;

@@ -8,6 +8,7 @@ import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
 import { colors } from "@/src/theme/colors";
 import { TouchableOpacityBox } from "@/src/utils/restyle/TouchableOpacityBox";
 import { FontAwesome6 } from "@expo/vector-icons";
+import { useQuery } from "@tanstack/react-query";
 import LottieView from "lottie-react-native";
 import { Linking } from "react-native";
 import { Agenda, DateData, LocaleConfig } from "react-native-calendars";
@@ -15,12 +16,26 @@ import { radius } from "../../theme/radius";
 import { calendarPT_BR } from "../../utils/localeCalendarConfig";
 import { TextBox } from "../../utils/restyle/TextBox";
 import { CalendarItemType } from "./Calendar.interface";
-import { items, openMap, styleCalendar, themeCalendar } from "./Calendar.utils";
+import {
+  getClassesByInstructor,
+  openMap,
+  styleCalendar,
+  themeCalendar,
+} from "./Calendar.utils";
 
 LocaleConfig.locales["pt"] = calendarPT_BR;
 LocaleConfig.defaultLocale = "pt";
 
 export const Calendar = () => {
+  const {
+    data: instructorClasses,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["instructorClasses"],
+    queryFn: () => getClassesByInstructor(),
+  });
+
   const renderItem = ({
     item,
     index,
@@ -59,12 +74,14 @@ export const Calendar = () => {
           onPress={() => openMap(item.fullAdress)}
         >
           <FontAwesome6 name="location-dot" size={22} color={colors.red} />
-          <TextBox variant="textCardCalendar">{item.fullAdress}</TextBox>
+          <TextBox variant="textCardCalendar" textAlign="center">
+            {item.fullAdress}
+          </TextBox>
         </TouchableOpacityBox>
 
         <CustomDivider />
 
-        <ViewBox marginTop="l" rowGap="s">
+        <ViewBox marginTop="s" rowGap="s">
           <TouchableOpacityBox
             flexDirection="row"
             columnGap="xs"
@@ -74,15 +91,6 @@ export const Calendar = () => {
             <FontAwesome6 name="phone" size={18} color={colors.red} />
             <TextBox variant="textCardCalendar">{item.phone}</TextBox>
           </TouchableOpacityBox>
-
-          <ViewBox
-            flexDirection="row"
-            columnGap="xs"
-            justifyContent="space-between"
-          >
-            <FontAwesome6 name="id-card-clip" size={18} color={colors.red} />
-            <TextBox variant="textCardCalendar">{item.id}</TextBox>
-          </ViewBox>
 
           <CustomButton
             color="red"
@@ -118,24 +126,15 @@ export const Calendar = () => {
       <LogoHeader />
       <Agenda
         showClosingKnob
-        items={items}
-        onCalendarToggled={(calendarOpened: boolean) => {
-          console.log(calendarOpened);
-        }}
-        onDayPress={(day: DateData) => {
-          console.log("day pressed", day);
-        }}
-        onDayChange={(day: DateData) => {
-          console.log("day changed", day);
-        }}
+        items={instructorClasses}
         pastScrollRange={24}
         futureScrollRange={24}
         renderItem={(item: CalendarItemType, index: number) =>
           renderItem({ item, index })
         }
         renderEmptyData={renderEmptyData}
-        onRefresh={() => console.log("refreshing...")}
-        refreshing={false}
+        onRefresh={() => refetch()}
+        refreshing={isLoading}
         refreshControl={null}
         theme={themeCalendar}
         style={styleCalendar}
