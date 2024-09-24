@@ -1,20 +1,47 @@
 import { CustomButton } from "@/src/components/CustomButton/CustomButton";
 import { CustomDateTimeInput } from "@/src/components/CustomDateTimeInput/CustomDateTimeInput";
+import { CustomDivider } from "@/src/components/CustomDivider/CustomDivider";
+import { CustomLabelText } from "@/src/components/CustomLabelText/CustomLabelText";
 import { CustomPickerInput } from "@/src/components/CustomPickerInput/CustomPickerInput";
 import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
 import { spacing } from "@/src/theme/spacing";
 import { ScrollViewBox } from "@/src/utils/restyle/ScrollViewBox";
+import { TextBox } from "@/src/utils/restyle/TextBox";
 import { ViewBox } from "@/src/utils/restyle/ViewBox";
+import { useQuery } from "@tanstack/react-query";
+import dayjs from "dayjs";
 import React from "react";
-import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
+import { FieldValues, SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { KeyboardAvoidingView, Platform } from "react-native";
+import { getClassesModalities } from "./AddClasses.utils";
 
 export const AddClasses = () => {
-  const { control, handleSubmit } = useForm();
+  const { control, handleSubmit } = useForm<FieldValues>({
+    defaultValues: {
+      classDate: dayjs().format("DD/MM/YYYY"),
+      classStartTime: dayjs().format("HH:mm"),
+      classEndTime: dayjs().format("HH:mm"),
+      chosenClass: { label: "Selecione uma modalidade", value: "" },
+    },
+  });
+  const { data: classesModalities } = useQuery({
+    queryKey: ["classesModalities"],
+    queryFn: () => getClassesModalities(),
+  });
+
+  const classDate = useWatch({ control, name: "classDate" });
+  const classStartTime = useWatch({ control, name: "classStartTime" });
+  const classEndTime = useWatch({ control, name: "classEndTime" });
+  const chosenClass = useWatch({ control, name: "chosenClass" });
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     console.log("data new class", data);
   };
+
+  const refactoredClassesModalities = classesModalities?.map((item) => ({
+    label: item.label,
+    value: item.value,
+  }));
 
   return (
     <KeyboardAvoidingView
@@ -56,12 +83,34 @@ export const AddClasses = () => {
             labelInput="Modalidades de Aulas"
             name="chosenClass"
             control={control}
-            items={[
-              { label: "Aula de Trânisto", value: "brt" },
-              { label: "Aula de Trânisto2", value: "brt2" },
-              { label: "Aula de Trânisto3", value: "brt3" },
-            ]}
+            items={refactoredClassesModalities || []}
           />
+
+          <CustomDivider />
+
+          <CustomLabelText
+            label="Resumo"
+            text="Aqui está um resumo das informações preenchidas"
+          />
+
+          <ViewBox mt="l">
+            <ViewBox flexDirection="row" justifyContent="space-between">
+              <TextBox variant="textCardCalendar">Data da Aula</TextBox>
+              <TextBox variant="label">{classDate}</TextBox>
+            </ViewBox>
+            <ViewBox flexDirection="row" justifyContent="space-between">
+              <TextBox variant="textCardCalendar">Horário do Início</TextBox>
+              <TextBox variant="label">{classStartTime}</TextBox>
+            </ViewBox>
+            <ViewBox flexDirection="row" justifyContent="space-between">
+              <TextBox variant="textCardCalendar">Horário do Fim</TextBox>
+              <TextBox variant="label">{classEndTime}</TextBox>
+            </ViewBox>
+            <ViewBox flexDirection="row" justifyContent="space-between">
+              <TextBox variant="textCardCalendar">Modalidade</TextBox>
+              <TextBox variant="label">{chosenClass?.label}</TextBox>
+            </ViewBox>
+          </ViewBox>
 
           <CustomButton
             mt="l"

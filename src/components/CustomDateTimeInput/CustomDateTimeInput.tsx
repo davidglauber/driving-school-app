@@ -69,7 +69,7 @@ export const CustomDateTimeInput = ({
               onConfirm={(date) => {
                 hideDatePicker();
                 onChange(
-                  dayjs(date).format(mode === "date" ? "DD-MM-YYYY" : "HH:mm")
+                  dayjs(date).format(mode === "date" ? "DD/MM/YYYY" : "HH:mm")
                 );
               }}
               minimumDate={new Date()}

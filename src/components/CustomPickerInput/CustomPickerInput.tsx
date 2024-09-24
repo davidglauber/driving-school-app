@@ -37,7 +37,12 @@ export const CustomPickerInput = ({
           >
             <Picker
               selectedValue={value}
-              onValueChange={(itemValue) => onChange(itemValue)}
+              onValueChange={(itemValue) => {
+                const selectedItem = items.find(
+                  (item) => item.value === itemValue
+                );
+                onChange(selectedItem);
+              }}
               style={{ flex: 1 }}
             >
               {items.map((item) => (
