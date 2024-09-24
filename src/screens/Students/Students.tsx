@@ -55,7 +55,9 @@ export const Students = () => {
   };
 
   const renderItem = ({ item, index }: StudentsInterface) => {
-    const progress = item.classesAcquired / item.classesNeeded;
+    const acquiredClasses = item.classes ? item.classes.length : 0;
+    const progress = acquiredClasses / item.classesNeeded;
+
     return (
       <ViewBox
         key={index}
@@ -66,7 +68,7 @@ export const Students = () => {
       >
         <TextBox variant="titleCardCalendar">{item.name}</TextBox>
         <TextBox variant="textCardCalendar">
-          {item.classesAcquired} de {item.classesNeeded} aulas concluídas -{" "}
+          {acquiredClasses} de {item.classesNeeded} aulas concluídas -{" "}
           {Math.round(progress * 100)}%
         </TextBox>
 

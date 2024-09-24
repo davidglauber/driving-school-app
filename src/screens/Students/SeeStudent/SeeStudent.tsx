@@ -14,11 +14,14 @@ import { TextBox } from "@/src/utils/restyle/TextBox";
 import { ViewBox } from "@/src/utils/restyle/ViewBox";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 import React from "react";
 import { FlatList, Linking } from "react-native";
 import ProgressBar from "react-native-progress/Bar";
 import { openMap } from "../../Calendar/Calendar.utils";
 import { GenericStudentType, StudentClass } from "../Students.interface";
+
+dayjs.extend(customParseFormat);
 
 const renderItem = ({ item, index }: { item: StudentClass; index: number }) => (
   <ViewBox
@@ -27,15 +30,15 @@ const renderItem = ({ item, index }: { item: StudentClass; index: number }) => (
     padding="s"
     borderRadius={radius.s}
   >
-    <ViewBox flexDirection="row" justifyContent="space-between">
-      <TextBox variant="titleDateUserCard">
-        {dayjs(item.classDate).format("DD/MM")}
+    <ViewBox>
+      <TextBox mb="s" variant="titleDateUserCard">
+        {item.chosenClass.label}
       </TextBox>
+      <TextBox>{dayjs(item.classDate, "DD/MM/YYYY").format("DD/MM")}</TextBox>
       <TextBox>
         {item.classStartTime} - {item.classEndTime}
       </TextBox>
     </ViewBox>
-    <TextBox>{item.chosenClass.label}</TextBox>
   </ViewBox>
 );
 
@@ -56,7 +59,9 @@ export const SeeStudent = () => {
 
   if (!student) return null;
 
-  const progress = student.classesAcquired / student.classesNeeded;
+  const totalClasses = student.classesNeeded;
+  const acquiredClasses = student.classes ? student.classes.length : 0;
+  const progress = acquiredClasses / totalClasses;
 
   return (
     <ViewBox height={height} bg="white" paddingHorizontal="l">
