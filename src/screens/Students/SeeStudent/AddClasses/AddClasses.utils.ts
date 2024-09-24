@@ -1,5 +1,6 @@
+import { auth } from "@/src/config/firebaseConfig";
 import dayjs from "dayjs";
-import { arrayUnion, collection, doc, getDocs, getFirestore, updateDoc } from "firebase/firestore";
+import { arrayUnion, collection, doc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
 import { StudentClass } from "../../Students.interface";
 
 const getClassesModalities = async () => {
@@ -11,13 +12,65 @@ const getClassesModalities = async () => {
     return classesModalities;
 };
 
+
+const isClassScheduled = async (newClass: StudentClass) => {
+    const firestore = getFirestore();
+    const currentUser = auth.currentUser;
+    const instructorRef = doc(firestore, `instructors/${currentUser?.uid}`);
+    const studentsRef = collection(firestore, "students");
+
+    const q = query(
+        studentsRef,
+        where("instructor", "==", instructorRef),
+    );
+
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+        return null;
+    }
+
+    for (const studentDoc of querySnapshot.docs) {
+        const studentData = studentDoc.data();
+        const existingClasses = studentData.classes || [];
+        const newClassStartTime = dayjs(`1970-01-01T${newClass.classStartTime}:00`);
+        const newClassEndTime = dayjs(`1970-01-01T${newClass.classEndTime}:00`);
+
+        const isScheduled = existingClasses.some((existingClass: StudentClass) => {
+            const existingClassStartTime = dayjs(`1970-01-01T${existingClass.classStartTime}:00`);
+            const existingClassEndTime = dayjs(`1970-01-01T${existingClass.classEndTime}:00`);
+            return (
+                (newClassStartTime.isBefore(existingClassEndTime) && newClassEndTime.isAfter(existingClassStartTime))
+            );
+        });
+
+        if (isScheduled) {
+            return studentData.name;
+        }
+    }
+
+    return null;
+};
+
 const saveNewClasses = async (studentId: string, newClasses: StudentClass[]) => {
     const firestore = getFirestore();
     const studentDocRef = doc(firestore, `students/${studentId}`);
 
-    await updateDoc(studentDocRef, {
-        classes: arrayUnion(...newClasses)
-    });
+    const validClasses = [];
+    for (const newClass of newClasses) {
+        const scheduledStudentName = await isClassScheduled(newClass);
+        if (scheduledStudentName) {
+            throw new Error(`Você já tem aula agendada entre ${newClass.classStartTime} e ${newClass.classEndTime} com ${scheduledStudentName}`);
+        } else {
+            validClasses.push(newClass);
+        }
+    }
+
+    if (validClasses.length > 0) {
+        await updateDoc(studentDocRef, {
+            classes: arrayUnion(...validClasses)
+        });
+    }
 };
 
 const classDurationMin = (

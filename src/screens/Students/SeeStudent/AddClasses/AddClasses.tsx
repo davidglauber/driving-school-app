@@ -81,15 +81,13 @@ export const AddClasses = () => {
         updateClasses(classes);
         goBack();
       })
-      .catch(() => {
+      .catch((error) => {
         Toast.show({
           type: "customErrorToast",
           text1: "Erro!",
-          text2: "Erro ao cadastrar.",
+          text2: error?.message || "Erro ao cadastrar aula.",
         });
       });
-
-    console.log("data new classes", classes);
   };
 
   const refactoredClassesModalities = classesModalities?.map((item) => ({
@@ -123,6 +121,7 @@ export const AddClasses = () => {
             mode="time"
             labelInput="Horário do Início"
             control={control}
+            defaultValue={classStartTime}
           />
           <ViewBox marginTop="s" />
           <CustomDateTimeInput
@@ -130,6 +129,7 @@ export const AddClasses = () => {
             mode="time"
             labelInput="Horário do Fim"
             control={control}
+            defaultValue={classEndTime}
           />
 
           <ViewBox marginTop="s" />

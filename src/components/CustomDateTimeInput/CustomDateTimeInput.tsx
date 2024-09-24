@@ -5,7 +5,7 @@ import { TextInputBox } from "@/src/utils/restyle/TextInputBox";
 import { ViewBox } from "@/src/utils/restyle/ViewBox";
 import { FontAwesome6 } from "@expo/vector-icons";
 import dayjs from "dayjs";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { ICustomDateTimeInput } from "./CustomDateTimeInput.interface";
@@ -15,9 +15,15 @@ export const CustomDateTimeInput = ({
   name,
   control,
   mode,
+  defaultValue,
   ...props
 }: ICustomDateTimeInput) => {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [currentValue, setCurrentValue] = useState(defaultValue);
+
+  useEffect(() => {
+    setCurrentValue(defaultValue);
+  }, [defaultValue]);
 
   const showDatePicker = () => {
     setDatePickerVisibility(true);
@@ -31,9 +37,7 @@ export const CustomDateTimeInput = ({
     <Controller
       control={control}
       name={name}
-      defaultValue={
-        mode === "date" ? dayjs().format("DD/MM/YYYY") : dayjs().format("HH:mm")
-      }
+      defaultValue={currentValue}
       render={({ field: { onChange, value }, fieldState: { error } }) => (
         <PressableBox
           onPress={showDatePicker}
@@ -66,11 +70,21 @@ export const CustomDateTimeInput = ({
               isVisible={isDatePickerVisible}
               mode={mode || "datetime"}
               locale="pt_BR"
+              date={
+                value
+                  ? dayjs(
+                      value,
+                      mode === "date" ? "DD/MM/YYYY" : "HH:mm"
+                    ).toDate()
+                  : new Date()
+              }
               onConfirm={(date) => {
                 hideDatePicker();
-                onChange(
-                  dayjs(date).format(mode === "date" ? "DD/MM/YYYY" : "HH:mm")
+                const formattedDate = dayjs(date).format(
+                  mode === "date" ? "DD/MM/YYYY" : "HH:mm"
                 );
+                onChange(formattedDate);
+                setCurrentValue(formattedDate);
               }}
               minimumDate={new Date()}
               onCancel={hideDatePicker}

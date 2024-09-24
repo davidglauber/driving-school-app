@@ -7,5 +7,6 @@ export interface ICustomDateTimeInput extends Omit<TextInputProps, "value"> {
     name: string;
     control: UseFormReturn["control"];
     mode?: DateTimePickerProps["mode"];
+    defaultValue?: string;
 }
   
