@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { arrayUnion, collection, doc, getDocs, getFirestore, updateDoc } from "firebase/firestore";
 import { StudentClass } from "../../Students.interface";
 
@@ -19,5 +20,34 @@ const saveNewClasses = async (studentId: string, newClasses: StudentClass[]) => 
     });
 };
 
+const classDurationMin = (
+    classStartTime: string, 
+    classEndTime: string,   
+    data: { chosenClass: {label: string, value: string}; classDate: string }
+): {isClassDurationFifteenMin: boolean, classes: StudentClass[]} => {
+    const startTime = dayjs(`1970-01-01T${classStartTime}:00`).subtract(3, "hour");
+    const endTime = dayjs(`1970-01-01T${classEndTime}:00`).subtract(3, "hour");
+    const totalDuration = endTime.diff(startTime, "minute");
+    const isClassDurationFifteenMin = totalDuration % 50 === 0 && totalDuration !== 0;
 
-export { getClassesModalities, saveNewClasses };
+    const numberOfClasses = totalDuration / 50;
+    const classes = [];
+
+    for (let i = 0; i < numberOfClasses; i++) {
+      const classStart = startTime.add(i * 50, "minute").add(3, "hour");
+      const classEnd = classStart.add(50, "minute");
+
+      classes.push({
+        chosenClass: data.chosenClass,
+        classDate: data.classDate,
+        classStartTime: classStart.format("HH:mm"),
+        classEndTime: classEnd.format("HH:mm"),
+      });
+    }
+
+    return { isClassDurationFifteenMin, classes }
+};
+
+
+export { classDurationMin, getClassesModalities, saveNewClasses };
+

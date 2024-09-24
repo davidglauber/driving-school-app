@@ -21,7 +21,11 @@ import { FieldValues, SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { KeyboardAvoidingView, Platform } from "react-native";
 import Toast from "react-native-toast-message";
 import { StudentClass } from "../../Students.interface";
-import { getClassesModalities, saveNewClasses } from "./AddClasses.utils";
+import {
+  classDurationMin,
+  getClassesModalities,
+  saveNewClasses,
+} from "./AddClasses.utils";
 
 dayjs.extend(duration);
 
@@ -52,39 +56,19 @@ export const AddClasses = () => {
   const chosenClass = useWatch({ control, name: "chosenClass" });
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
-    const startTime = dayjs(`1970-01-01T${data.classStartTime}:00`).subtract(
-      3,
-      "hour"
-    );
-    const endTime = dayjs(`1970-01-01T${data.classEndTime}:00`).subtract(
-      3,
-      "hour"
+    const { isClassDurationFifteenMin, classes } = classDurationMin(
+      data.classStartTime,
+      data.classEndTime,
+      { classDate: data.classDate, chosenClass: data.chosenClass }
     );
 
-    const totalDuration = endTime.diff(startTime, "minute");
-
-    if (totalDuration % 50 !== 0 || totalDuration === 0) {
+    if (!isClassDurationFifteenMin) {
       Toast.show({
         type: "customErrorToast",
         text1: "Erro!",
         text2: "Cada aula deve durar exatamente 50 minutos.",
       });
       return;
-    }
-
-    const numberOfClasses = totalDuration / 50;
-    const classes = [];
-
-    for (let i = 0; i < numberOfClasses; i++) {
-      const classStart = startTime.add(i * 50, "minute").add(3, "hour");
-      const classEnd = classStart.add(50, "minute");
-
-      classes.push({
-        chosenClass: data.chosenClass,
-        classDate: data.classDate,
-        classStartTime: classStart.format("HH:mm"),
-        classEndTime: classEnd.format("HH:mm"),
-      });
     }
 
     await addNewClass(classes)
