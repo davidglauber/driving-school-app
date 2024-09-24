@@ -4,20 +4,24 @@ import { CustomDivider } from "@/src/components/CustomDivider/CustomDivider";
 import { CustomLabelText } from "@/src/components/CustomLabelText/CustomLabelText";
 import { CustomPickerInput } from "@/src/components/CustomPickerInput/CustomPickerInput";
 import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
+import { RootStackParamList } from "@/src/routes/Stack";
 import { addClassSchema } from "@/src/schemas/forms";
+import { useStudentStore } from "@/src/store/useStudentStore";
 import { spacing } from "@/src/theme/spacing";
 import { ScrollViewBox } from "@/src/utils/restyle/ScrollViewBox";
 import { TextBox } from "@/src/utils/restyle/TextBox";
 import { ViewBox } from "@/src/utils/restyle/ViewBox";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import React from "react";
 import { FieldValues, SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { KeyboardAvoidingView, Platform } from "react-native";
 import Toast from "react-native-toast-message";
-import { getClassesModalities } from "./AddClasses.utils";
+import { StudentClass } from "../../Students.interface";
+import { getClassesModalities, saveNewClasses } from "./AddClasses.utils";
 
 dayjs.extend(duration);
 
@@ -31,11 +35,17 @@ export const AddClasses = () => {
     },
     resolver: zodResolver(addClassSchema),
   });
+  const { student } = useStudentStore();
   const { data: classesModalities } = useQuery({
     queryKey: ["classesModalities"],
     queryFn: () => getClassesModalities(),
   });
-
+  const { mutateAsync: addNewClass, isPending } = useMutation({
+    mutationKey: ["addNewClass"],
+    mutationFn: (data: StudentClass[]) =>
+      saveNewClasses((student && student.id) || "", data),
+  });
+  const { goBack } = useNavigation<NavigationProp<RootStackParamList>>();
   const classDate = useWatch({ control, name: "classDate" });
   const classStartTime = useWatch({ control, name: "classStartTime" });
   const classEndTime = useWatch({ control, name: "classEndTime" });
@@ -76,6 +86,23 @@ export const AddClasses = () => {
         classEndTime: classEnd.format("HH:mm"),
       });
     }
+
+    await addNewClass(classes)
+      .then(() => {
+        Toast.show({
+          type: "customSuccessToast",
+          text1: "Sucesso!",
+          text2: `${classes.length > 1 ? "Aulas" : "Aula"} cadastrada com sucesso.`,
+        });
+        goBack();
+      })
+      .catch(() => {
+        Toast.show({
+          type: "customErrorToast",
+          text1: "Erro!",
+          text2: "Erro ao cadastrar.",
+        });
+      });
 
     console.log("data new classes", classes);
   };
@@ -160,6 +187,7 @@ export const AddClasses = () => {
             titleColor="white"
             color="red"
             onPress={handleSubmit(onSubmit)}
+            isLoading={isPending}
           />
         </ScrollViewBox>
       </ViewBox>

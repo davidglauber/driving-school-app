@@ -1,4 +1,5 @@
-import { collection, getDocs, getFirestore } from "firebase/firestore";
+import { arrayUnion, collection, doc, getDocs, getFirestore, updateDoc } from "firebase/firestore";
+import { StudentClass } from "../../Students.interface";
 
 const getClassesModalities = async () => {
     const firestore = getFirestore();
@@ -9,4 +10,14 @@ const getClassesModalities = async () => {
     return classesModalities;
 };
 
-export { getClassesModalities };
+const saveNewClasses = async (studentId: string, newClasses: StudentClass[]) => {
+    const firestore = getFirestore();
+    const studentDocRef = doc(firestore, `students/${studentId}`);
+
+    await updateDoc(studentDocRef, {
+        classes: arrayUnion(...newClasses)
+    });
+};
+
+
+export { getClassesModalities, saveNewClasses };
