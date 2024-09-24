@@ -51,18 +51,33 @@ export const AddClasses = () => {
       "hour"
     );
 
-    const duration = endTime.diff(startTime, "minute");
+    const totalDuration = endTime.diff(startTime, "minute");
 
-    if (duration !== 50) {
+    if (totalDuration % 50 !== 0 || totalDuration === 0) {
       Toast.show({
         type: "customErrorToast",
         text1: "Erro!",
-        text2: "A duração de cada aula deve ser de exatamente 50 minutos.",
+        text2: "Cada aula deve durar exatamente 50 minutos.",
       });
       return;
     }
 
-    console.log("data new class", data);
+    const numberOfClasses = totalDuration / 50;
+    const classes = [];
+
+    for (let i = 0; i < numberOfClasses; i++) {
+      const classStart = startTime.add(i * 50, "minute").add(3, "hour");
+      const classEnd = classStart.add(50, "minute");
+
+      classes.push({
+        chosenClass: data.chosenClass,
+        classDate: data.classDate,
+        classStartTime: classStart.format("HH:mm"),
+        classEndTime: classEnd.format("HH:mm"),
+      });
+    }
+
+    console.log("data new classes", classes);
   };
 
   const refactoredClassesModalities = classesModalities?.map((item) => ({
