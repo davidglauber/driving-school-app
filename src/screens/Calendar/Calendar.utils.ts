@@ -51,6 +51,7 @@ const getClassesByInstructor = async (): Promise<CalendarItemInterface> => {
         phone: student.phone,
         fullAdress: student.fullAddress,
         classes: [{ ...restClass, classDate: formattedDate }],
+        student: student,
       });
     });
   });

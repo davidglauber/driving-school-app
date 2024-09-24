@@ -5,16 +5,20 @@ import { ViewBox } from "../../utils/restyle/ViewBox";
 import { CustomButton } from "@/src/components/CustomButton/CustomButton";
 import { CustomDivider } from "@/src/components/CustomDivider/CustomDivider";
 import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
+import { RootStackParamList } from "@/src/routes/Stack";
+import { useStudentStore } from "@/src/store/useStudentStore";
 import { colors } from "@/src/theme/colors";
 import { TouchableOpacityBox } from "@/src/utils/restyle/TouchableOpacityBox";
 import { FontAwesome6 } from "@expo/vector-icons";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
 import LottieView from "lottie-react-native";
 import { Linking } from "react-native";
-import { Agenda, DateData, LocaleConfig } from "react-native-calendars";
+import { Agenda, LocaleConfig } from "react-native-calendars";
 import { radius } from "../../theme/radius";
 import { calendarPT_BR } from "../../utils/localeCalendarConfig";
 import { TextBox } from "../../utils/restyle/TextBox";
+import { GenericStudentType } from "../Students/Students.interface";
 import { CalendarItemType } from "./Calendar.interface";
 import {
   getClassesByInstructor,
@@ -27,6 +31,8 @@ LocaleConfig.locales["pt"] = calendarPT_BR;
 LocaleConfig.defaultLocale = "pt";
 
 export const Calendar = () => {
+  const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
+  const { setStudent } = useStudentStore();
   const {
     data: instructorClasses,
     isLoading,
@@ -35,7 +41,10 @@ export const Calendar = () => {
     queryKey: ["instructorClasses"],
     queryFn: () => getClassesByInstructor(),
   });
-
+  const handleViewProfile = (student: GenericStudentType) => {
+    setStudent(student);
+    navigate("SeeStudent");
+  };
   const renderItem = ({
     item,
     index,
@@ -98,7 +107,7 @@ export const Calendar = () => {
             color="red"
             titleColor="white"
             title="Ver Perfil"
-            onPress={() => console.log("ver perfil")}
+            onPress={() => handleViewProfile(item.student)}
           />
         </ViewBox>
       </ViewBox>
