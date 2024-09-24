@@ -3,11 +3,15 @@ import Tabs from "@/src/routes/Tabs";
 import { NewStudent } from "@/src/screens/Students/NewStudent/NewStudent";
 import { AddClasses } from "@/src/screens/Students/SeeStudent/AddClasses/AddClasses";
 import { SeeStudent } from "@/src/screens/Students/SeeStudent/SeeStudent";
+import { useNavigationIsReady } from "@/src/store/useNavigationIsReady";
 import { colors } from "@/src/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
-import { NavigationContainer } from "@react-navigation/native";
+import {
+  NavigationContainer,
+  NavigationContainerRef,
+} from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import React from "react";
+import React, { createRef } from "react";
 import { TouchableOpacity } from "react-native";
 
 export type RootStackParamList = {
@@ -19,10 +23,18 @@ export type RootStackParamList = {
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
+const navigationRef = createRef<NavigationContainerRef<RootStackParamList>>();
 
 const MainNavigator = () => {
+  const { setIsReady } = useNavigationIsReady();
+
   return (
-    <NavigationContainer>
+    <NavigationContainer
+      ref={navigationRef}
+      onReady={() => {
+        setIsReady(true);
+      }}
+    >
       <Stack.Navigator
         initialRouteName="Tabs"
         screenOptions={{
