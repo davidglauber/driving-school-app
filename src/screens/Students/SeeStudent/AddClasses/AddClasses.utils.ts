@@ -52,7 +52,7 @@ const isClassScheduled = async (newClass: StudentClass) => {
     return null;
 };
 
-const saveNewClasses = async (studentId: string, newClasses: StudentClass[]) => {
+const saveNewClasses = async (studentId: number | '', newClasses: StudentClass[]) => {
     const firestore = getFirestore();
     const studentDocRef = doc(firestore, `students/${studentId}`);
 

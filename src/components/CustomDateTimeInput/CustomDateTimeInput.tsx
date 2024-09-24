@@ -86,7 +86,7 @@ export const CustomDateTimeInput = ({
                 onChange(formattedDate);
                 setCurrentValue(formattedDate);
               }}
-              minimumDate={new Date()}
+              minimumDate={mode === "date" ? new Date() : undefined}
               onCancel={hideDatePicker}
             />
           </ViewBox>
