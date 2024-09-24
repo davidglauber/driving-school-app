@@ -32,7 +32,6 @@ export const CustomPickerInput = ({
             borderWidth={2}
             borderColor="gray"
             borderRadius={radius.m}
-            padding="m"
             marginTop="s"
           >
             <Picker
@@ -54,7 +53,13 @@ export const CustomPickerInput = ({
               ))}
             </Picker>
           </ViewBox>
-          {error && <TextBox color="red">*{error.message}</TextBox>}
+          {error && (
+            <TextBox color="red">
+              *{" "}
+              {error.message ||
+                "Selecione uma aula válida, o valor padrão não é aceito"}
+            </TextBox>
+          )}
         </ViewBox>
       )}
     />

@@ -14,6 +14,8 @@ import React from "react";
 import { FieldValues, SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { KeyboardAvoidingView, Platform } from "react-native";
 import { getClassesModalities } from "./AddClasses.utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { addClassSchema } from "@/src/schemas/forms";
 
 export const AddClasses = () => {
   const { control, handleSubmit } = useForm<FieldValues>({
@@ -23,6 +25,7 @@ export const AddClasses = () => {
       classEndTime: dayjs().format("HH:mm"),
       chosenClass: { label: "Selecione uma modalidade", value: "" },
     },
+    resolver: zodResolver(addClassSchema),
   });
   const { data: classesModalities } = useQuery({
     queryKey: ["classesModalities"],
@@ -94,19 +97,19 @@ export const AddClasses = () => {
           />
 
           <ViewBox mt="l">
-            <ViewBox flexDirection="row" justifyContent="space-between">
+            <ViewBox>
               <TextBox variant="textCardCalendar">Data da Aula</TextBox>
               <TextBox variant="label">{classDate}</TextBox>
             </ViewBox>
-            <ViewBox flexDirection="row" justifyContent="space-between">
+            <ViewBox mt="s">
               <TextBox variant="textCardCalendar">Horário do Início</TextBox>
               <TextBox variant="label">{classStartTime}</TextBox>
             </ViewBox>
-            <ViewBox flexDirection="row" justifyContent="space-between">
+            <ViewBox mt="s">
               <TextBox variant="textCardCalendar">Horário do Fim</TextBox>
               <TextBox variant="label">{classEndTime}</TextBox>
             </ViewBox>
-            <ViewBox flexDirection="row" justifyContent="space-between">
+            <ViewBox mt="s">
               <TextBox variant="textCardCalendar">Modalidade</TextBox>
               <TextBox variant="label">{chosenClass?.label}</TextBox>
             </ViewBox>

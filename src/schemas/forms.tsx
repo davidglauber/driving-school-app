@@ -17,3 +17,18 @@ export const registerStudentSchema = z.object({
   psicolocicalEvaluationRequired: z.string().min(1, "Campo obrigatório"),
   psicolocicalEvaluationAcquired: z.string().min(1, "Campo obrigatório"),
 });
+
+export const addClassSchema = z.object({
+  classDate: z.string().min(1, "Campo obrigatório"),
+  classStartTime: z.string().min(1, "Campo obrigatório"),
+  classEndTime: z.string().min(1, "Campo obrigatório"),
+  chosenClass: z
+    .object({
+      label: z.string().min(1, "Selecione uma modalidade"),
+      value: z.string().min(1, "Selecione uma modalidade"),
+    })
+    .refine((data) => data.label !== "" && data.value !== "", {
+      message: "Selecione uma modalidade válida",
+      path: ["label"],
+    }),
+});
