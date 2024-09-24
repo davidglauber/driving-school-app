@@ -39,7 +39,7 @@ export const AddClasses = () => {
     },
     resolver: zodResolver(addClassSchema),
   });
-  const { student } = useStudentStore();
+  const { student, updateClasses } = useStudentStore();
   const { data: classesModalities } = useQuery({
     queryKey: ["classesModalities"],
     queryFn: () => getClassesModalities(),
@@ -78,6 +78,7 @@ export const AddClasses = () => {
           text1: "Sucesso!",
           text2: `${classes.length > 1 ? "Aulas" : "Aula"} cadastrada com sucesso.`,
         });
+        updateClasses(classes);
         goBack();
       })
       .catch(() => {
