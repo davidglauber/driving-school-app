@@ -2,8 +2,10 @@ import { Calendar } from "@/src/screens/Calendar/Calendar";
 import { Settings } from "@/src/screens/Settings";
 import { Students } from "@/src/screens/Students/Students";
 import { colors } from "@/src/theme/colors";
+import { radius } from "@/src/theme/radius";
 import { height } from "@/src/utils/dimensions";
 import { FontAwesome6 } from "@expo/vector-icons";
+import { Platform } from "react-native";
 import { AnimatedTabBarNavigator } from "react-native-animated-nav-tab-bar";
 
 type TabBarIconProps = {
@@ -13,7 +15,7 @@ type TabBarIconProps = {
 };
 
 const Tabs = AnimatedTabBarNavigator();
-
+const isIOS = Platform.OS === "ios";
 export default () => (
   <Tabs.Navigator
     initialRouteName="Calendar"
@@ -24,6 +26,8 @@ export default () => (
       tabStyle: {
         height: height * 0.09,
         backgroundColor: colors.red,
+        borderTopLeftRadius: radius.xl,
+        borderTopRightRadius: radius.xl,
       },
       labelStyle: {
         fontFamily: "SFBold",
@@ -33,7 +37,7 @@ export default () => (
     }}
     appearance={{
       shadow: true,
-      floating: true,
+      floating: isIOS ? true : false,
     }}
   >
     <Tabs.Screen
