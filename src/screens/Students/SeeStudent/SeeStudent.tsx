@@ -43,13 +43,25 @@ const renderItem = ({ item, index }: { item: StudentClass; index: number }) => (
 );
 
 const ClassesList = ({ classes }: Pick<GenericStudentType, "classes">) => {
+  const sortedClasses = classes?.sort((a, b) => {
+    const timeA = dayjs(
+      `${a.classDate} ${a.classStartTime}`,
+      "DD/MM/YYYY HH:mm"
+    );
+    const timeB = dayjs(
+      `${b.classDate} ${b.classStartTime}`,
+      "DD/MM/YYYY HH:mm"
+    );
+    return timeA.isBefore(timeB) ? -1 : 1;
+  });
+
   return (
     <FlatList
       horizontal
-      data={classes || []}
+      data={sortedClasses || []}
       contentContainerStyle={{ columnGap: spacing.s }}
       renderItem={({ item, index }) => renderItem({ item, index })}
-      keyExtractor={(_, index) => index.toExponential()}
+      keyExtractor={(_, index) => index.toString()}
     />
   );
 };
