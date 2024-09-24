@@ -4,18 +4,22 @@ import { CustomDivider } from "@/src/components/CustomDivider/CustomDivider";
 import { CustomLabelText } from "@/src/components/CustomLabelText/CustomLabelText";
 import { CustomPickerInput } from "@/src/components/CustomPickerInput/CustomPickerInput";
 import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
+import { addClassSchema } from "@/src/schemas/forms";
 import { spacing } from "@/src/theme/spacing";
 import { ScrollViewBox } from "@/src/utils/restyle/ScrollViewBox";
 import { TextBox } from "@/src/utils/restyle/TextBox";
 import { ViewBox } from "@/src/utils/restyle/ViewBox";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
+import duration from "dayjs/plugin/duration";
 import React from "react";
 import { FieldValues, SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { KeyboardAvoidingView, Platform } from "react-native";
+import Toast from "react-native-toast-message";
 import { getClassesModalities } from "./AddClasses.utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { addClassSchema } from "@/src/schemas/forms";
+
+dayjs.extend(duration);
 
 export const AddClasses = () => {
   const { control, handleSubmit } = useForm<FieldValues>({
@@ -38,6 +42,26 @@ export const AddClasses = () => {
   const chosenClass = useWatch({ control, name: "chosenClass" });
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+    const startTime = dayjs(`1970-01-01T${data.classStartTime}:00`).subtract(
+      3,
+      "hour"
+    );
+    const endTime = dayjs(`1970-01-01T${data.classEndTime}:00`).subtract(
+      3,
+      "hour"
+    );
+
+    const duration = endTime.diff(startTime, "minute");
+
+    if (duration !== 50) {
+      Toast.show({
+        type: "customErrorToast",
+        text1: "Erro!",
+        text2: "A duração de cada aula deve ser de exatamente 50 minutos.",
+      });
+      return;
+    }
+
     console.log("data new class", data);
   };
 

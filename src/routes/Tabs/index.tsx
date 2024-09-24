@@ -26,8 +26,8 @@ export default () => (
       tabStyle: {
         height: height * 0.09,
         backgroundColor: colors.red,
-        borderTopLeftRadius: radius.xl,
-        borderTopRightRadius: radius.xl,
+        borderTopLeftRadius: isIOS ? radius.xxl : radius.xl,
+        borderTopRightRadius: isIOS ? radius.xxl : radius.xl,
       },
       labelStyle: {
         fontFamily: "SFBold",
