@@ -74,9 +74,11 @@ export const Calendar = () => {
           onPress={() => openMap(item.fullAdress)}
         >
           <FontAwesome6 name="location-dot" size={22} color={colors.red} />
-          <TextBox variant="textCardCalendar" textAlign="center">
-            {item.fullAdress}
-          </TextBox>
+          <ViewBox maxWidth="70%">
+            <TextBox variant="textCardCalendar" textAlign="right">
+              {item.fullAdress}
+            </TextBox>
+          </ViewBox>
         </TouchableOpacityBox>
 
         <CustomDivider />
