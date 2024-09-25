@@ -63,8 +63,13 @@ export const AddClasses = () => {
   const { mutateAsync: editStudentClass, isPending: isPendingEdit } =
     useMutation({
       mutationKey: ["editStudentClass"],
-      mutationFn: (data: StudentClass) =>
-        editSpecificClass(student && student.id, data),
+      mutationFn: ({
+        studentId,
+        classToUpdate,
+      }: {
+        studentId: number;
+        classToUpdate: StudentClass;
+      }) => editSpecificClass(studentId, classToUpdate),
     });
   const { goBack } = useNavigation<NavigationProp<RootStackParamList>>();
   const classDate = useWatch({ control, name: "classDate" });
@@ -98,7 +103,10 @@ export const AddClasses = () => {
     }
 
     if (isEdit) {
-      await editStudentClass(classes[0])
+      await editStudentClass({
+        studentId: (student && student.id) || 0,
+        classToUpdate: classes[0],
+      })
         .then(() => {
           Toast.show({
             type: "customSuccessToast",
@@ -159,6 +167,7 @@ export const AddClasses = () => {
             labelInput="Data da Aula"
             name="classDate"
             control={control}
+            editable={isEdit}
           />
 
           <ViewBox marginTop="s" />
@@ -168,6 +177,7 @@ export const AddClasses = () => {
             labelInput="Horário do Início"
             control={control}
             defaultValue={classStartTime}
+            editable={!isEdit}
           />
           <ViewBox marginTop="s" />
           <CustomDateTimeInput
@@ -176,6 +186,7 @@ export const AddClasses = () => {
             labelInput="Horário do Fim"
             control={control}
             defaultValue={classEndTime}
+            editable={!isEdit}
           />
 
           <ViewBox marginTop="s" />

@@ -33,6 +33,14 @@ export const CustomDateTimeInput = ({
     setDatePickerVisibility(false);
   };
 
+  const handleOnPress = () => {
+    if (props.editable !== false) {
+      showDatePicker();
+    } else {
+      return;
+    }
+  };
+
   return (
     <Controller
       control={control}
@@ -40,7 +48,7 @@ export const CustomDateTimeInput = ({
       defaultValue={currentValue}
       render={({ field: { onChange, value }, fieldState: { error } }) => (
         <PressableBox
-          onPress={showDatePicker}
+          onPress={() => handleOnPress()}
           width={"100%"}
           style={[props.style, { opacity: props.editable !== false ? 1 : 0.5 }]}
         >

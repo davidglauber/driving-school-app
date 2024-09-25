@@ -1,7 +1,7 @@
 import { auth } from "@/src/config/firebaseConfig";
 import dayjs from "dayjs";
 import { arrayUnion, collection, doc, getDoc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
-import { StudentClass } from "../../Students.interface";
+import { GenericStudentType, StudentClass } from "../../Students.interface";
 import { v4 as uuidv4 } from 'uuid';
 
 const getClassesModalities = async () => {
@@ -78,28 +78,30 @@ const saveNewClasses = async (studentId: number | '', newClasses: StudentClass[]
     }
 };
 
-const editSpecificClass = async (studentId: number | null, updatedClass: StudentClass) => {
+const editSpecificClass = async (studentId: number, classToUpdate: StudentClass): Promise<void> => {
+    console.log('studentId', studentId);
+    console.log('classToUpdate', classToUpdate);
+
     const firestore = getFirestore();
-    const studentDocRef = doc(firestore, `students/${studentId}`);
-    const studentDoc = await getDoc(studentDocRef);
+    const studentRef = doc(firestore, `students/${studentId}`);
+    const studentDoc = await getDoc(studentRef);
 
-    const studentData = studentDoc.data();
-    if (!studentData) return null;
+    const studentData = studentDoc.data() as GenericStudentType;
 
-    const existingClasses = studentData.classes || [];
-
-    const classIndex = existingClasses.findIndex((cls: StudentClass) => cls.id === updatedClass.id);
-    if (classIndex === -1) {
-        throw new Error("Class not found");
-    }
-
-    existingClasses[classIndex] = updatedClass;
-
-    await updateDoc(studentDocRef, {
-        classes: existingClasses
+    const updatedClasses = studentData.classes?.map((studentClass) => {
+        if (
+            studentClass.classStartTime === classToUpdate.classStartTime &&
+            studentClass.classEndTime === classToUpdate.classEndTime &&
+            studentClass.classDate === classToUpdate.classDate &&
+            studentClass.chosenClass.value === classToUpdate.chosenClass.value
+        ) {
+            return classToUpdate;
+        }
+        return studentClass;
     });
-};
 
+    // await updateDoc(studentRef, { classes: updatedClasses });
+};
 
 const classDurationMin = (
     classStartTime: string, 

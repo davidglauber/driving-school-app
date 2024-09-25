@@ -6,6 +6,7 @@ import { CustomButton } from "@/src/components/CustomButton/CustomButton";
 import { CustomDivider } from "@/src/components/CustomDivider/CustomDivider";
 import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
 import { RootStackParamList } from "@/src/routes/Stack";
+import { useClassStore } from "@/src/store/useClassStore";
 import { useStudentStore } from "@/src/store/useStudentStore";
 import { colors } from "@/src/theme/colors";
 import { TouchableOpacityBox } from "@/src/utils/restyle/TouchableOpacityBox";
@@ -17,6 +18,8 @@ import {
   useNavigation,
 } from "@react-navigation/native";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 import LottieView from "lottie-react-native";
 import { Linking } from "react-native";
 import { Agenda, LocaleConfig } from "react-native-calendars";
@@ -35,9 +38,6 @@ import {
   styleCalendar,
   themeCalendar,
 } from "./Calendar.utils";
-import { useClassStore } from "@/src/store/useClassStore";
-import customParseFormat from "dayjs/plugin/customParseFormat";
-import dayjs from "dayjs";
 
 dayjs.extend(customParseFormat);
 
@@ -47,7 +47,7 @@ LocaleConfig.defaultLocale = "pt";
 export const Calendar = () => {
   const isFocused = useIsFocused();
   const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
-  const { setStudent } = useStudentStore();
+  const { student, setStudent } = useStudentStore();
   const { setClassStudent } = useClassStore();
   const { data: instructorClasses, refetch } = useQuery({
     queryKey: ["instructorClasses"],
@@ -86,10 +86,14 @@ export const Calendar = () => {
     await deleteStudentClass({ studentId, classToDelete });
   };
 
-  const handleEditClass = (classStudent: StudentClass) => {
+  const handleEditClass = (
+    student: GenericStudentType,
+    classStudent: StudentClass
+  ) => {
     const formattedDate = dayjs(classStudent.classDate).format("DD/MM/YYYY");
     const updatedClassStudent = { ...classStudent, classDate: formattedDate };
 
+    setStudent(student);
     setClassStudent(updatedClassStudent);
     navigate("AddClasses", { isEdit: true });
   };
@@ -162,7 +166,7 @@ export const Calendar = () => {
             <CustomButton
               color="red"
               titleColor="white"
-              onPress={() => handleEditClass(classItem)}
+              onPress={() => handleEditClass(item.student, classItem)}
               leftIcon={
                 <FontAwesome6 name="pencil" size={24} color={colors.white} />
               }
