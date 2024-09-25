@@ -1,5 +1,5 @@
 import { Calendar } from "@/src/screens/Calendar/Calendar";
-import { Settings } from "@/src/screens/Settings";
+import { Settings } from "@/src/screens/Settings/Settings";
 import { Students } from "@/src/screens/Students/Students";
 import { colors } from "@/src/theme/colors";
 import { radius } from "@/src/theme/radius";
