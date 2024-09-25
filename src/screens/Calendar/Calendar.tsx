@@ -16,16 +16,20 @@ import {
   useIsFocused,
   useNavigation,
 } from "@react-navigation/native";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import LottieView from "lottie-react-native";
 import { Linking } from "react-native";
 import { Agenda, LocaleConfig } from "react-native-calendars";
 import { radius } from "../../theme/radius";
 import { calendarPT_BR } from "../../utils/localeCalendarConfig";
 import { TextBox } from "../../utils/restyle/TextBox";
-import { GenericStudentType } from "../Students/Students.interface";
+import {
+  GenericStudentType,
+  StudentClass,
+} from "../Students/Students.interface";
 import { CalendarItemType } from "./Calendar.interface";
 import {
+  deleteClassFromStudent,
   getClassesByInstructor,
   openMap,
   styleCalendar,
@@ -43,6 +47,20 @@ export const Calendar = () => {
     queryKey: ["instructorClasses"],
     queryFn: () => getClassesByInstructor(),
   });
+  const { mutateAsync: deleteStudentClass, isPending: isPendingDelete } =
+    useMutation({
+      mutationKey: ["deleteStudentClass"],
+      mutationFn: ({
+        studentId,
+        classToDelete,
+      }: {
+        studentId: number;
+        classToDelete: StudentClass;
+      }) => deleteClassFromStudent(studentId, classToDelete),
+      onSuccess: () => {
+        refetch();
+      },
+    });
 
   useFocusEffect(
     useCallback(() => {
@@ -54,6 +72,14 @@ export const Calendar = () => {
     setStudent(student);
     navigate("SeeStudent");
   };
+
+  const handleDeleteClass = async (
+    studentId: number,
+    classToDelete: StudentClass
+  ) => {
+    await deleteStudentClass({ studentId, classToDelete });
+  };
+
   const renderItem = ({
     item,
     index,
@@ -112,12 +138,31 @@ export const Calendar = () => {
             <TextBox variant="textCardCalendar">{item.phone}</TextBox>
           </TouchableOpacityBox>
 
-          <CustomButton
-            color="red"
-            titleColor="white"
-            title="Ver Perfil"
-            onPress={() => handleViewProfile(item.student)}
-          />
+          <ViewBox flexDirection="row" justifyContent="space-between">
+            <CustomButton
+              color="red"
+              titleColor="white"
+              title="Ver Perfil"
+              onPress={() => handleViewProfile(item.student)}
+            />
+            <CustomButton
+              color="red"
+              titleColor="white"
+              onPress={() => console.log("not working")}
+              leftIcon={
+                <FontAwesome6 name="pencil" size={24} color={colors.white} />
+              }
+            />
+            <CustomButton
+              color="red"
+              titleColor="white"
+              onPress={() => handleDeleteClass(item.student.id, classItem)}
+              leftIcon={
+                <FontAwesome6 name="trash-can" size={24} color={colors.white} />
+              }
+              isLoading={isPendingDelete}
+            />
+          </ViewBox>
         </ViewBox>
       </ViewBox>
     ));

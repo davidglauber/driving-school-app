@@ -3,7 +3,7 @@ import { colors } from "@/src/theme/colors";
 import { height, width } from "@/src/utils/dimensions";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import { collection, doc, getDocs, getFirestore, orderBy, query, where } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, getFirestore, orderBy, query, updateDoc, where } from "firebase/firestore";
 import { Linking, Platform } from "react-native";
 import { GenericStudentType, StudentClass } from "../Students/Students.interface";
 import { CalendarItemInterface } from "./Calendar.interface";
@@ -71,6 +71,30 @@ const getClassesByInstructor = async (): Promise<CalendarItemInterface> => {
   return calendarItems;
 };
 
+
+const deleteClassFromStudent = async (studentId: number, classToDelete: StudentClass): Promise<void> => {
+  const firestore = getFirestore();
+  const studentRef = doc(firestore, `students/${studentId}`);
+  const studentDoc = await getDoc(studentRef);
+
+  const studentData = studentDoc.data() as GenericStudentType;
+
+  const normalizeDate = (date: string): string => {
+    return dayjs(date, 'DD/MM/YYYY').format('YYYY-MM-DD');
+  };
+
+  const updatedClasses = studentData.classes?.filter(
+    (studentClass) =>
+      studentClass.classStartTime !== classToDelete.classStartTime ||
+      studentClass.classEndTime !== classToDelete.classEndTime ||
+      normalizeDate(studentClass.classDate) !== classToDelete.classDate ||
+      studentClass.chosenClass.value !== classToDelete.chosenClass.value
+  );
+
+  await updateDoc(studentRef, { classes: updatedClasses });
+};
+
+
 const openMap = (address: string) => {
   const url = Platform.select({
     ios: `maps:0,0?q=${address}`,
@@ -82,4 +106,4 @@ const openMap = (address: string) => {
   }
 };
 
-export { getClassesByInstructor, openMap };
+export { getClassesByInstructor, openMap, deleteClassFromStudent };
