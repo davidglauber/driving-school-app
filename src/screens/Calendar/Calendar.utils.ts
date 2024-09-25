@@ -3,7 +3,7 @@ import { colors } from "@/src/theme/colors";
 import { height, width } from "@/src/utils/dimensions";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import { collection, doc, getDocs, getFirestore, query, where } from "firebase/firestore";
+import { collection, doc, getDocs, getFirestore, orderBy, query, where } from "firebase/firestore";
 import { Linking, Platform } from "react-native";
 import { GenericStudentType, StudentClass } from "../Students/Students.interface";
 import { CalendarItemInterface } from "./Calendar.interface";
@@ -28,46 +28,47 @@ export const styleCalendar = {
 };
 
 const getClassesByInstructor = async (): Promise<CalendarItemInterface> => {
-    const firestore = getFirestore();
-    const currentUser = auth.currentUser;
-    const instructorRef = doc(firestore, `instructors/${currentUser?.uid}`);
-    const studentsRef = collection(firestore, "students");
+  const firestore = getFirestore();
+  const currentUser = auth.currentUser;
+  const instructorRef = doc(firestore, `instructors/${currentUser?.uid}`);
+  const studentsRef = collection(firestore, "students");
 
-    const q = query(studentsRef, where("instructor", "==", instructorRef));
-    const querySnapshot = await getDocs(q);
-    const allClasses: { student: GenericStudentType, studentClass: StudentClass }[] = [];
+  const q = query(studentsRef, where("instructor", "==", instructorRef));
+  const querySnapshot = await getDocs(q);
+  const allClasses: { student: GenericStudentType, studentClass: StudentClass }[] = [];
 
-    querySnapshot.docs.forEach(doc => {
-      const student = doc.data() as GenericStudentType;
-      student.classes?.forEach(studentClass => {
-        allClasses.push({ student, studentClass });
-      });
+  querySnapshot.docs.forEach(doc => {
+    const student = doc.data() as GenericStudentType;
+    student.classes?.forEach(studentClass => {
+      allClasses.push({ student, studentClass });
     });
+  });
 
-    allClasses.sort((a, b) => {
-      const startTimeA = dayjs(a.studentClass.classStartTime, "HH:mm");
-      const startTimeB = dayjs(b.studentClass.classStartTime, "HH:mm");
-      return startTimeA.isBefore(startTimeB) ? -1 : 1;
+  allClasses.sort((a, b) => {
+    const startTimeA = dayjs(a.studentClass.classStartTime, "HH:mm");
+    const startTimeB = dayjs(b.studentClass.classStartTime, "HH:mm");
+    return startTimeA.isBefore(startTimeB) ? -1 : 1;
+  });
+
+  const calendarItems: CalendarItemInterface = {};
+
+  allClasses.forEach(({ student, studentClass }) => {
+    const { classDate, ...restClass } = studentClass;
+    const formattedDate = dayjs(classDate, "DD/MM/YYYY").format("YYYY-MM-DD");
+    if (!calendarItems[formattedDate]) {
+      calendarItems[formattedDate] = [];
+    }
+    calendarItems[formattedDate].push({
+      name: student.name,
+      id: student.id,
+      phone: student.phone,
+      fullAdress: student.fullAddress,
+      classes: [{ ...restClass, classDate: formattedDate }],
+      student: student,
     });
+  });
 
-    const calendarItems: CalendarItemInterface = {};
-
-    allClasses.forEach(({ student, studentClass }) => {
-      const { classDate, ...restClass } = studentClass;
-      const formattedDate = dayjs(classDate, "DD/MM/YYYY").format("YYYY-MM-DD");
-      if (!calendarItems[formattedDate]) {
-        calendarItems[formattedDate] = [];
-      }
-      calendarItems[formattedDate].push({
-        name: student.name,
-        id: student.id,
-        phone: student.phone,
-        fullAdress: student.fullAddress,
-        classes: [{ ...restClass, classDate: formattedDate }],
-        student: student,
-      });
-    });
-    return calendarItems;
+  return calendarItems;
 };
 
 const openMap = (address: string) => {

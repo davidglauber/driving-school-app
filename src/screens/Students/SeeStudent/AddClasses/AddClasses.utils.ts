@@ -33,14 +33,19 @@ const isClassScheduled = async (newClass: StudentClass) => {
     for (const studentDoc of querySnapshot.docs) {
         const studentData = studentDoc.data();
         const existingClasses = studentData.classes || [];
+        const newClassDate = newClass.classDate;
         const newClassStartTime = dayjs(`1970-01-01T${newClass.classStartTime}:00`);
         const newClassEndTime = dayjs(`1970-01-01T${newClass.classEndTime}:00`);
 
         const isScheduled = existingClasses.some((existingClass: StudentClass) => {
+            const existingClassDate = existingClass.classDate;
+            if (existingClassDate !== newClassDate) {
+                return false;
+            }
             const existingClassStartTime = dayjs(`1970-01-01T${existingClass.classStartTime}:00`);
             const existingClassEndTime = dayjs(`1970-01-01T${existingClass.classEndTime}:00`);
             return (
-                (newClassStartTime.isBefore(existingClassEndTime) && newClassEndTime.isAfter(existingClassStartTime))
+                newClassStartTime.isBefore(existingClassEndTime) && newClassEndTime.isAfter(existingClassStartTime)
             );
         });
 

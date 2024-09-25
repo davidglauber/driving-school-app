@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback } from "react";
 import { height } from "../../utils/dimensions";
 import { ViewBox } from "../../utils/restyle/ViewBox";
 
@@ -39,11 +39,7 @@ export const Calendar = () => {
   const isFocused = useIsFocused();
   const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
   const { setStudent } = useStudentStore();
-  const {
-    data: instructorClasses,
-    isLoading,
-    refetch,
-  } = useQuery({
+  const { data: instructorClasses, refetch } = useQuery({
     queryKey: ["instructorClasses"],
     queryFn: () => getClassesByInstructor(),
   });
