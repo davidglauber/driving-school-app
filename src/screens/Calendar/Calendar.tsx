@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 import { height } from "../../utils/dimensions";
 import { ViewBox } from "../../utils/restyle/ViewBox";
 
@@ -10,7 +10,12 @@ import { useStudentStore } from "@/src/store/useStudentStore";
 import { colors } from "@/src/theme/colors";
 import { TouchableOpacityBox } from "@/src/utils/restyle/TouchableOpacityBox";
 import { FontAwesome6 } from "@expo/vector-icons";
-import { NavigationProp, useNavigation } from "@react-navigation/native";
+import {
+  NavigationProp,
+  useFocusEffect,
+  useIsFocused,
+  useNavigation,
+} from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
 import LottieView from "lottie-react-native";
 import { Linking } from "react-native";
@@ -31,6 +36,7 @@ LocaleConfig.locales["pt"] = calendarPT_BR;
 LocaleConfig.defaultLocale = "pt";
 
 export const Calendar = () => {
+  const isFocused = useIsFocused();
   const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
   const { setStudent } = useStudentStore();
   const {
@@ -41,6 +47,13 @@ export const Calendar = () => {
     queryKey: ["instructorClasses"],
     queryFn: () => getClassesByInstructor(),
   });
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [isFocused])
+  );
+
   const handleViewProfile = (student: GenericStudentType) => {
     setStudent(student);
     navigate("SeeStudent");
@@ -144,9 +157,6 @@ export const Calendar = () => {
           renderItem({ item, index })
         }
         renderEmptyData={renderEmptyData}
-        onRefresh={() => refetch()}
-        refreshing={isLoading}
-        refreshControl={null}
         theme={themeCalendar}
         style={styleCalendar}
       />
