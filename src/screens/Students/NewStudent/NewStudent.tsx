@@ -23,9 +23,6 @@ export const NewStudent = () => {
   const { params } = useRoute<RouteProp<RootStackParamList, "NewStudent">>();
   const isEdit = params.isEdit;
   const { student, setStudent } = useStudentStore();
-
-  if (!student) return null;
-
   const { control, setValue, handleSubmit } = useForm({
     resolver: zodResolver(registerStudentSchema),
     defaultValues: isEdit ? (student as FieldValues) : undefined,

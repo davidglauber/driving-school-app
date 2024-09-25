@@ -6,6 +6,7 @@ import { CustomPickerInput } from "@/src/components/CustomPickerInput/CustomPick
 import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
 import { RootStackParamList } from "@/src/routes/Stack";
 import { addClassSchema } from "@/src/schemas/forms";
+import { useClassStore } from "@/src/store/useClassStore";
 import { useStudentStore } from "@/src/store/useStudentStore";
 import { spacing } from "@/src/theme/spacing";
 import { ScrollViewBox } from "@/src/utils/restyle/ScrollViewBox";
@@ -28,10 +29,10 @@ import Toast from "react-native-toast-message";
 import { StudentClass } from "../../Students.interface";
 import {
   classDurationMin,
+  editSpecificClass,
   getClassesModalities,
   saveNewClasses,
 } from "./AddClasses.utils";
-import { useClassStore } from "@/src/store/useClassStore";
 
 dayjs.extend(duration);
 
@@ -53,11 +54,18 @@ export const AddClasses = () => {
     queryKey: ["classesModalities"],
     queryFn: () => getClassesModalities(),
   });
-  const { mutateAsync: addNewClass, isPending } = useMutation({
+  const { mutateAsync: addNewClass, isPending: isPendingCreate } = useMutation({
     mutationKey: ["addNewClass"],
     mutationFn: (data: StudentClass[]) =>
       saveNewClasses((student && student.id) || "", data),
   });
+
+  const { mutateAsync: editStudentClass, isPending: isPendingEdit } =
+    useMutation({
+      mutationKey: ["editStudentClass"],
+      mutationFn: (data: StudentClass) =>
+        editSpecificClass(student && student.id, data),
+    });
   const { goBack } = useNavigation<NavigationProp<RootStackParamList>>();
   const classDate = useWatch({ control, name: "classDate" });
   const classStartTime = useWatch({ control, name: "classStartTime" });
@@ -89,23 +97,43 @@ export const AddClasses = () => {
       return;
     }
 
-    await addNewClass(classes)
-      .then(() => {
-        Toast.show({
-          type: "customSuccessToast",
-          text1: "Sucesso!",
-          text2: `${classes.length > 1 ? "Aulas" : "Aula"} cadastrada com sucesso.`,
+    if (isEdit) {
+      await editStudentClass(classes[0])
+        .then(() => {
+          Toast.show({
+            type: "customSuccessToast",
+            text1: "Sucesso!",
+            text2: "Aula editada.",
+          });
+          updateClasses(classes);
+          goBack();
+        })
+        .catch((error) => {
+          Toast.show({
+            type: "customErrorToast",
+            text1: "Erro!",
+            text2: error?.message || "Erro ao editar aula.",
+          });
         });
-        updateClasses(classes);
-        goBack();
-      })
-      .catch((error) => {
-        Toast.show({
-          type: "customErrorToast",
-          text1: "Erro!",
-          text2: error?.message || "Erro ao cadastrar aula.",
+    } else {
+      await addNewClass(classes)
+        .then(() => {
+          Toast.show({
+            type: "customSuccessToast",
+            text1: "Sucesso!",
+            text2: `${classes.length > 1 ? "Aulas" : "Aula"} cadastrada com sucesso.`,
+          });
+          updateClasses(classes);
+          goBack();
+        })
+        .catch((error) => {
+          Toast.show({
+            type: "customErrorToast",
+            text1: "Erro!",
+            text2: error?.message || "Erro ao cadastrar aula.",
+          });
         });
-      });
+    }
   };
 
   const refactoredClassesModalities = classesModalities?.map((item) => ({
@@ -186,11 +214,11 @@ export const AddClasses = () => {
 
           <CustomButton
             mt="l"
-            title="Cadastrar Aula"
+            title={isEdit ? "Editar Aula" : "Cadastrar Aula"}
             titleColor="white"
             color="red"
             onPress={handleSubmit(onSubmit)}
-            isLoading={isPending}
+            isLoading={isEdit ? isPendingEdit : isPendingCreate}
           />
         </ScrollViewBox>
       </ViewBox>

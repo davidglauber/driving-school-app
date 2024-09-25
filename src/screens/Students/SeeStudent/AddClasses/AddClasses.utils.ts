@@ -1,7 +1,8 @@
 import { auth } from "@/src/config/firebaseConfig";
 import dayjs from "dayjs";
-import { arrayUnion, collection, doc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
+import { arrayUnion, collection, doc, getDoc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
 import { StudentClass } from "../../Students.interface";
+import { v4 as uuidv4 } from 'uuid';
 
 const getClassesModalities = async () => {
     const firestore = getFirestore();
@@ -11,7 +12,6 @@ const getClassesModalities = async () => {
     const classesModalities = querySnapshot.docs.map(doc => doc.data());
     return classesModalities;
 };
-
 
 const isClassScheduled = async (newClass: StudentClass) => {
     const firestore = getFirestore();
@@ -67,7 +67,7 @@ const saveNewClasses = async (studentId: number | '', newClasses: StudentClass[]
         if (scheduledStudentName) {
             throw new Error(`Você já tem aula agendada entre ${newClass.classStartTime} e ${newClass.classEndTime} com ${scheduledStudentName}`);
         } else {
-            validClasses.push(newClass);
+            validClasses.push({ ...newClass, id: uuidv4() });
         }
     }
 
@@ -77,6 +77,29 @@ const saveNewClasses = async (studentId: number | '', newClasses: StudentClass[]
         });
     }
 };
+
+const editSpecificClass = async (studentId: number | null, updatedClass: StudentClass) => {
+    const firestore = getFirestore();
+    const studentDocRef = doc(firestore, `students/${studentId}`);
+    const studentDoc = await getDoc(studentDocRef);
+
+    const studentData = studentDoc.data();
+    if (!studentData) return null;
+
+    const existingClasses = studentData.classes || [];
+
+    const classIndex = existingClasses.findIndex((cls: StudentClass) => cls.id === updatedClass.id);
+    if (classIndex === -1) {
+        throw new Error("Class not found");
+    }
+
+    existingClasses[classIndex] = updatedClass;
+
+    await updateDoc(studentDocRef, {
+        classes: existingClasses
+    });
+};
+
 
 const classDurationMin = (
     classStartTime: string, 
@@ -96,6 +119,7 @@ const classDurationMin = (
       const classEnd = classStart.add(50, "minute");
 
       classes.push({
+        id: uuidv4(),
         chosenClass: data.chosenClass,
         classDate: data.classDate,
         classStartTime: classStart.format("HH:mm"),
@@ -106,6 +130,4 @@ const classDurationMin = (
     return { isClassDurationFifteenMin, classes }
 };
 
-
-export { classDurationMin, getClassesModalities, saveNewClasses };
-
+export { classDurationMin, getClassesModalities, saveNewClasses, editSpecificClass };

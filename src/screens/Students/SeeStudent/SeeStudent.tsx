@@ -70,11 +70,10 @@ export const SeeStudent = () => {
   const { student } = useStudentStore();
   const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
 
-  if (!student) return null;
+  const totalClasses = student?.classesNeeded;
+  const acquiredClasses = student?.classes ? student.classes.length : 0;
 
-  const totalClasses = student.classesNeeded;
-  const acquiredClasses = student.classes ? student.classes.length : 0;
-  const progress = acquiredClasses / totalClasses;
+  const progress = totalClasses && acquiredClasses / totalClasses;
 
   return (
     <ViewBox height={height} bg="white" paddingHorizontal="l">
@@ -90,7 +89,7 @@ export const SeeStudent = () => {
           borderRadius={radius.m}
         >
           <TextBox variant="titleCardCalendar" textAlign="center">
-            {student.name}
+            {student?.name}
           </TextBox>
 
           <ViewBox
@@ -108,42 +107,51 @@ export const SeeStudent = () => {
               height={spacing.s}
             />
             <TextBox variant="titleCardCalendar" color="red">
-              {Math.round(progress * 100)}%
+              {progress && Math.round(progress * 100)}%
             </TextBox>
           </ViewBox>
 
           <ViewBox marginVertical="s" />
-          <ClassesList classes={student.classes} />
+          <ClassesList classes={student?.classes} />
           <CustomDivider />
 
-          <PressableBox onPress={() => Linking.openURL(`tel:${student.phone}`)}>
-            <CustomLabelText label="Telefone" text={student.phone} mb="s" />
+          <PressableBox
+            onPress={() => Linking.openURL(`tel:${student?.phone || ""}`)}
+          >
+            <CustomLabelText
+              label="Telefone"
+              text={student?.phone || ""}
+              mb="s"
+            />
           </PressableBox>
 
-          <PressableBox onPress={() => openMap(student.fullAddress)}>
-            <CustomLabelText label="Endereço" text={student.fullAddress} />
+          <PressableBox onPress={() => openMap(student?.fullAddress || "")}>
+            <CustomLabelText
+              label="Endereço"
+              text={student?.fullAddress || ""}
+            />
           </PressableBox>
 
           <CustomDivider />
 
           <CustomLabelText
             label="Aulas Necessárias"
-            text={student.classesNeeded}
+            text={student?.classesNeeded || ""}
             mb="s"
           />
           <CustomLabelText
             label="Aulas Adquiridas"
-            text={student.classesAcquired}
+            text={student?.classesAcquired || ""}
             mb="s"
           />
           <CustomLabelText
             label="Avaliações Psicológicas Necessárias"
-            text={student.psicolocicalEvaluationRequired}
+            text={student?.psicolocicalEvaluationRequired || ""}
             mb="s"
           />
           <CustomLabelText
             label="Avaliações Psicológicas Adquiridas"
-            text={student.psicolocicalEvaluationAcquired}
+            text={student?.psicolocicalEvaluationAcquired || ""}
           />
 
           <ViewBox flexDirection="row" justifyContent="space-between">

@@ -16,7 +16,7 @@ const createUser = async (data: FieldValues) => {
   return docRef.id;
 };
 
-const editUser = async (id: string, data: FieldValues) => {
+const editUser = async (id: string | undefined, data: FieldValues) => {
   const firestore = getFirestore();
   const docRef = doc(firestore, `students/${id}`);
   await updateDoc(docRef, data);

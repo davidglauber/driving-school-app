@@ -1,4 +1,5 @@
 export type StudentClass = {
+    id: string;
     classStartTime: string;
     classEndTime: string;
     classDate: string;
