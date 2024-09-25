@@ -15,22 +15,32 @@ import React, { useEffect } from "react";
 import { FieldValues, SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { KeyboardAvoidingView, Platform } from "react-native";
 import Toast from "react-native-toast-message";
-import { createUser } from "./NewStudent.utils";
+import { GenericStudentType } from "../Students.interface";
+import { createUser, editUser } from "./NewStudent.utils";
 import { useGetStudentLocation } from "./useGetStudentLocation/useGetStudentLocation";
 
 export const NewStudent = () => {
   const { params } = useRoute<RouteProp<RootStackParamList, "NewStudent">>();
-  const { student } = useStudentStore();
+  const isEdit = params.isEdit;
+  const { student, setStudent } = useStudentStore();
+
+  if (!student) return null;
+
   const { control, setValue, handleSubmit } = useForm({
     resolver: zodResolver(registerStudentSchema),
-    defaultValues: params.isEdit ? (student as FieldValues) : undefined,
+    defaultValues: isEdit ? (student as FieldValues) : undefined,
   });
   const cep = useWatch({ control, name: "cep" });
   const { goBack } = useNavigation();
   const { data, isLoading } = useGetStudentLocation({ cep: cep || "" });
-  const { mutateAsync: createNewUser, isPending } = useMutation({
-    mutationKey: ["createNewUser"],
-    mutationFn: (data: FieldValues) => createUser(data),
+  const { mutateAsync: createNewUser, isPending: isPendingCreate } =
+    useMutation({
+      mutationKey: ["createNewUser"],
+      mutationFn: (data: FieldValues) => createUser(data),
+    });
+  const { mutateAsync: editStudent, isPending: isPendingEdit } = useMutation({
+    mutationKey: ["editStudent"],
+    mutationFn: (data: FieldValues) => editUser(student?.id.toString(), data),
   });
 
   useEffect(() => {
@@ -49,25 +59,48 @@ export const NewStudent = () => {
   }, [data, setValue]);
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
-    await createNewUser(data)
-      .then(() => {
-        Toast.show({
-          type: "customSuccessToast",
-          text1: "Sucesso!",
-          text2: "Aluno criado.",
-          position: "bottom",
+    if (isEdit) {
+      await editStudent(data)
+        .then(() => {
+          Toast.show({
+            type: "customSuccessToast",
+            text1: "Sucesso!",
+            text2: "Informações atualizadas.",
+            position: "bottom",
+          });
+          setStudent(data as GenericStudentType);
+          goBack();
+        })
+        .catch((error) => {
+          Toast.show({
+            type: "customErrorToast",
+            text1: "Erro!",
+            text2: "Erro ao editar aluno",
+            position: "bottom",
+          });
+          console.error("Erro ao editar aluno", error);
         });
-        goBack();
-      })
-      .catch((error) => {
-        Toast.show({
-          type: "customErrorToast",
-          text1: "Erro!",
-          text2: "Erro ao criar aluno",
-          position: "bottom",
+    } else {
+      await createNewUser(data)
+        .then(() => {
+          Toast.show({
+            type: "customSuccessToast",
+            text1: "Sucesso!",
+            text2: "Aluno criado.",
+            position: "bottom",
+          });
+          goBack();
+        })
+        .catch((error) => {
+          Toast.show({
+            type: "customErrorToast",
+            text1: "Erro!",
+            text2: "Erro ao criar aluno",
+            position: "bottom",
+          });
+          console.error("Erro ao criar aluno", error);
         });
-        console.error("Erro ao criar aluno", error);
-      });
+    }
   };
 
   return (
@@ -182,7 +215,7 @@ export const NewStudent = () => {
             marginTop="xl"
             title="Salvar"
             onPress={handleSubmit(onSubmit)}
-            isLoading={isPending}
+            isLoading={isEdit ? isPendingEdit : isPendingCreate}
           />
         </ScrollViewBox>
       </ViewBox>
