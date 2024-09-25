@@ -17,7 +17,7 @@ import { TouchableOpacity } from "react-native";
 export type RootStackParamList = {
   Login: undefined;
   Tabs: undefined;
-  NewStudent: undefined;
+  NewStudent: { isEdit?: boolean };
   SeeStudent: undefined;
   AddClasses: undefined;
 };

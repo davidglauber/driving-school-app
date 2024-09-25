@@ -12,6 +12,7 @@ import { PressableBox } from "@/src/utils/restyle/PressableBox";
 import { ScrollViewBox } from "@/src/utils/restyle/ScrollViewBox";
 import { TextBox } from "@/src/utils/restyle/TextBox";
 import { ViewBox } from "@/src/utils/restyle/ViewBox";
+import { FontAwesome6 } from "@expo/vector-icons";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
@@ -145,13 +146,25 @@ export const SeeStudent = () => {
             text={student.psicolocicalEvaluationAcquired}
           />
 
-          <CustomButton
-            color="red"
-            titleColor="white"
-            title="Adicionar Aulas"
-            mt="l"
-            onPress={() => navigate("AddClasses")}
-          />
+          <ViewBox flexDirection="row" justifyContent="space-between">
+            <CustomButton
+              width={width * 0.62}
+              color="red"
+              titleColor="white"
+              title="Adicionar Aulas"
+              mt="l"
+              onPress={() => navigate("AddClasses")}
+            />
+            <CustomButton
+              leftIcon={
+                <FontAwesome6 name={"pencil"} size={24} color={colors.white} />
+              }
+              color="red"
+              titleColor="white"
+              mt="l"
+              onPress={() => navigate("NewStudent", { isEdit: true })}
+            />
+          </ViewBox>
         </ViewBox>
       </ScrollViewBox>
     </ViewBox>

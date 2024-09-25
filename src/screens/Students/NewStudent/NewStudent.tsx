@@ -2,12 +2,14 @@ import { CustomButton } from "@/src/components/CustomButton/CustomButton";
 import { CustomDivider } from "@/src/components/CustomDivider/CustomDivider";
 import { CustomTextInput } from "@/src/components/CustomTextInput/CustomTextInput";
 import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
+import { RootStackParamList } from "@/src/routes/Stack";
 import { registerStudentSchema } from "@/src/schemas/forms";
+import { useStudentStore } from "@/src/store/useStudentStore";
 import { spacing } from "@/src/theme/spacing";
 import { ScrollViewBox } from "@/src/utils/restyle/ScrollViewBox";
 import { ViewBox } from "@/src/utils/restyle/ViewBox";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigation } from "@react-navigation/native";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { useMutation } from "@tanstack/react-query";
 import React, { useEffect } from "react";
 import { FieldValues, SubmitHandler, useForm, useWatch } from "react-hook-form";
@@ -17,12 +19,15 @@ import { createUser } from "./NewStudent.utils";
 import { useGetStudentLocation } from "./useGetStudentLocation/useGetStudentLocation";
 
 export const NewStudent = () => {
+  const { params } = useRoute<RouteProp<RootStackParamList, "NewStudent">>();
+  const { student } = useStudentStore();
   const { control, setValue, handleSubmit } = useForm({
     resolver: zodResolver(registerStudentSchema),
+    defaultValues: params.isEdit ? (student as FieldValues) : undefined,
   });
   const cep = useWatch({ control, name: "cep" });
   const { goBack } = useNavigation();
-  const { data, isLoading } = useGetStudentLocation({ cep });
+  const { data, isLoading } = useGetStudentLocation({ cep: cep || "" });
   const { mutateAsync: createNewUser, isPending } = useMutation({
     mutationKey: ["createNewUser"],
     mutationFn: (data: FieldValues) => createUser(data),

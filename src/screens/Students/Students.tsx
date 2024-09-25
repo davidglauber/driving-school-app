@@ -159,7 +159,7 @@ export const Students = () => {
                 leftIcon={
                   <FontAwesome6 name="user-plus" size={24} color="white" />
                 }
-                onPress={() => navigate("NewStudent")}
+                onPress={() => navigate("NewStudent", { isEdit: false })}
               />
             </ViewBox>
           }
