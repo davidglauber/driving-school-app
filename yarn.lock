@@ -4200,7 +4200,7 @@ __metadata:
     expo-font: ~12.0.9
     expo-haptics: ~13.0.1
     expo-linking: ~6.3.1
-    expo-splash-screen: ~0.27.5
+    expo-splash-screen: ~0.27.6
     expo-status-bar: ~1.12.1
     expo-system-ui: ~3.0.7
     expo-updates: ~0.25.24
@@ -6281,7 +6281,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-splash-screen@npm:~0.27.5":
+"expo-splash-screen@npm:~0.27.6":
   version: 0.27.6
   resolution: "expo-splash-screen@npm:0.27.6"
   dependencies:
