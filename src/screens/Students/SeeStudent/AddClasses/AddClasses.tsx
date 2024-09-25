@@ -79,6 +79,7 @@ export const AddClasses = () => {
 
   useEffect(() => {
     if (classStudent) {
+      setValue("id", classStudent.id);
       setValue("classDate", classStudent.classDate);
       setValue("classStartTime", classStudent.classStartTime);
       setValue("classEndTime", classStudent.classEndTime);
@@ -103,9 +104,11 @@ export const AddClasses = () => {
     }
 
     if (isEdit) {
+      const classToUpdate = { ...classes[0], id: classStudent?.id || "" };
+
       await editStudentClass({
         studentId: (student && student.id) || 0,
-        classToUpdate: classes[0],
+        classToUpdate: classToUpdate,
       })
         .then(() => {
           Toast.show({
@@ -167,7 +170,7 @@ export const AddClasses = () => {
             labelInput="Data da Aula"
             name="classDate"
             control={control}
-            editable={isEdit}
+            editable={!isEdit}
           />
 
           <ViewBox marginTop="s" />

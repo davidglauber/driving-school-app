@@ -88,10 +88,10 @@ export const Calendar = () => {
 
   const handleEditClass = (
     student: GenericStudentType,
-    classStudent: StudentClass
+    classItem: StudentClass
   ) => {
-    const formattedDate = dayjs(classStudent.classDate).format("DD/MM/YYYY");
-    const updatedClassStudent = { ...classStudent, classDate: formattedDate };
+    const formattedDate = dayjs(classItem.classDate).format("DD/MM/YYYY");
+    const updatedClassStudent = { ...classItem, classDate: formattedDate };
 
     setStudent(student);
     setClassStudent(updatedClassStudent);

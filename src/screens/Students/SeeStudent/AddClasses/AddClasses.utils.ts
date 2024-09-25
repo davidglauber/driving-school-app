@@ -79,9 +79,6 @@ const saveNewClasses = async (studentId: number | '', newClasses: StudentClass[]
 };
 
 const editSpecificClass = async (studentId: number, classToUpdate: StudentClass): Promise<void> => {
-    console.log('studentId', studentId);
-    console.log('classToUpdate', classToUpdate);
-
     const firestore = getFirestore();
     const studentRef = doc(firestore, `students/${studentId}`);
     const studentDoc = await getDoc(studentRef);
@@ -89,18 +86,15 @@ const editSpecificClass = async (studentId: number, classToUpdate: StudentClass)
     const studentData = studentDoc.data() as GenericStudentType;
 
     const updatedClasses = studentData.classes?.map((studentClass) => {
-        if (
-            studentClass.classStartTime === classToUpdate.classStartTime &&
-            studentClass.classEndTime === classToUpdate.classEndTime &&
-            studentClass.classDate === classToUpdate.classDate &&
-            studentClass.chosenClass.value === classToUpdate.chosenClass.value
-        ) {
+        if (studentClass.id === classToUpdate.id) {
             return classToUpdate;
         }
         return studentClass;
     });
 
-    // await updateDoc(studentRef, { classes: updatedClasses });
+    console.log('updatedClasses', updatedClasses);
+
+    await updateDoc(studentRef, { classes: updatedClasses });
 };
 
 const classDurationMin = (
