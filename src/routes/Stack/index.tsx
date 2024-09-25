@@ -19,7 +19,7 @@ export type RootStackParamList = {
   Tabs: undefined;
   NewStudent: { isEdit?: boolean };
   SeeStudent: undefined;
-  AddClasses: undefined;
+  AddClasses: { isEdit?: boolean };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();

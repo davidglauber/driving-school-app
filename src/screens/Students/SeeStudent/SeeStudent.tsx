@@ -153,7 +153,7 @@ export const SeeStudent = () => {
               titleColor="white"
               title="Adicionar Aulas"
               mt="l"
-              onPress={() => navigate("AddClasses")}
+              onPress={() => navigate("AddClasses", { isEdit: false })}
             />
             <CustomButton
               leftIcon={

@@ -12,11 +12,16 @@ import { ScrollViewBox } from "@/src/utils/restyle/ScrollViewBox";
 import { TextBox } from "@/src/utils/restyle/TextBox";
 import { ViewBox } from "@/src/utils/restyle/ViewBox";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { NavigationProp, useNavigation } from "@react-navigation/native";
+import {
+  NavigationProp,
+  RouteProp,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
-import React from "react";
+import React, { useEffect } from "react";
 import { FieldValues, SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { KeyboardAvoidingView, Platform } from "react-native";
 import Toast from "react-native-toast-message";
@@ -26,11 +31,14 @@ import {
   getClassesModalities,
   saveNewClasses,
 } from "./AddClasses.utils";
+import { useClassStore } from "@/src/store/useClassStore";
 
 dayjs.extend(duration);
 
 export const AddClasses = () => {
-  const { control, handleSubmit } = useForm<FieldValues>({
+  const { params } = useRoute<RouteProp<RootStackParamList, "AddClasses">>();
+  const isEdit = params.isEdit;
+  const { control, setValue, handleSubmit } = useForm<FieldValues>({
     defaultValues: {
       classDate: dayjs().format("DD/MM/YYYY"),
       classStartTime: dayjs().format("HH:mm"),
@@ -40,6 +48,7 @@ export const AddClasses = () => {
     resolver: zodResolver(addClassSchema),
   });
   const { student, updateClasses } = useStudentStore();
+  const { classStudent } = useClassStore();
   const { data: classesModalities } = useQuery({
     queryKey: ["classesModalities"],
     queryFn: () => getClassesModalities(),
@@ -54,6 +63,15 @@ export const AddClasses = () => {
   const classStartTime = useWatch({ control, name: "classStartTime" });
   const classEndTime = useWatch({ control, name: "classEndTime" });
   const chosenClass = useWatch({ control, name: "chosenClass" });
+
+  useEffect(() => {
+    if (classStudent) {
+      setValue("classDate", classStudent.classDate);
+      setValue("classStartTime", classStudent.classStartTime);
+      setValue("classEndTime", classStudent.classEndTime);
+      setValue("chosenClass", classStudent.chosenClass);
+    }
+  }, [classStudent, setValue]);
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     const { isClassDurationFifteenMin, classes } = classDurationMin(

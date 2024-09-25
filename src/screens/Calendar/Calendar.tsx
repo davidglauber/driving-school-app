@@ -35,6 +35,11 @@ import {
   styleCalendar,
   themeCalendar,
 } from "./Calendar.utils";
+import { useClassStore } from "@/src/store/useClassStore";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import dayjs from "dayjs";
+
+dayjs.extend(customParseFormat);
 
 LocaleConfig.locales["pt"] = calendarPT_BR;
 LocaleConfig.defaultLocale = "pt";
@@ -43,6 +48,7 @@ export const Calendar = () => {
   const isFocused = useIsFocused();
   const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
   const { setStudent } = useStudentStore();
+  const { setClassStudent } = useClassStore();
   const { data: instructorClasses, refetch } = useQuery({
     queryKey: ["instructorClasses"],
     queryFn: () => getClassesByInstructor(),
@@ -78,6 +84,14 @@ export const Calendar = () => {
     classToDelete: StudentClass
   ) => {
     await deleteStudentClass({ studentId, classToDelete });
+  };
+
+  const handleEditClass = (classStudent: StudentClass) => {
+    const formattedDate = dayjs(classStudent.classDate).format("DD/MM/YYYY");
+    const updatedClassStudent = { ...classStudent, classDate: formattedDate };
+
+    setClassStudent(updatedClassStudent);
+    navigate("AddClasses", { isEdit: true });
   };
 
   const renderItem = ({
@@ -148,7 +162,7 @@ export const Calendar = () => {
             <CustomButton
               color="red"
               titleColor="white"
-              onPress={() => console.log("not working")}
+              onPress={() => handleEditClass(classItem)}
               leftIcon={
                 <FontAwesome6 name="pencil" size={24} color={colors.white} />
               }
