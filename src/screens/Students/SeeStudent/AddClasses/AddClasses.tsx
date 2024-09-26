@@ -170,7 +170,6 @@ export const AddClasses = () => {
             labelInput="Data da Aula"
             name="classDate"
             control={control}
-            editable={!isEdit}
           />
 
           <ViewBox marginTop="s" />
@@ -180,7 +179,6 @@ export const AddClasses = () => {
             labelInput="Horário do Início"
             control={control}
             defaultValue={classStartTime}
-            editable={!isEdit}
           />
           <ViewBox marginTop="s" />
           <CustomDateTimeInput
@@ -189,7 +187,6 @@ export const AddClasses = () => {
             labelInput="Horário do Fim"
             control={control}
             defaultValue={classEndTime}
-            editable={!isEdit}
           />
 
           <ViewBox marginTop="s" />

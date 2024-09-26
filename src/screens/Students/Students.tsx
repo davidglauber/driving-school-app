@@ -11,9 +11,14 @@ import { height, width } from "@/src/utils/dimensions";
 import { TextBox } from "@/src/utils/restyle/TextBox";
 import { ViewBox } from "@/src/utils/restyle/ViewBox";
 import { FontAwesome6 } from "@expo/vector-icons";
-import { NavigationProp, useNavigation } from "@react-navigation/native";
+import {
+  NavigationProp,
+  useFocusEffect,
+  useIsFocused,
+  useNavigation,
+} from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
-import React, { useState } from "react";
+import React, { useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { ActivityIndicator, FlatList, Linking } from "react-native";
 import ProgressBar from "react-native-progress/Bar";
@@ -22,6 +27,7 @@ import { GenericStudentType, StudentsInterface } from "./Students.interface";
 import { getStudentsByInstructor } from "./Students.utils";
 
 export const Students = () => {
+  const isFocused = useIsFocused();
   const { control, watch } = useForm();
   const { setStudent } = useStudentStore();
   const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
@@ -34,13 +40,12 @@ export const Students = () => {
     queryKey: ["students"],
     queryFn: () => getStudentsByInstructor(),
   });
-  const [refreshing, setRefreshing] = useState(false);
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [isFocused])
+  );
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await refetch();
-    setRefreshing(false);
-  };
   const filteredStudents =
     students &&
     students
@@ -128,8 +133,6 @@ export const Students = () => {
           renderItem={renderItem}
           contentContainerStyle={{ paddingBottom: height * 0.1 }}
           showsVerticalScrollIndicator={false}
-          refreshing={refreshing}
-          onRefresh={onRefresh}
           ListHeaderComponent={
             <ViewBox
               flexDirection="row"
