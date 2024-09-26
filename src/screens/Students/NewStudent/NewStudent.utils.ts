@@ -8,6 +8,7 @@ const createUser = async (data: FieldValues) => {
   const instructorRef = doc(firestore, `instructors/${currentUser?.uid}`);
   const dataToSend = {
     instructor: instructorRef,
+    rg: data.rg ?? "",
     ...data,
   };
 
