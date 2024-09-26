@@ -3,6 +3,7 @@ import { CustomDivider } from "@/src/components/CustomDivider/CustomDivider";
 import { CustomTextInput } from "@/src/components/CustomTextInput/CustomTextInput";
 import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
 import { RootStackParamList } from "@/src/routes/Stack";
+import { useStudentStore } from "@/src/store/useStudentStore";
 import { colors } from "@/src/theme/colors";
 import { radius } from "@/src/theme/radius";
 import { spacing } from "@/src/theme/spacing";
@@ -10,25 +11,57 @@ import { height, width } from "@/src/utils/dimensions";
 import { TextBox } from "@/src/utils/restyle/TextBox";
 import { ViewBox } from "@/src/utils/restyle/ViewBox";
 import { FontAwesome6 } from "@expo/vector-icons";
-import { NavigationProp, useNavigation } from "@react-navigation/native";
-import React from "react";
+import {
+  NavigationProp,
+  useFocusEffect,
+  useIsFocused,
+  useNavigation,
+} from "@react-navigation/native";
+import { useQuery } from "@tanstack/react-query";
+import React, { useCallback } from "react";
 import { useForm } from "react-hook-form";
-import { FlatList, Linking } from "react-native";
+import { ActivityIndicator, FlatList, Linking } from "react-native";
 import ProgressBar from "react-native-progress/Bar";
 import { openMap } from "../Calendar/Calendar.utils";
-import { StudentsInterface } from "./Students.interface";
-import { students } from "./Students.utils";
+import { GenericStudentType, StudentsInterface } from "./Students.interface";
+import { getStudentsByInstructor } from "./Students.utils";
 
 export const Students = () => {
+  const isFocused = useIsFocused();
   const { control, watch } = useForm();
+  const { setStudent } = useStudentStore();
   const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
   const searchText = watch("search", "");
-
-  const filteredStudents = students.filter((student) =>
-    student.name.toLowerCase().includes(searchText.toLowerCase())
+  const {
+    data: students,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["students"],
+    queryFn: () => getStudentsByInstructor(),
+  });
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [isFocused])
   );
+
+  const filteredStudents =
+    students &&
+    students
+      .filter((student) =>
+        student.name.toLowerCase().includes(searchText.toLowerCase())
+      )
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+  const handleNavigate = (item: GenericStudentType) => {
+    setStudent(item);
+    navigate("SeeStudent");
+  };
+
   const renderItem = ({ item, index }: StudentsInterface) => {
-    const progress = item.classesAcquired / item.classesNeeded;
+    const acquiredClasses = item.classes ? item.classes.length : 0;
+    const progress = acquiredClasses / item.classesNeeded;
 
     return (
       <ViewBox
@@ -40,7 +73,7 @@ export const Students = () => {
       >
         <TextBox variant="titleCardCalendar">{item.name}</TextBox>
         <TextBox variant="textCardCalendar">
-          {item.classesAcquired} de {item.classesNeeded} aulas concluídas -{" "}
+          {acquiredClasses} de {item.classesNeeded} aulas concluídas -{" "}
           {Math.round(progress * 100)}%
         </TextBox>
 
@@ -69,7 +102,7 @@ export const Students = () => {
           />
           <CustomButton
             color="white"
-            onPress={() => navigate("SeeStudent", { student: item })}
+            onPress={() => handleNavigate(item)}
             title="Ver Detalhes"
             leftIcon={
               <FontAwesome6
@@ -92,46 +125,55 @@ export const Students = () => {
       paddingHorizontal="l"
     >
       <LogoHeader />
-      <FlatList
-        data={filteredStudents}
-        renderItem={renderItem}
-        contentContainerStyle={{ paddingBottom: height * 0.1 }}
-        showsVerticalScrollIndicator={false}
-        ListHeaderComponent={
-          <ViewBox
-            flexDirection="row"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <CustomTextInput
-              name="search"
-              control={control}
-              placeholder="Pesquise o aluno"
-              rightIcon={
-                <FontAwesome6
-                  name={"magnifying-glass"}
-                  size={24}
-                  color="black"
-                />
-              }
-              style={{ width: width * 0.7 }}
-            />
-            <CustomButton
-              color="red"
-              titleColor="white"
-              alignSelf="center"
-              mt="s"
-              height={"88%"}
-              borderRadius={radius.m}
-              leftIcon={
-                <FontAwesome6 name="user-plus" size={24} color="white" />
-              }
-              onPress={() => navigate("NewStudent")}
-            />
-          </ViewBox>
-        }
-        ListHeaderComponentStyle={{ marginBottom: spacing.m }}
-      />
+      {isLoading ? (
+        <ActivityIndicator size="small" color={colors.red} />
+      ) : (
+        <FlatList
+          data={filteredStudents}
+          renderItem={renderItem}
+          contentContainerStyle={{ paddingBottom: height * 0.1 }}
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={
+            <ViewBox
+              flexDirection="row"
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              <CustomTextInput
+                name="search"
+                control={control}
+                placeholder="Pesquise o aluno"
+                rightIcon={
+                  <FontAwesome6
+                    name={"magnifying-glass"}
+                    size={24}
+                    color="black"
+                  />
+                }
+                style={{ width: width * 0.7 }}
+              />
+              <CustomButton
+                color="red"
+                titleColor="white"
+                alignSelf="center"
+                mt="s"
+                height={"88%"}
+                borderRadius={radius.m}
+                leftIcon={
+                  <FontAwesome6 name="user-plus" size={24} color="white" />
+                }
+                onPress={() => navigate("NewStudent", { isEdit: false })}
+              />
+            </ViewBox>
+          }
+          ListHeaderComponentStyle={{ marginBottom: spacing.m }}
+          keyExtractor={(_, index) => index.toExponential()}
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          updateCellsBatchingPeriod={50}
+          removeClippedSubviews
+        />
+      )}
     </ViewBox>
   );
 };

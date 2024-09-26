@@ -1,4 +1,4 @@
-import { FieldValues, RegisterOptions, UseFormReturn } from "react-hook-form";
+import { UseFormReturn } from "react-hook-form";
 import { TextInputProps } from "react-native";
 
 export interface TextInputInterface extends Omit<TextInputProps, 'value'> {

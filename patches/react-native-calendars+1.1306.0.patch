@@ -1,0 +1,322 @@
+diff --git a/node_modules/react-native-calendars/.buildkite/pipeline.yml b/node_modules/react-native-calendars/.buildkite/pipeline.yml
+index 874e6e1..b3224a8 100644
+--- a/node_modules/react-native-calendars/.buildkite/pipeline.yml
++++ b/node_modules/react-native-calendars/.buildkite/pipeline.yml
+@@ -27,9 +27,9 @@ steps:
+   - label: "Build"
+     command: |
+       nvm install
+-      yarn
+-      yarn test
+-      yarn build:ts
++      npm install
++      npm run test
++      npm run build:ts
+       if [[ $BUILDKITE_PULL_REQUEST == 'false' ]];then
+-        yarn release
++        npm run release
+       fi
+diff --git a/node_modules/react-native-calendars/.node-version b/node_modules/react-native-calendars/.node-version
+index 2edeafb..25bf17f 100644
+--- a/node_modules/react-native-calendars/.node-version
++++ b/node_modules/react-native-calendars/.node-version
+@@ -1 +1 @@
+-20
+\ No newline at end of file
++18
+\ No newline at end of file
+diff --git a/node_modules/react-native-calendars/.yarnrc b/node_modules/react-native-calendars/.yarnrc
+deleted file mode 100644
+index 772d3e2..0000000
+--- a/node_modules/react-native-calendars/.yarnrc
++++ /dev/null
+@@ -1 +0,0 @@
+---registry "https://registry.npmjs.org/"
+\ No newline at end of file
+diff --git a/node_modules/react-native-calendars/README.md b/node_modules/react-native-calendars/README.md
+index c179afe..5057a6d 100644
+--- a/node_modules/react-native-calendars/README.md
++++ b/node_modules/react-native-calendars/README.md
+@@ -5,7 +5,8 @@
+ ## A declarative cross-platform React Native calendar component for iOS and Android.
+ 
+ [![Version](https://img.shields.io/npm/v/react-native-calendars.svg)](https://www.npmjs.com/package/react-native-calendars)
+-[![Build status](https://badge.buildkite.com/1a911fa39db2518a615b73f3dc18ec0938a66403f2ad66f79b.svg)](https://buildkite.com/wix-mobile-oss/react-native-calendars)
++[![Build Status](https://travis-ci.org/wix/react-native-calendars.svg?branch=master)](https://travis-ci.org/wix/react-native-calendars)
++
+ <br>
+ 
+ This module includes information on how to use this customizable **React Native** calendar component.
+@@ -39,7 +40,7 @@ $ git clone git@github.com:wix/react-native-calendars.git
+ 
+ $ cd react-native-calendars
+ 
+-$ yarn install
++$ npm install
+ 
+ $ cd ios && pod install && cd ..
+ 
+@@ -56,6 +57,14 @@ Here's how to get started with react-native-calendars in your React Native proje
+ 
+ ### Install the package:
+ 
++Using `npm`:
++
++```
++$ npm install --save react-native-calendars
++```
++
++Using `Yarn`:
++
+ ```
+ $ yarn add react-native-calendars
+ ```
+@@ -188,6 +197,13 @@ export default App;
+ ### Adding a global theme to the calendar:
+ 
+ ```javascript
++import React, { useState } from 'react';
++import { Calendar, LocaleConfig } from 'react-native-calendars';
++
++const App = () => {
++  const [selected, setSelected] = useState('');
++
++  return (
+     <Calendar
+       style={{
+         borderWidth: 1,
+@@ -202,9 +218,7 @@ export default App;
+         selectedDayTextColor: '#ffffff',
+         todayTextColor: '#00adf5',
+         dayTextColor: '#2d4150',
+-        textDisabledColor: '#dd99ee'
+-      }}
+-    </Calendar>
++        textDisabledColor: '#d9e
+ ```
+ 
+ ## Customized Calendar Examples
+@@ -268,7 +282,7 @@ We welcome contributions to react-native-calendars.
+ 
+ If you have an idea for a new feature or have discovered a bug, please open an issue.
+ 
+-Please `yarn test` and `yarn lint` before pushing changes.
++Please `npm run test` and `npm run lint` before pushing changes.
+ 
+ Don't forget to add a **title** and a **description** explaining the issue you're trying to solve and your proposed solution.
+ 
+diff --git a/node_modules/react-native-calendars/src/agenda/reservation-list/reservation.js b/node_modules/react-native-calendars/src/agenda/reservation-list/reservation.js
+index bc1e2c0..1eb0d70 100644
+--- a/node_modules/react-native-calendars/src/agenda/reservation-list/reservation.js
++++ b/node_modules/react-native-calendars/src/agenda/reservation-list/reservation.js
+@@ -22,32 +22,32 @@ class Reservation extends Component {
+         super(props);
+         this.style = styleConstructor(props.theme);
+     }
+-    shouldComponentUpdate(nextProps) {
+-        const d1 = this.props.date;
+-        const d2 = nextProps.date;
+-        const r1 = this.props.item;
+-        const r2 = nextProps.item;
+-        let changed = true;
+-        if (!d1 && !d2) {
+-            changed = false;
+-        }
+-        else if (d1 && d2) {
+-            if (d1.getTime() !== d2.getTime()) {
+-                changed = true;
+-            }
+-            else if (!r1 && !r2) {
+-                changed = false;
+-            }
+-            else if (r1 && r2) {
+-                if ((!d1 && !d2) || (d1 && d2)) {
+-                    if (isFunction(this.props.rowHasChanged)) {
+-                        changed = this.props.rowHasChanged(r1, r2);
+-                    }
+-                }
+-            }
+-        }
+-        return changed;
+-    }
++    // shouldComponentUpdate(nextProps) {
++    //     const d1 = this.props.date;
++    //     const d2 = nextProps.date;
++    //     const r1 = this.props.item;
++    //     const r2 = nextProps.item;
++    //     let changed = true;
++    //     if (!d1 && !d2) {
++    //         changed = false;
++    //     }
++    //     else if (d1 && d2) {
++    //         if (d1.getTime() !== d2.getTime()) {
++    //             changed = true;
++    //         }
++    //         else if (!r1 && !r2) {
++    //             changed = false;
++    //         }
++    //         else if (r1 && r2) {
++    //             if ((!d1 && !d2) || (d1 && d2)) {
++    //                 if (isFunction(this.props.rowHasChanged)) {
++    //                     changed = this.props.rowHasChanged(r1, r2);
++    //                 }
++    //             }
++    //         }
++    //     }
++    //     return changed;
++    // }
+     renderDate() {
+         const { item, date, renderDay } = this.props;
+         if (isFunction(renderDay)) {
+diff --git a/node_modules/react-native-calendars/src/calendar-list/index.js b/node_modules/react-native-calendars/src/calendar-list/index.js
+index 112da79..e0449bc 100644
+--- a/node_modules/react-native-calendars/src/calendar-list/index.js
++++ b/node_modules/react-native-calendars/src/calendar-list/index.js
+@@ -43,7 +43,7 @@ const CalendarList = (props, ref) => {
+     /** ScrollView props */
+     horizontal = false, pagingEnabled, scrollEnabled = true, nestedScrollEnabled = true, scrollsToTop = false, keyExtractor = (_, index) => String(index), keyboardShouldPersistTaps, onScrollBeginDrag, onScrollEndDrag, onMomentumScrollBegin, onMomentumScrollEnd, 
+     /** FlatList props */
+-    contentContainerStyle, onEndReachedThreshold, onEndReached } = props;
++    onEndReachedThreshold, onEndReached } = props;
+     const calendarProps = extractCalendarProps(props);
+     const headerProps = extractHeaderProps(props);
+     const calendarSize = horizontal ? calendarWidth : calendarHeight;
+@@ -196,7 +196,7 @@ const CalendarList = (props, ref) => {
+     return (<View style={style.current.flatListContainer} testID={testID}>
+       <FlatList 
+     // @ts-expect-error
+-    ref={list} windowSize={shouldUseAndroidRTLFix ? pastScrollRange + futureScrollRange + 1 : undefined} style={listStyle} showsVerticalScrollIndicator={showScrollIndicator} showsHorizontalScrollIndicator={showScrollIndicator} data={items} renderItem={renderItem} getItemLayout={getItemLayout} initialNumToRender={range.current} initialScrollIndex={initialDateIndex} viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs.current} testID={`${testID}.list`} onLayout={onLayout} removeClippedSubviews={removeClippedSubviews} pagingEnabled={pagingEnabled} scrollEnabled={scrollEnabled} scrollsToTop={scrollsToTop} horizontal={horizontal} keyboardShouldPersistTaps={keyboardShouldPersistTaps} keyExtractor={keyExtractor} onEndReachedThreshold={onEndReachedThreshold} onEndReached={onEndReached} nestedScrollEnabled={nestedScrollEnabled} onMomentumScrollBegin={onMomentumScrollBegin} onMomentumScrollEnd={onMomentumScrollEnd} onScrollBeginDrag={onScrollBeginDrag} onScrollEndDrag={onScrollEndDrag} contentContainerStyle={contentContainerStyle}/>
++    ref={list} windowSize={shouldUseAndroidRTLFix ? pastScrollRange + futureScrollRange + 1 : undefined} style={listStyle} showsVerticalScrollIndicator={showScrollIndicator} showsHorizontalScrollIndicator={showScrollIndicator} data={items} renderItem={renderItem} getItemLayout={getItemLayout} initialNumToRender={range.current} initialScrollIndex={initialDateIndex} viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs.current} testID={`${testID}.list`} onLayout={onLayout} removeClippedSubviews={removeClippedSubviews} pagingEnabled={pagingEnabled} scrollEnabled={scrollEnabled} scrollsToTop={scrollsToTop} horizontal={horizontal} keyboardShouldPersistTaps={keyboardShouldPersistTaps} keyExtractor={keyExtractor} onEndReachedThreshold={onEndReachedThreshold} onEndReached={onEndReached} nestedScrollEnabled={nestedScrollEnabled} onMomentumScrollBegin={onMomentumScrollBegin} onMomentumScrollEnd={onMomentumScrollEnd} onScrollBeginDrag={onScrollBeginDrag} onScrollEndDrag={onScrollEndDrag}/>
+       {renderStaticHeader()}
+     </View>);
+ };
+diff --git a/node_modules/react-native-calendars/src/calendar/day/period/index.js b/node_modules/react-native-calendars/src/calendar/day/period/index.js
+index 54bdfa0..f27db0e 100644
+--- a/node_modules/react-native-calendars/src/calendar/day/period/index.js
++++ b/node_modules/react-native-calendars/src/calendar/day/period/index.js
+@@ -54,6 +54,9 @@ const PeriodDay = (props) => {
+                 borderRadius: 17,
+                 overflow: 'hidden'
+             });
++            if (markingStyle.containerStyle) {
++                containerStyle.push(markingStyle.containerStyle);
++            }
+             const start = markingStyle.startingDay;
+             const end = markingStyle.endingDay;
+             if (start && !end) {
+@@ -62,9 +65,6 @@ const PeriodDay = (props) => {
+             else if (end && !start || end && start) {
+                 containerStyle.push({ backgroundColor: markingStyle.endingDay?.backgroundColor });
+             }
+-            if (markingStyle.containerStyle) {
+-                containerStyle.push(markingStyle.containerStyle);
+-            }
+         }
+         return containerStyle;
+     }, [marking, state]);
+diff --git a/node_modules/react-native-calendars/src/expandableCalendar/AgendaListsCommon.d.ts b/node_modules/react-native-calendars/src/expandableCalendar/AgendaListsCommon.d.ts
+index a6401ae..7d5a83d 100644
+--- a/node_modules/react-native-calendars/src/expandableCalendar/AgendaListsCommon.d.ts
++++ b/node_modules/react-native-calendars/src/expandableCalendar/AgendaListsCommon.d.ts
+@@ -28,8 +28,6 @@ export interface AgendaListProps extends SectionListProps<any, DefaultSectionT>
+     infiniteListProps?: {
+         itemHeight?: number;
+         titleHeight?: number;
+-        /** item height by type, require passing itemCustomHeightType in the elements you want to set custom height */
+-        itemHeightByType?: Record<string, number>;
+         visibleIndicesChangedDebounce?: number;
+         renderFooter?: () => React.ReactElement | null;
+     };
+diff --git a/node_modules/react-native-calendars/src/expandableCalendar/index.js b/node_modules/react-native-calendars/src/expandableCalendar/index.js
+index fe7025d..4fb12b0 100644
+--- a/node_modules/react-native-calendars/src/expandableCalendar/index.js
++++ b/node_modules/react-native-calendars/src/expandableCalendar/index.js
+@@ -275,20 +275,19 @@ const ExpandableCalendar = (props) => {
+             deltaY.setValue(_height.current); // set the start position for the animated value
+             _height.current = toValue || newValue;
+             _isOpen = _height.current >= threshold; // re-check after _height.current was set
+-            resetWeekCalendarOpacity(_isOpen);
+             Animated.spring(deltaY, {
+                 toValue: _height.current,
+                 speed: SPEED,
+                 bounciness: BOUNCINESS,
+                 useNativeDriver: false
+-            }).start(() => {
+-                onCalendarToggled?.(_isOpen);
+-                setPosition(() => _height.current === closedHeight ? Positions.CLOSED : Positions.OPEN);
+-            });
++            }).start();
++            onCalendarToggled?.(_isOpen);
++            setPosition(() => _height.current === closedHeight ? Positions.CLOSED : Positions.OPEN);
+             closeHeader(_isOpen);
++            resetWeekCalendarOpacity(_isOpen);
+         }
+     };
+-    const resetWeekCalendarOpacity = async (isOpen) => {
++    const resetWeekCalendarOpacity = (isOpen) => {
+         _weekCalendarStyles.style.opacity = isOpen ? 0 : 1;
+         updateNativeStyles();
+     };
+diff --git a/node_modules/react-native-calendars/src/expandableCalendar/infiniteAgendaList.js b/node_modules/react-native-calendars/src/expandableCalendar/infiniteAgendaList.js
+index 62e5678..fbd0f59 100644
+--- a/node_modules/react-native-calendars/src/expandableCalendar/infiniteAgendaList.js
++++ b/node_modules/react-native-calendars/src/expandableCalendar/infiniteAgendaList.js
+@@ -107,18 +107,9 @@ const InfiniteAgendaList = ({ theme, sections, scrollToNextEvent, avoidDateUpdat
+             }, 500);
+         }
+     }, 1000, { leading: false, trailing: true }), [sections]);
+-    const layoutProvider = useMemo(() => new LayoutProvider((index) => dataRef.current[index]?.isTitle ? 'title' : dataRef.current[index]?.itemCustomHeightType ?? 'page', (type, dim) => {
++    const layoutProvider = useMemo(() => new LayoutProvider((index) => dataRef.current[index]?.isTitle ? 'title' : 'page', (type, dim) => {
+         dim.width = constants.screenWidth;
+-        switch (type) {
+-            case 'title':
+-                dim.height = infiniteListProps?.titleHeight ?? 60;
+-                break;
+-            case 'page':
+-                dim.height = infiniteListProps?.itemHeight ?? 80;
+-                break;
+-            default:
+-                dim.height = infiniteListProps?.itemHeightByType?.[type] ?? infiniteListProps?.itemHeight ?? 80;
+-        }
++        dim.height = type === 'title' ? infiniteListProps?.titleHeight ?? 60 : infiniteListProps?.itemHeight ?? 80;
+     }), []);
+     const _onScroll = useCallback((rawEvent) => {
+         if (!didScroll.current) {
+diff --git a/node_modules/react-native-calendars/src/timeline/EventBlock.d.ts b/node_modules/react-native-calendars/src/timeline/EventBlock.d.ts
+index 747e161..3bc54f9 100644
+--- a/node_modules/react-native-calendars/src/timeline/EventBlock.d.ts
++++ b/node_modules/react-native-calendars/src/timeline/EventBlock.d.ts
+@@ -24,7 +24,6 @@ export interface EventBlockProps {
+     styles: {
+         [key: string]: ViewStyle | TextStyle;
+     };
+-    testID?: string;
+ }
+ declare const EventBlock: (props: EventBlockProps) => React.JSX.Element;
+ export default EventBlock;
+diff --git a/node_modules/react-native-calendars/src/timeline/EventBlock.js b/node_modules/react-native-calendars/src/timeline/EventBlock.js
+index fbe5f19..8008c86 100644
+--- a/node_modules/react-native-calendars/src/timeline/EventBlock.js
++++ b/node_modules/react-native-calendars/src/timeline/EventBlock.js
+@@ -21,7 +21,7 @@ const EventBlock = (props) => {
+     const _onPress = useCallback(() => {
+         onPress(index);
+     }, [index, onPress]);
+-    return (<TouchableOpacity testID={props.testID} activeOpacity={0.9} onPress={_onPress} style={[styles.event, eventStyle]}>
++    return (<TouchableOpacity activeOpacity={0.9} onPress={_onPress} style={[styles.event, eventStyle]}>
+       {renderEvent ? (renderEvent(event)) : (<View>
+           <Text numberOfLines={1} style={styles.eventTitle}>
+             {event.title || 'Event'}
+diff --git a/node_modules/react-native-calendars/src/timeline/Timeline.js b/node_modules/react-native-calendars/src/timeline/Timeline.js
+index 8eae6ce..c4bc2d7 100644
+--- a/node_modules/react-native-calendars/src/timeline/Timeline.js
++++ b/node_modules/react-native-calendars/src/timeline/Timeline.js
+@@ -75,7 +75,7 @@ const Timeline = (props) => {
+     const renderEvents = (dayIndex) => {
+         const events = packedEvents[dayIndex].map((event, eventIndex) => {
+             const onEventPress = () => _onEventPress(dayIndex, eventIndex);
+-            return (<EventBlock key={eventIndex} index={eventIndex} event={event} styles={styles.current} format24h={format24h} onPress={onEventPress} renderEvent={renderEvent} testID={`${testID}.event.${event.id}`}/>);
++            return (<EventBlock key={eventIndex} index={eventIndex} event={event} styles={styles.current} format24h={format24h} onPress={onEventPress} renderEvent={renderEvent}/>);
+         });
+         return (<View pointerEvents={'box-none'} style={[{ marginLeft: dayIndex === 0 ? timelineLeftInset : undefined }, styles.current.eventsContainer]}>
+         {events}

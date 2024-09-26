@@ -2,22 +2,43 @@ import { CustomButton } from "@/src/components/CustomButton/CustomButton";
 import { CustomDivider } from "@/src/components/CustomDivider/CustomDivider";
 import { CustomTextInput } from "@/src/components/CustomTextInput/CustomTextInput";
 import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
+import { RootStackParamList } from "@/src/routes/Stack";
 import { registerStudentSchema } from "@/src/schemas/forms";
+import { useStudentStore } from "@/src/store/useStudentStore";
 import { spacing } from "@/src/theme/spacing";
 import { ScrollViewBox } from "@/src/utils/restyle/ScrollViewBox";
 import { ViewBox } from "@/src/utils/restyle/ViewBox";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import { useMutation } from "@tanstack/react-query";
 import React, { useEffect } from "react";
 import { FieldValues, SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { KeyboardAvoidingView, Platform } from "react-native";
+import Toast from "react-native-toast-message";
+import { GenericStudentType } from "../Students.interface";
+import { createUser, editUser } from "./NewStudent.utils";
 import { useGetStudentLocation } from "./useGetStudentLocation/useGetStudentLocation";
 
 export const NewStudent = () => {
+  const { params } = useRoute<RouteProp<RootStackParamList, "NewStudent">>();
+  const isEdit = params.isEdit;
+  const { student, setStudent } = useStudentStore();
   const { control, setValue, handleSubmit } = useForm({
     resolver: zodResolver(registerStudentSchema),
+    defaultValues: isEdit ? (student as FieldValues) : undefined,
   });
   const cep = useWatch({ control, name: "cep" });
-  const { data, isLoading } = useGetStudentLocation({ cep });
+  const { goBack } = useNavigation();
+  const { data, isLoading } = useGetStudentLocation({ cep: cep || "" });
+  const { mutateAsync: createNewUser, isPending: isPendingCreate } =
+    useMutation({
+      mutationKey: ["createNewUser"],
+      mutationFn: (data: FieldValues) => createUser(data),
+    });
+  const { mutateAsync: editStudent, isPending: isPendingEdit } = useMutation({
+    mutationKey: ["editStudent"],
+    mutationFn: (data: FieldValues) => editUser(student?.id.toString(), data),
+  });
 
   useEffect(() => {
     if (data) {
@@ -34,13 +55,49 @@ export const NewStudent = () => {
     }
   }, [data, setValue]);
 
-  const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    const dataToSend = {
-      id: Math.random(), //it will come from firebase automatically
-      instructor: "/instructor/idofinstructor", // it will come from the firebase collection reference
-      ...data,
-    };
-    console.log("hook form data", dataToSend);
+  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+    if (isEdit) {
+      await editStudent(data)
+        .then(() => {
+          Toast.show({
+            type: "customSuccessToast",
+            text1: "Sucesso!",
+            text2: "Informações atualizadas.",
+            position: "bottom",
+          });
+          setStudent(data as GenericStudentType);
+          goBack();
+        })
+        .catch((error) => {
+          Toast.show({
+            type: "customErrorToast",
+            text1: "Erro!",
+            text2: "Erro ao editar aluno",
+            position: "bottom",
+          });
+          console.error("Erro ao editar aluno", error);
+        });
+    } else {
+      await createNewUser(data)
+        .then(() => {
+          Toast.show({
+            type: "customSuccessToast",
+            text1: "Sucesso!",
+            text2: "Aluno criado.",
+            position: "bottom",
+          });
+          goBack();
+        })
+        .catch((error) => {
+          Toast.show({
+            type: "customErrorToast",
+            text1: "Erro!",
+            text2: "Erro ao criar aluno",
+            position: "bottom",
+          });
+          console.error("Erro ao criar aluno", error);
+        });
+    }
   };
 
   return (
@@ -64,8 +121,18 @@ export const NewStudent = () => {
             keyboardType="number-pad"
             maxLength={11}
           />
-          <ViewBox marginVertical="xs" />
 
+          <ViewBox marginVertical="xs" />
+          <CustomTextInput
+            name="rg"
+            control={control}
+            labelInput="RG (opcional)"
+            placeholder="Digite aqui"
+            keyboardType="number-pad"
+            maxLength={10}
+          />
+
+          <ViewBox marginVertical="xs" />
           <CustomTextInput
             name="name"
             control={control}
@@ -108,8 +175,17 @@ export const NewStudent = () => {
             labelInput="*Sentimento do aluno no volante"
             placeholder="O que o aluno sente quando está dirigindo?"
           />
-          <ViewBox marginVertical="xs" />
 
+          <ViewBox marginVertical="xs" />
+          <CustomTextInput
+            name="profession"
+            control={control}
+            labelInput="*Profissão do aluno"
+            placeholder="Com o que o aluno trabalha?"
+            autoCapitalize="words"
+          />
+
+          <ViewBox marginVertical="xs" />
           <CustomTextInput
             name="classesNeeded"
             control={control}
@@ -155,6 +231,7 @@ export const NewStudent = () => {
             marginTop="xl"
             title="Salvar"
             onPress={handleSubmit(onSubmit)}
+            isLoading={isEdit ? isPendingEdit : isPendingCreate}
           />
         </ScrollViewBox>
       </ViewBox>

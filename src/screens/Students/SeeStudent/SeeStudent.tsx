@@ -3,6 +3,7 @@ import { CustomDivider } from "@/src/components/CustomDivider/CustomDivider";
 import { CustomLabelText } from "@/src/components/CustomLabelText/CustomLabelText";
 import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
 import { RootStackParamList } from "@/src/routes/Stack";
+import { useStudentStore } from "@/src/store/useStudentStore";
 import { colors } from "@/src/theme/colors";
 import { radius } from "@/src/theme/radius";
 import { spacing } from "@/src/theme/spacing";
@@ -11,13 +12,17 @@ import { PressableBox } from "@/src/utils/restyle/PressableBox";
 import { ScrollViewBox } from "@/src/utils/restyle/ScrollViewBox";
 import { TextBox } from "@/src/utils/restyle/TextBox";
 import { ViewBox } from "@/src/utils/restyle/ViewBox";
-import { RouteProp, useRoute } from "@react-navigation/native";
+import { FontAwesome6 } from "@expo/vector-icons";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
 import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 import React from "react";
 import { FlatList, Linking } from "react-native";
 import ProgressBar from "react-native-progress/Bar";
 import { openMap } from "../../Calendar/Calendar.utils";
 import { GenericStudentType, StudentClass } from "../Students.interface";
+
+dayjs.extend(customParseFormat);
 
 const renderItem = ({ item, index }: { item: StudentClass; index: number }) => (
   <ViewBox
@@ -26,33 +31,49 @@ const renderItem = ({ item, index }: { item: StudentClass; index: number }) => (
     padding="s"
     borderRadius={radius.s}
   >
-    <ViewBox flexDirection="row" justifyContent="space-between">
-      <TextBox variant="titleDateUserCard">
-        {dayjs(item.classDate).format("DD/MM")}
+    <ViewBox>
+      <TextBox mb="s" variant="titleDateUserCard">
+        {item.chosenClass.label}
       </TextBox>
+      <TextBox>{dayjs(item.classDate, "DD/MM/YYYY").format("DD/MM")}</TextBox>
       <TextBox>
         {item.classStartTime} - {item.classEndTime}
       </TextBox>
     </ViewBox>
-    <TextBox>{item.chosenClass.label}</TextBox>
   </ViewBox>
 );
 
 const ClassesList = ({ classes }: Pick<GenericStudentType, "classes">) => {
+  const sortedClasses = classes?.sort((a, b) => {
+    const timeA = dayjs(
+      `${a.classDate} ${a.classStartTime}`,
+      "DD/MM/YYYY HH:mm"
+    );
+    const timeB = dayjs(
+      `${b.classDate} ${b.classStartTime}`,
+      "DD/MM/YYYY HH:mm"
+    );
+    return timeA.isBefore(timeB) ? -1 : 1;
+  });
+
   return (
     <FlatList
       horizontal
-      data={classes || []}
+      data={sortedClasses || []}
       contentContainerStyle={{ columnGap: spacing.s }}
       renderItem={({ item, index }) => renderItem({ item, index })}
-      keyExtractor={(_, index) => index.toExponential()}
+      keyExtractor={(_, index) => index.toString()}
     />
   );
 };
 export const SeeStudent = () => {
-  const { params }: RouteProp<RootStackParamList, "SeeStudent"> = useRoute();
-  const student = params.student;
-  const progress = student.classesAcquired / student.classesNeeded;
+  const { student } = useStudentStore();
+  const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
+
+  const totalClasses = student?.classesNeeded;
+  const acquiredClasses = student?.classes ? student.classes.length : 0;
+
+  const progress = totalClasses && acquiredClasses / totalClasses;
 
   return (
     <ViewBox height={height} bg="white" paddingHorizontal="l">
@@ -68,7 +89,7 @@ export const SeeStudent = () => {
           borderRadius={radius.m}
         >
           <TextBox variant="titleCardCalendar" textAlign="center">
-            {student.name}
+            {student?.name}
           </TextBox>
 
           <ViewBox
@@ -86,52 +107,78 @@ export const SeeStudent = () => {
               height={spacing.s}
             />
             <TextBox variant="titleCardCalendar" color="red">
-              {Math.round(progress * 100)}%
+              {progress && Math.round(progress * 100)}%
             </TextBox>
           </ViewBox>
 
           <ViewBox marginVertical="s" />
-          <ClassesList classes={student.classes} />
+          <ClassesList classes={student?.classes} />
           <CustomDivider />
 
-          <CustomLabelText label="ID de Matrícula" text={student.id} mb="s" />
-          <PressableBox onPress={() => Linking.openURL(`tel:${student.phone}`)}>
-            <CustomLabelText label="Telefone" text={student.phone} mb="s" />
+          <PressableBox
+            onPress={() => Linking.openURL(`tel:${student?.phone || ""}`)}
+          >
+            <CustomLabelText
+              label="Telefone"
+              text={student?.phone || ""}
+              mb="s"
+            />
           </PressableBox>
 
-          <PressableBox onPress={() => openMap(student.fullAddress)}>
-            <CustomLabelText label="Endereço" text={student.fullAddress} />
+          <PressableBox onPress={() => openMap(student?.fullAddress || "")}>
+            <CustomLabelText
+              label="Endereço"
+              text={student?.fullAddress || ""}
+            />
           </PressableBox>
+
+          <CustomLabelText
+            label="Profissão"
+            text={student?.profession || "Não informado"}
+            mt="s"
+          />
 
           <CustomDivider />
 
           <CustomLabelText
             label="Aulas Necessárias"
-            text={student.classesNeeded}
+            text={student?.classesNeeded || ""}
             mb="s"
           />
           <CustomLabelText
             label="Aulas Adquiridas"
-            text={student.classesAcquired}
+            text={student?.classesAcquired || ""}
             mb="s"
           />
           <CustomLabelText
             label="Avaliações Psicológicas Necessárias"
-            text={student.psicolocicalEvaluationRequired}
+            text={student?.psicolocicalEvaluationRequired || ""}
             mb="s"
           />
           <CustomLabelText
             label="Avaliações Psicológicas Adquiridas"
-            text={student.psicolocicalEvaluationAcquired}
+            text={student?.psicolocicalEvaluationAcquired || ""}
           />
 
-          <CustomButton
-            color="red"
-            titleColor="white"
-            title="Adicionar Aulas"
-            mt="l"
-            onPress={() => console.log("not working yet")}
-          />
+          <ViewBox flexDirection="row" justifyContent="space-between">
+            <CustomButton
+              width={width * 0.62}
+              color="red"
+              titleColor="white"
+              title="Adicionar Aulas"
+              mt="l"
+              onPress={() => navigate("AddClasses", { isEdit: false })}
+            />
+            <CustomButton
+              leftIcon={
+                <FontAwesome6 name={"pencil"} size={24} color={colors.white} />
+              }
+              color="red"
+              titleColor="white"
+              mt="l"
+              onPress={() => navigate("NewStudent", { isEdit: true })}
+            />
+          </ViewBox>
         </ViewBox>
       </ScrollViewBox>
     </ViewBox>
