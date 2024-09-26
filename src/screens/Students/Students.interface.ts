@@ -8,11 +8,13 @@ export type StudentClass = {
 export type GenericStudentType = {
     id: number;
     cpf: string;
+    rg?: string;
     name: string;
     cep: string;
     phone: string;
     fullAddress: string;
     feelingDriving: string;
+    profession: string;
     classesNeeded: number;
     classesAcquired: number;
     instructor?: any;

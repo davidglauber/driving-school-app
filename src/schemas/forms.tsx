@@ -7,11 +7,13 @@ export const loginSchema = z.object({
 
 export const registerStudentSchema = z.object({
   cpf: z.string().min(11, "O CPF deve ter 11 dígitos"),
+  rg: z.string().optional(),
   name: z.string().min(1, "Campo obrigatório"),
   cep: z.string().min(8, "O CEP deve ter 8 dígitos"),
   phone: z.string().min(10, "O telefone deve ter pelo menos 10 dígitos"),
   fullAddress: z.string().optional(),
   feelingDriving: z.string().min(1, "Campo obrigatório"),
+  profession: z.string().min(1, "Campo obrigatório"),
   classesNeeded: z.string().min(1, "Campo obrigatório"),
   classesAcquired: z.string().min(1, "Campo obrigatório"),
   psicolocicalEvaluationRequired: z.string().min(1, "Campo obrigatório"),

@@ -132,6 +132,12 @@ export const SeeStudent = () => {
             />
           </PressableBox>
 
+          <CustomLabelText
+            label="Profissão"
+            text={student?.profession || "Não informado"}
+            mt="s"
+          />
+
           <CustomDivider />
 
           <CustomLabelText

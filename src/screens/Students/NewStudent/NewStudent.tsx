@@ -121,8 +121,18 @@ export const NewStudent = () => {
             keyboardType="number-pad"
             maxLength={11}
           />
-          <ViewBox marginVertical="xs" />
 
+          <ViewBox marginVertical="xs" />
+          <CustomTextInput
+            name="rg"
+            control={control}
+            labelInput="RG (opcional)"
+            placeholder="Digite aqui"
+            keyboardType="number-pad"
+            maxLength={10}
+          />
+
+          <ViewBox marginVertical="xs" />
           <CustomTextInput
             name="name"
             control={control}
@@ -165,8 +175,17 @@ export const NewStudent = () => {
             labelInput="*Sentimento do aluno no volante"
             placeholder="O que o aluno sente quando está dirigindo?"
           />
-          <ViewBox marginVertical="xs" />
 
+          <ViewBox marginVertical="xs" />
+          <CustomTextInput
+            name="profession"
+            control={control}
+            labelInput="*Profissão do aluno"
+            placeholder="Com o que o aluno trabalha?"
+            autoCapitalize="words"
+          />
+
+          <ViewBox marginVertical="xs" />
           <CustomTextInput
             name="classesNeeded"
             control={control}
