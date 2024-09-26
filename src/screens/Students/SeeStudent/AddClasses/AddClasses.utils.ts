@@ -85,14 +85,17 @@ const editSpecificClass = async (studentId: number, classToUpdate: StudentClass)
 
     const studentData = studentDoc.data() as GenericStudentType;
 
+    const scheduledStudentName = await isClassScheduled(classToUpdate);
+    if (scheduledStudentName) {
+        throw new Error(`Você já tem aula agendada entre ${classToUpdate.classStartTime} e ${classToUpdate.classEndTime} com ${scheduledStudentName}`);
+    }
+
     const updatedClasses = studentData.classes?.map((studentClass) => {
         if (studentClass.id === classToUpdate.id) {
             return classToUpdate;
         }
         return studentClass;
     });
-
-    console.log('updatedClasses', updatedClasses);
 
     await updateDoc(studentRef, { classes: updatedClasses });
 };
