@@ -17,7 +17,7 @@ import { NavigationProp, useNavigation } from "@react-navigation/native";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import React from "react";
-import { FlatList, Linking } from "react-native";
+import { FlatList, Linking, Platform } from "react-native";
 import ProgressBar from "react-native-progress/Bar";
 import { openMap } from "../../Calendar/Calendar.utils";
 import { GenericStudentType, StudentClass } from "../Students.interface";
@@ -74,12 +74,14 @@ export const SeeStudent = () => {
   const acquiredClasses = student?.classes ? student.classes.length : 0;
 
   const progress = totalClasses && acquiredClasses / totalClasses;
+  const dynamicPaddingBottom =
+    Platform.OS === "ios" ? spacing.xxl * 1.5 : spacing.xxl * 2;
 
   return (
     <ViewBox height={height} bg="white" paddingHorizontal="l">
       <LogoHeader />
       <ScrollViewBox
-        contentContainerStyle={{ paddingBottom: spacing.xxl * 1.5 }}
+        contentContainerStyle={{ paddingBottom: dynamicPaddingBottom }}
         showsVerticalScrollIndicator={false}
       >
         <ViewBox

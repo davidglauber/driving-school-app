@@ -117,6 +117,7 @@ export const Students = () => {
       </ViewBox>
     );
   };
+
   return (
     <ViewBox
       height={height}

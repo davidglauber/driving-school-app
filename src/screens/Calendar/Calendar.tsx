@@ -52,7 +52,7 @@ const dynamicSystemHeight = Platform.select({
 export const Calendar = () => {
   const isFocused = useIsFocused();
   const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
-  const { student, setStudent } = useStudentStore();
+  const { setStudent } = useStudentStore();
   const { setClassStudent } = useClassStore();
   const { data: instructorClasses, refetch } = useQuery({
     queryKey: ["instructorClasses"],
