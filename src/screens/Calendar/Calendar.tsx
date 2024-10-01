@@ -21,7 +21,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import LottieView from "lottie-react-native";
-import { Linking } from "react-native";
+import { Linking, Platform } from "react-native";
 import { Agenda, LocaleConfig } from "react-native-calendars";
 import { radius } from "../../theme/radius";
 import { calendarPT_BR } from "../../utils/localeCalendarConfig";
@@ -43,6 +43,11 @@ dayjs.extend(customParseFormat);
 
 LocaleConfig.locales["pt"] = calendarPT_BR;
 LocaleConfig.defaultLocale = "pt";
+
+const dynamicSystemHeight = Platform.select({
+  android: height * 0.96,
+  ios: height,
+});
 
 export const Calendar = () => {
   const isFocused = useIsFocused();
@@ -201,7 +206,7 @@ export const Calendar = () => {
 
   return (
     <ViewBox
-      height={height}
+      height={dynamicSystemHeight}
       bg="white"
       justifyContent="center"
       paddingBottom="xxl"
