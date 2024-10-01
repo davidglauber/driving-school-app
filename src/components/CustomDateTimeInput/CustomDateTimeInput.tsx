@@ -9,6 +9,7 @@ import React, { useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { ICustomDateTimeInput } from "./CustomDateTimeInput.interface";
+import { colors } from "@/src/theme/colors";
 
 export const CustomDateTimeInput = ({
   labelInput,
@@ -63,7 +64,7 @@ export const CustomDateTimeInput = ({
             marginTop="s"
           >
             <TextInputBox
-              style={{ fontFamily: "SFMedium", flex: 1 }}
+              style={{ fontFamily: "SFMedium", flex: 1, color: colors.black }}
               onChangeText={onChange}
               value={value}
               placeholderTextColor={"gray"}

@@ -13,7 +13,7 @@ const getClassesModalities = async () => {
     return classesModalities;
 };
 
-const isClassScheduled = async (newClass: StudentClass) => {
+const isClassScheduled = async (newClass: StudentClass, currentClassId?: string) => {
     const firestore = getFirestore();
     const currentUser = auth.currentUser;
     const instructorRef = doc(firestore, `instructors/${currentUser?.uid}`);
@@ -38,6 +38,9 @@ const isClassScheduled = async (newClass: StudentClass) => {
         const newClassEndTime = dayjs(`1970-01-01T${newClass.classEndTime}:00`);
 
         const isScheduled = existingClasses.some((existingClass: StudentClass) => {
+            if (existingClass.id === currentClassId) {
+                return false; // Ignore the class being edited
+            }
             const existingClassDate = existingClass.classDate;
             if (existingClassDate !== newClassDate) {
                 return false;
@@ -85,7 +88,7 @@ const editSpecificClass = async (studentId: number, classToUpdate: StudentClass)
 
     const studentData = studentDoc.data() as GenericStudentType;
 
-    const scheduledStudentName = await isClassScheduled(classToUpdate);
+    const scheduledStudentName = await isClassScheduled(classToUpdate, classToUpdate.id);
     if (scheduledStudentName) {
         throw new Error(`Você já tem aula agendada entre ${classToUpdate.classStartTime} e ${classToUpdate.classEndTime} com ${scheduledStudentName}`);
     }
