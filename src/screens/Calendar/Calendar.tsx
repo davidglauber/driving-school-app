@@ -165,8 +165,10 @@ export const Calendar = () => {
             <CustomButton
               color="red"
               titleColor="white"
-              title="Ver Perfil"
               onPress={() => handleViewProfile(item.student)}
+              leftIcon={
+                <FontAwesome6 name="eye" size={24} color={colors.white} />
+              }
             />
             <CustomButton
               color="red"

@@ -104,14 +104,6 @@ export const Students = () => {
             color="white"
             onPress={() => handleNavigate(item)}
             title="Ver Detalhes"
-            leftIcon={
-              <FontAwesome6
-                name="eye"
-                size={24}
-                color="black"
-                style={{ marginRight: 5 }}
-              />
-            }
           />
         </ViewBox>
       </ViewBox>
