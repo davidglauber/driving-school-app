@@ -165,7 +165,7 @@ export const NewStudent = () => {
             control={control}
             labelInput="Endereço Completo"
             placeholder="Digite aqui"
-            editable={false}
+            editable={true}
           />
 
           <CustomDivider />
