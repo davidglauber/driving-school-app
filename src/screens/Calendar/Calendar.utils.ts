@@ -22,7 +22,7 @@ export const styleCalendar = {
   width: CALENDAR_WIDTH,
   maxHeight: CALENDAR_MAX_HEIGHT,
   alignSelf: "center",
-  borderRadius: 40,
+  borderRadius: 20,
   borderWidth: 2,
   borderColor: colors.gray,
 };
