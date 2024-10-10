@@ -3885,6 +3885,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-native-html-to-pdf@npm:^0.8.3":
+  version: 0.8.3
+  resolution: "@types/react-native-html-to-pdf@npm:0.8.3"
+  checksum: 503278f3c82431316784f295871812a97f006902f364522aed9799fb96d76804cfba3a1f673c2515811eb6e8392c8480e0e02acc7b567aeec26f4fe9141ac656
+  languageName: node
+  linkType: hard
+
 "@types/react-native@npm:^0.73.0":
   version: 0.73.0
   resolution: "@types/react-native@npm:0.73.0"
@@ -4191,6 +4198,7 @@ __metadata:
     "@types/jest": ^29.5.12
     "@types/react": ~18.2.45
     "@types/react-native": ^0.73.0
+    "@types/react-native-html-to-pdf": ^0.8.3
     "@types/react-test-renderer": ^18.0.7
     "@types/uuid": ^10.0.0
     axios: ^1.7.7
@@ -4200,6 +4208,7 @@ __metadata:
     expo-font: ~12.0.9
     expo-haptics: ~13.0.1
     expo-linking: ~6.3.1
+    expo-print: ~13.0.1
     expo-sharing: ~12.0.1
     expo-splash-screen: ~0.27.6
     expo-status-bar: ~1.12.1
@@ -6280,6 +6289,15 @@ __metadata:
   dependencies:
     invariant: ^2.2.4
   checksum: 0bd35e9967b5aebb7ccdbd95d3a806fe009af4ec22f53d6856c121ff0390545b1bc15f65a943fc4707bd300c29f0eb7d66d0ddc2ecc177f22d3dbe8ae305d207
+  languageName: node
+  linkType: hard
+
+"expo-print@npm:~13.0.1":
+  version: 13.0.1
+  resolution: "expo-print@npm:13.0.1"
+  peerDependencies:
+    expo: "*"
+  checksum: 8cb6353448ad8673911c6df9e174a98c960d4bdcced09c05bdbb918c4cace3af8cb662428f0187ac5030d287befc674609dd0df6e6e17664323601edc6c36417
   languageName: node
   linkType: hard
 
