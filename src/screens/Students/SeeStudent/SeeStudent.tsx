@@ -11,12 +11,15 @@ import { height, width } from "@/src/utils/dimensions";
 import { PressableBox } from "@/src/utils/restyle/PressableBox";
 import { ScrollViewBox } from "@/src/utils/restyle/ScrollViewBox";
 import { TextBox } from "@/src/utils/restyle/TextBox";
+import * as FileSystem from "expo-file-system";
 import { ViewBox } from "@/src/utils/restyle/ViewBox";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import React from "react";
+import * as Sharing from "expo-sharing";
+import { toPng } from "html-to-image";
+import React, { useRef } from "react";
 import { FlatList, Linking, Platform } from "react-native";
 import ProgressBar from "react-native-progress/Bar";
 import { openMap } from "../../Calendar/Calendar.utils";
@@ -66,9 +69,11 @@ const ClassesList = ({ classes }: Pick<GenericStudentType, "classes">) => {
     />
   );
 };
+
 export const SeeStudent = () => {
   const { student } = useStudentStore();
   const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
+  const viewRef = useRef<HTMLDivElement>(null);
 
   const totalClasses = student?.classesNeeded;
   const acquiredClasses = student?.classes ? student.classes.length : 0;
@@ -76,6 +81,46 @@ export const SeeStudent = () => {
   const progress = totalClasses && acquiredClasses / totalClasses;
   const dynamicPaddingBottom =
     Platform.OS === "ios" ? spacing.xxl * 1.5 : spacing.xxl * 2;
+
+  const generateHTML = () => {
+    if (!student?.classes) return "";
+
+    const classesHTML = student.classes
+      .map(
+        (item) => `
+          <div style="background-color: gray; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+            <h3>${item.chosenClass.label}</h3>
+            <p>${dayjs(item.classDate, "DD/MM/YYYY").format("DD/MM")}</p>
+            <p>${item.classStartTime} - ${item.classEndTime}</p>
+          </div>
+        `
+      )
+      .join("");
+
+    return `
+          <div style="padding: 20px; border: 2px solid gray; border-radius: 10px;">
+            <h1 style="text-align: center;">${student.name}</h1>
+            <div style="margin-top: 20px;">
+              ${classesHTML}
+            </div>
+          </div>
+        `;
+  };
+
+  const sharingClasses = async () => {
+    const htmlContent = generateHTML();
+    const fileUri = FileSystem.documentDirectory + "classes.html";
+
+    await FileSystem.writeAsStringAsync(fileUri, htmlContent, {
+      encoding: FileSystem.EncodingType.UTF8,
+    });
+
+    await Sharing.shareAsync(fileUri, {
+      mimeType: "text/html",
+      dialogTitle: "Compartilhar Aulas",
+      UTI: "public.html",
+    });
+  };
 
   return (
     <ViewBox height={height} bg="white" paddingHorizontal="l">
@@ -85,6 +130,7 @@ export const SeeStudent = () => {
         showsVerticalScrollIndicator={false}
       >
         <ViewBox
+          ref={viewRef}
           borderWidth={2}
           borderColor="gray"
           padding="m"
@@ -162,12 +208,13 @@ export const SeeStudent = () => {
             text={student?.psicolocicalEvaluationAcquired || ""}
           />
 
-          <ViewBox flexDirection="row" justifyContent="space-between">
+          <ViewBox flexDirection="row" justifyContent="center">
             <CustomButton
-              width={width * 0.62}
               color="red"
               titleColor="white"
-              title="Adicionar Aulas"
+              leftIcon={
+                <FontAwesome6 name={"plus"} size={24} color={colors.white} />
+              }
               mt="l"
               onPress={() => navigate("AddClasses", { isEdit: false })}
             />
@@ -179,6 +226,15 @@ export const SeeStudent = () => {
               titleColor="white"
               mt="l"
               onPress={() => navigate("NewStudent", { isEdit: true })}
+            />
+            <CustomButton
+              leftIcon={
+                <FontAwesome6 name={"share"} size={24} color={colors.white} />
+              }
+              color="red"
+              titleColor="white"
+              mt="l"
+              onPress={sharingClasses}
             />
           </ViewBox>
         </ViewBox>
