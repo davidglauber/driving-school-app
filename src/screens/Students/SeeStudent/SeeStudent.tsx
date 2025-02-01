@@ -16,10 +16,14 @@ import { FontAwesome6 } from "@expo/vector-icons";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import React from "react";
-import { FlatList, Linking, Platform, Share } from "react-native";
+import * as Print from "expo-print";
+import * as Sharing from "expo-sharing";
+
+import React, { useState } from "react";
+import { FlatList, Linking, Platform } from "react-native";
 import ProgressBar from "react-native-progress/Bar";
 import { openMap } from "../../Calendar/Calendar.utils";
+
 import { GenericStudentType, StudentClass } from "../Students.interface";
 dayjs.extend(customParseFormat);
 
@@ -69,42 +73,13 @@ const ClassesList = ({ classes }: Pick<GenericStudentType, "classes">) => {
 export const SeeStudent = () => {
   const { student } = useStudentStore();
   const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
+  const [isLoading, setIsLoading] = useState(false);
   const totalClasses = student?.classesNeeded;
   const acquiredClasses = student?.classes ? student.classes.length : 0;
 
   const progress = totalClasses && acquiredClasses / totalClasses;
   const dynamicPaddingBottom =
     Platform.OS === "ios" ? spacing.xxl * 1.5 : spacing.xxl * 2;
-
-  // const shortenLink = async (longUrl: string, alias: string) => {
-  //   const url = "https://spoo.me/";
-  //   const data = new URLSearchParams();
-  //   data.append("url", longUrl);
-  //   data.append("alias", alias);
-
-  //   try {
-  //     const response = await fetch(url, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-type": "application/x-www-form-urlencoded",
-  //         Accept: "application/json",
-  //       },
-  //       body: data,
-  //     });
-
-  //     if (response.ok) {
-  //       const result = await response.json();
-  //       console.log("Shortened URL:", result);
-  //       return result.shortenedUrl; // Adjust based on the actual response structure
-  //     } else {
-  //       console.error(`HTTP error! Status: ${response.status}`);
-  //       return null;
-  //     }
-  //   } catch (error) {
-  //     console.error("Error shortening the URL:", error);
-  //     return null;
-  //   }
-  // };
 
   const generateGoogleCalendarLink = () => {
     if (!student?.classes) return [];
@@ -129,10 +104,12 @@ export const SeeStudent = () => {
         label: `${item.chosenClass.label} às ${item.classStartTime}`,
         date: dayjs(item.classDate, "DD/MM/YYYY").format("DD/MM"),
         link: `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
-          `Aula amanhã de ${item.chosenClass.label} de ${item.classStartTime} até ${item.classEndTime}`
+          `Aula amanhã de ${item.chosenClass.label.replace(/[()]/g, "")} de ${
+            item.classStartTime
+          } até ${item.classEndTime}`
         )}&dates=${start}/${end}&details=${encodeURIComponent(
           details
-        )}&location=${encodeURIComponent(location)}`,
+        )}&location=${encodeURIComponent(location)}`.replace(/[()]/g, ""),
       };
     });
 
@@ -140,20 +117,74 @@ export const SeeStudent = () => {
   };
 
   const handleShareMessage = async () => {
+    setIsLoading(true);
     const events = generateGoogleCalendarLink();
-    const message =
-      `👤 Parabéns, bem vindo(a) a Agora Vai ${student?.name}! \n\nAqui está um resumo de todas as suas aulas agendadas, se você quiser criar um lembrete no seu calendário clique em "Criar Lembrete" e você será avisado(a) um dia antes de cada aula, não perca nada\n\n` +
-      events
-        .map(
-          (event) =>
-            `📚 Aula: ${event.label}\n📅 Dia: ${event.date}\n🔔 Criar lembrete: ${event.link}`
-        )
-        .join("\n\n");
+    const message = events
+      .map(
+        (event) =>
+          `📚 Aula: ${event.label}<br/>📅 Dia: ${event.date}<br/>🔔 <a href="${event.link}">Criar lembrete</a>`
+      )
+      .join("<br/><br/>");
+
+    const htmlContent = `
+    <html>
+      <head>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+          }
+          .header {
+            text-align: center;
+            padding: 20px;
+            background-color: ${colors.red};
+            color: white;
+          }
+          .header img {
+            width: 100px;
+            height: auto;
+          }
+          .content {
+            padding: 20px;
+          }
+          .content h1 {
+            font-size: 24px;
+            color: ${colors.red};
+          }
+          .content p {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+          }
+          .content a {
+            color: ${colors.lightBlue};
+            text-decoration: none;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <img src="https://i.imgur.com/gGqRpo4.png" alt="Logo" />
+          <h1>Lista de aulas</h1>
+          <h1>${student?.name}</h1>
+        </div>
+        <div class="content">
+          <h1>👤 Parabéns, bem vindo(a) a Agora Vai ${student?.name}!</h1>
+          <p>Aqui está um resumo de todas as suas aulas agendadas, se você quiser criar um lembrete no seu calendário clique em "Criar Lembrete" e você será avisado(a) um dia antes de cada aula, não perca nada</p>
+          <p>${message}</p>
+        </div>
+      </body>
+    </html>
+  `;
 
     try {
-      await Share.share({
-        message,
-      });
+      const { uri } = await Print.printToFileAsync({ html: htmlContent });
+      await Sharing.shareAsync(uri, {
+        mimeType: "application/pdf",
+        dialogTitle: "Compartilhar Aulas Agendadas",
+        UTI: "com.adobe.pdf",
+      }).finally(() => setIsLoading(false));
     } catch (error) {
       console.error("An error occurred while sharing the message", error);
     }
@@ -270,6 +301,7 @@ export const SeeStudent = () => {
               color="red"
               titleColor="white"
               mt="l"
+              isLoading={isLoading}
               onPress={handleShareMessage}
             />
           </ViewBox>
