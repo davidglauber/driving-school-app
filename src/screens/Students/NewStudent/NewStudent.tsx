@@ -11,25 +11,22 @@ import { ViewBox } from "@/src/utils/restyle/ViewBox";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { useMutation } from "@tanstack/react-query";
-import React, { useEffect } from "react";
-import { FieldValues, SubmitHandler, useForm, useWatch } from "react-hook-form";
+import React from "react";
+import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { KeyboardAvoidingView, Platform } from "react-native";
 import Toast from "react-native-toast-message";
 import { GenericStudentType } from "../Students.interface";
 import { createUser, editUser } from "./NewStudent.utils";
-import { useGetStudentLocation } from "./useGetStudentLocation/useGetStudentLocation";
 
 export const NewStudent = () => {
   const { params } = useRoute<RouteProp<RootStackParamList, "NewStudent">>();
   const isEdit = params.isEdit;
   const { student, setStudent } = useStudentStore();
-  const { control, setValue, handleSubmit } = useForm({
+  const { control, handleSubmit } = useForm({
     resolver: zodResolver(registerStudentSchema),
     defaultValues: isEdit ? (student as FieldValues) : undefined,
   });
-  const cep = useWatch({ control, name: "cep" });
   const { goBack } = useNavigation();
-  const { data, isLoading } = useGetStudentLocation({ cep: cep || "" });
   const { mutateAsync: createNewUser, isPending: isPendingCreate } =
     useMutation({
       mutationKey: ["createNewUser"],
@@ -39,21 +36,6 @@ export const NewStudent = () => {
     mutationKey: ["editStudent"],
     mutationFn: (data: FieldValues) => editUser(student?.id.toString(), data),
   });
-
-  useEffect(() => {
-    if (data) {
-      const { logradouro, bairro, localidade, uf } = data;
-
-      if (logradouro && bairro && localidade && uf) {
-        setValue(
-          "fullAddress",
-          `${logradouro}, ${bairro}, ${localidade} - ${uf}`
-        );
-      } else {
-        setValue("fullAddress", "Endereço não encontrado");
-      }
-    }
-  }, [data, setValue]);
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     if (isEdit) {
@@ -119,7 +101,7 @@ export const NewStudent = () => {
             labelInput="*CPF"
             placeholder="Digite aqui"
             keyboardType="number-pad"
-            maxLength={11}
+            maxLength={20}
           />
 
           <ViewBox marginVertical="xs" />
@@ -153,11 +135,10 @@ export const NewStudent = () => {
           <CustomTextInput
             name="cep"
             control={control}
-            labelInput="*CEP"
+            labelInput="CEP"
             placeholder="Digite aqui"
             keyboardType="number-pad"
             maxLength={8}
-            isLoading={isLoading}
           />
           <ViewBox marginVertical="xs" />
           <CustomTextInput
