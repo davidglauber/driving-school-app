@@ -127,9 +127,7 @@ export const SeeStudent = () => {
 
       return {
         label: `${item.chosenClass.label} às ${item.classStartTime}`,
-        date: dayjs(item.classDate, "DD/MM/YYYY")
-          .subtract(1, "day")
-          .format("DD/MM"),
+        date: dayjs(item.classDate, "DD/MM/YYYY").format("DD/MM"),
         link: `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
           `Aula amanhã de ${item.chosenClass.label} de ${item.classStartTime} até ${item.classEndTime}`
         )}&dates=${start}/${end}&details=${encodeURIComponent(
