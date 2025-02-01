@@ -99,8 +99,10 @@ export const SeeStudent = () => {
         label:
           "Aula de " +
           item.chosenClass.label +
-          "amanhã às" +
-          item.classStartTime,
+          "amanhã de" +
+          item.classStartTime +
+          "até" +
+          item.classEndTime,
         date: dayjs(item.classDate, "DD/MM/YYYY")
           .subtract(1, "day")
           .format("DD/MM"),
