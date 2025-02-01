@@ -17,7 +17,7 @@ import { NavigationProp, useNavigation } from "@react-navigation/native";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import React from "react";
-import { FlatList, Linking, Platform } from "react-native";
+import { FlatList, Linking, Platform, Share } from "react-native";
 import ProgressBar from "react-native-progress/Bar";
 import { openMap } from "../../Calendar/Calendar.utils";
 import { GenericStudentType, StudentClass } from "../Students.interface";
@@ -77,7 +77,7 @@ export const SeeStudent = () => {
     Platform.OS === "ios" ? spacing.xxl * 1.5 : spacing.xxl * 2;
 
   const generateGoogleCalendarLink = () => {
-    if (!student?.classes) return "";
+    if (!student?.classes) return [];
 
     const events = student.classes.map((item) => {
       const start = dayjs(
@@ -91,23 +91,40 @@ export const SeeStudent = () => {
       const details = `Class: ${item.chosenClass.label}`;
       const location = student.fullAddress;
 
-      return `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
-        item.chosenClass.label
-      )}&dates=${start}/${end}&details=${encodeURIComponent(
-        details
-      )}&location=${encodeURIComponent(location)}`;
+      return {
+        label: item.chosenClass.label,
+        date: dayjs(item.classDate, "DD/MM/YYYY").format("DD/MM"),
+        link: `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
+          item.chosenClass.label
+        )}&dates=${start}/${end}&details=${encodeURIComponent(
+          details
+        )}&location=${encodeURIComponent(location)}`,
+      };
     });
 
     return events;
   };
-  const handleAddToGoogleCalendar = () => {
-    const links = generateGoogleCalendarLink();
-    if (links.length > 0) {
-      Linking.openURL(links[0]).catch((err) =>
-        console.error("An error occurred", err)
-      );
+
+  const handleShareMessage = async () => {
+    const events = generateGoogleCalendarLink();
+    const message =
+      `👤 Parabéns, bem vinda a Agora Vai ${student?.name}! Aqui está um resumo de todas as suas aulas agendadas, se você quiser criar um lembrete no seu calendário clique em "Criar Lembrete" que você será avisado(a) um dia antes de cada aula, não perca nada ein\n\n` +
+      events
+        .map(
+          (event) =>
+            `📚 Aula: ${event.label}\n📅 Dia: ${event.date}\n🔔 Criar lembrete: ${event.link}`
+        )
+        .join("\n\n");
+
+    try {
+      await Share.share({
+        message,
+      });
+    } catch (error) {
+      console.error("An error occurred while sharing the message", error);
     }
   };
+
   return (
     <ViewBox height={height} bg="white" paddingHorizontal="l">
       <LogoHeader />
@@ -219,7 +236,7 @@ export const SeeStudent = () => {
               color="red"
               titleColor="white"
               mt="l"
-              onPress={handleAddToGoogleCalendar}
+              onPress={handleShareMessage}
             />
           </ViewBox>
         </ViewBox>
