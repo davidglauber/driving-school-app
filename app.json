@@ -23,7 +23,9 @@
       "softwareKeyboardLayoutMode": "pan",
       "package": "com.socialempire.agoravaiv2"
     },
-    "plugins": [],
+    "plugins": [
+      "expo-font"
+    ],
     "extra": {
       "eas": {
         "projectId": "929cbb6f-a1da-4e39-aa40-b6a1964499fd"

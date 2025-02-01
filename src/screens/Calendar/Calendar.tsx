@@ -21,7 +21,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import LottieView from "lottie-react-native";
-import { Linking, Platform } from "react-native";
+import { FlatList, Linking, Platform } from "react-native";
 import { Agenda, LocaleConfig } from "react-native-calendars";
 import { radius } from "../../theme/radius";
 import { calendarPT_BR } from "../../utils/localeCalendarConfig";
@@ -109,88 +109,102 @@ export const Calendar = () => {
   }: {
     item: CalendarItemType;
     index: number;
-  }) =>
-    item.classes &&
-    item.classes.map((classItem, classIndex) => (
-      <ViewBox
-        width="95%"
-        key={`${index}-${classIndex}`}
-        bg="white"
-        padding="m"
-        marginVertical="s"
-        borderRadius={radius.m}
-      >
-        <TextBox variant="titleCardCalendar">{item.name}</TextBox>
-        <ViewBox>
-          <TextBox>{classItem.chosenClass.label}</TextBox>
+  }) => {
+    return (
+      <FlatList
+        data={item.classes}
+        keyExtractor={(classItem) => `${classItem.id}`}
+        renderItem={({ item: classItem, index: classIndex }) => (
           <ViewBox
-            flexDirection="row"
-            columnGap="xs"
-            mt="l"
-            justifyContent="space-between"
+            width="95%"
+            key={`${item.id}-${classIndex}`}
+            bg="white"
+            padding="m"
+            marginVertical="s"
+            borderRadius={radius.m}
           >
-            <FontAwesome6 name="clock" size={22} color={colors.red} />
-            <TextBox variant="textCardCalendar">{`${classItem.classStartTime} - ${classItem.classEndTime}`}</TextBox>
-          </ViewBox>
-        </ViewBox>
-        <TouchableOpacityBox
-          flexDirection="row"
-          columnGap="xs"
-          mt="s"
-          justifyContent="space-between"
-          onPress={() => openMap(item.fullAdress)}
-        >
-          <FontAwesome6 name="location-dot" size={22} color={colors.red} />
-          <ViewBox maxWidth="70%">
-            <TextBox variant="textCardCalendar" textAlign="right">
-              {item.fullAdress}
-            </TextBox>
-          </ViewBox>
-        </TouchableOpacityBox>
+            <TextBox variant="titleCardCalendar">{item.name}</TextBox>
+            <ViewBox>
+              <TextBox>{classItem.chosenClass.label}</TextBox>
+              <ViewBox
+                flexDirection="row"
+                columnGap="xs"
+                mt="l"
+                justifyContent="space-between"
+              >
+                <FontAwesome6 name="clock" size={22} color={colors.red} />
+                <TextBox variant="textCardCalendar">{`${classItem.classStartTime} - ${classItem.classEndTime}`}</TextBox>
+              </ViewBox>
+            </ViewBox>
+            <TouchableOpacityBox
+              flexDirection="row"
+              columnGap="xs"
+              mt="s"
+              justifyContent="space-between"
+              onPress={() => openMap(item.fullAdress)}
+            >
+              <FontAwesome6 name="location-dot" size={22} color={colors.red} />
+              <ViewBox maxWidth="70%">
+                <TextBox variant="textCardCalendar" textAlign="right">
+                  {item.fullAdress}
+                </TextBox>
+              </ViewBox>
+            </TouchableOpacityBox>
 
-        <CustomDivider />
+            <CustomDivider />
 
-        <ViewBox marginTop="s" rowGap="s">
-          <TouchableOpacityBox
-            flexDirection="row"
-            columnGap="xs"
-            justifyContent="space-between"
-            onPress={() => Linking.openURL(`tel:${item.phone}`)}
-          >
-            <FontAwesome6 name="phone" size={18} color={colors.red} />
-            <TextBox variant="textCardCalendar">{item.phone}</TextBox>
-          </TouchableOpacityBox>
+            <ViewBox marginTop="s" rowGap="s">
+              <TouchableOpacityBox
+                flexDirection="row"
+                columnGap="xs"
+                justifyContent="space-between"
+                onPress={() => Linking.openURL(`tel:${item.phone}`)}
+              >
+                <FontAwesome6 name="phone" size={18} color={colors.red} />
+                <TextBox variant="textCardCalendar">{item.phone}</TextBox>
+              </TouchableOpacityBox>
 
-          <ViewBox flexDirection="row" justifyContent="space-between">
-            <CustomButton
-              color="red"
-              titleColor="white"
-              onPress={() => handleViewProfile(item.student)}
-              leftIcon={
-                <FontAwesome6 name="eye" size={24} color={colors.white} />
-              }
-            />
-            <CustomButton
-              color="red"
-              titleColor="white"
-              onPress={() => handleEditClass(item.student, classItem)}
-              leftIcon={
-                <FontAwesome6 name="pencil" size={24} color={colors.white} />
-              }
-            />
-            <CustomButton
-              color="red"
-              titleColor="white"
-              onPress={() => handleDeleteClass(item.student.id, classItem)}
-              leftIcon={
-                <FontAwesome6 name="trash-can" size={24} color={colors.white} />
-              }
-              isLoading={isPendingDelete}
-            />
+              <ViewBox flexDirection="row" justifyContent="space-between">
+                <CustomButton
+                  color="red"
+                  titleColor="white"
+                  onPress={() => handleViewProfile(item.student)}
+                  leftIcon={
+                    <FontAwesome6 name="eye" size={24} color={colors.white} />
+                  }
+                />
+                <CustomButton
+                  color="red"
+                  titleColor="white"
+                  onPress={() => handleEditClass(item.student, classItem)}
+                  leftIcon={
+                    <FontAwesome6
+                      name="pencil"
+                      size={24}
+                      color={colors.white}
+                    />
+                  }
+                />
+                <CustomButton
+                  color="red"
+                  titleColor="white"
+                  onPress={() => handleDeleteClass(item.student.id, classItem)}
+                  leftIcon={
+                    <FontAwesome6
+                      name="trash-can"
+                      size={24}
+                      color={colors.white}
+                    />
+                  }
+                  isLoading={isPendingDelete}
+                />
+              </ViewBox>
+            </ViewBox>
           </ViewBox>
-        </ViewBox>
-      </ViewBox>
-    ));
+        )}
+      />
+    );
+  };
 
   const renderEmptyData = () => (
     <ViewBox justifyContent="center" alignItems="center">

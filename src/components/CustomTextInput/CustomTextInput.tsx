@@ -56,6 +56,7 @@ export const CustomTextInput = ({
                 onBlur={onBlur}
                 value={value}
                 placeholderTextColor={"gray"}
+                secureTextEntry={props.secureTextEntry}
               />
             ) : (
               <ActivityIndicator size="small" color="gray" />
