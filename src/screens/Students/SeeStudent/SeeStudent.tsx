@@ -76,6 +76,36 @@ export const SeeStudent = () => {
   const dynamicPaddingBottom =
     Platform.OS === "ios" ? spacing.xxl * 1.5 : spacing.xxl * 2;
 
+  // const shortenLink = async (longUrl: string, alias: string) => {
+  //   const url = "https://spoo.me/";
+  //   const data = new URLSearchParams();
+  //   data.append("url", longUrl);
+  //   data.append("alias", alias);
+
+  //   try {
+  //     const response = await fetch(url, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-type": "application/x-www-form-urlencoded",
+  //         Accept: "application/json",
+  //       },
+  //       body: data,
+  //     });
+
+  //     if (response.ok) {
+  //       const result = await response.json();
+  //       console.log("Shortened URL:", result);
+  //       return result.shortenedUrl; // Adjust based on the actual response structure
+  //     } else {
+  //       console.error(`HTTP error! Status: ${response.status}`);
+  //       return null;
+  //     }
+  //   } catch (error) {
+  //     console.error("Error shortening the URL:", error);
+  //     return null;
+  //   }
+  // };
+
   const generateGoogleCalendarLink = () => {
     if (!student?.classes) return [];
 
@@ -84,30 +114,24 @@ export const SeeStudent = () => {
         `${item.classDate} ${item.classStartTime}`,
         "DD/MM/YYYY HH:mm"
       )
-        .subtract(24, "hour")
+        .subtract(1, "day")
         .format("YYYYMMDDTHHmmss");
       const end = dayjs(
         `${item.classDate} ${item.classEndTime}`,
         "DD/MM/YYYY HH:mm"
       )
-        .subtract(24, "hour")
+        .subtract(1, "day")
         .format("YYYYMMDDTHHmmss");
-      const details = `Class: ${item.chosenClass.label}`;
+      const details = `Aula: ${item.chosenClass.label}`;
       const location = student.fullAddress;
 
       return {
-        label:
-          "Aula de " +
-          item.chosenClass.label +
-          "amanhã de" +
-          item.classStartTime +
-          "até" +
-          item.classEndTime,
+        label: `${item.chosenClass.label} às ${item.classStartTime}`,
         date: dayjs(item.classDate, "DD/MM/YYYY")
           .subtract(1, "day")
           .format("DD/MM"),
         link: `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
-          item.chosenClass.label
+          `Aula amanhã de ${item.chosenClass.label} de ${item.classStartTime} até ${item.classEndTime}`
         )}&dates=${start}/${end}&details=${encodeURIComponent(
           details
         )}&location=${encodeURIComponent(location)}`,
