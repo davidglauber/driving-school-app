@@ -2,7 +2,7 @@
   "expo": {
     "name": "Agora Vai (Instrutor)",
     "slug": "agora-vai-v2",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -23,9 +23,7 @@
       "softwareKeyboardLayoutMode": "pan",
       "package": "com.socialempire.agoravaiv2"
     },
-    "plugins": [
-      "expo-font"
-    ],
+    "plugins": ["expo-font"],
     "extra": {
       "eas": {
         "projectId": "929cbb6f-a1da-4e39-aa40-b6a1964499fd"

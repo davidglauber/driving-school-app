@@ -108,7 +108,7 @@ export const SeeStudent = () => {
   const handleShareMessage = async () => {
     const events = generateGoogleCalendarLink();
     const message =
-      `👤 Parabéns, bem vinda a Agora Vai ${student?.name}! Aqui está um resumo de todas as suas aulas agendadas, se você quiser criar um lembrete no seu calendário clique em "Criar Lembrete" que você será avisado(a) um dia antes de cada aula, não perca nada ein\n\n` +
+      `👤 Parabéns, bem vindo(a) a Agora Vai ${student?.name}! Aqui está um resumo de todas as suas aulas agendadas, se você quiser criar um lembrete no seu calendário clique em "Criar Lembrete" que você será avisado(a) um dia antes de cada aula, não perca nada ein\n\n` +
       events
         .map(
           (event) =>
