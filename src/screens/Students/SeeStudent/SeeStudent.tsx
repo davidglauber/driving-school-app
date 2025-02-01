@@ -122,7 +122,7 @@ export const SeeStudent = () => {
     const message = events
       .map(
         (event) =>
-          `📚 Aula: ${event.label}<br/>📅 Dia: ${event.date}<br/>🔔 <a href="${event.link}">Criar lembrete</a>`
+          `📚 Aula: ${event.label}<br/>📅 Dia: ${event.date}<br/>🔔 <a href="${event.link}">Criar lembrete no calendário</a>`
       )
       .join("<br/><br/>");
 
@@ -171,8 +171,8 @@ export const SeeStudent = () => {
         </div>
         <div class="content">
           <h1>👤 Parabéns, bem vindo(a) a Agora Vai ${student?.name}!</h1>
-          <p>Aqui está um resumo de todas as suas aulas agendadas, se você quiser criar um lembrete no seu calendário clique em "Criar Lembrete" e você será avisado(a) um dia antes de cada aula, não perca nada</p>
-          <p>${message}</p>
+          <p>Aqui está um resumo de todas as suas aulas agendadas, se você quiser criar um lembrete no seu calendário clique em "Criar Lembrete" e você será avisado(a) um dia antes de cada aula, não perca nada!</p>
+          <h3>${message}</h3>
         </div>
       </body>
     </html>
