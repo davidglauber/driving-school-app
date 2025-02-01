@@ -83,17 +83,27 @@ export const SeeStudent = () => {
       const start = dayjs(
         `${item.classDate} ${item.classStartTime}`,
         "DD/MM/YYYY HH:mm"
-      ).format("YYYYMMDDTHHmmss");
+      )
+        .subtract(24, "hour")
+        .format("YYYYMMDDTHHmmss");
       const end = dayjs(
         `${item.classDate} ${item.classEndTime}`,
         "DD/MM/YYYY HH:mm"
-      ).format("YYYYMMDDTHHmmss");
+      )
+        .subtract(24, "hour")
+        .format("YYYYMMDDTHHmmss");
       const details = `Class: ${item.chosenClass.label}`;
       const location = student.fullAddress;
 
       return {
-        label: item.chosenClass.label,
-        date: dayjs(item.classDate, "DD/MM/YYYY").format("DD/MM"),
+        label:
+          "Aula de " +
+          item.chosenClass.label +
+          "amanhã às" +
+          item.classStartTime,
+        date: dayjs(item.classDate, "DD/MM/YYYY")
+          .subtract(1, "day")
+          .format("DD/MM"),
         link: `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
           item.chosenClass.label
         )}&dates=${start}/${end}&details=${encodeURIComponent(
@@ -108,7 +118,7 @@ export const SeeStudent = () => {
   const handleShareMessage = async () => {
     const events = generateGoogleCalendarLink();
     const message =
-      `👤 Parabéns, bem vindo(a) a Agora Vai ${student?.name}! Aqui está um resumo de todas as suas aulas agendadas, se você quiser criar um lembrete no seu calendário clique em "Criar Lembrete" que você será avisado(a) um dia antes de cada aula, não perca nada ein\n\n` +
+      `👤 Parabéns, bem vindo(a) a Agora Vai ${student?.name}! \n\nAqui está um resumo de todas as suas aulas agendadas, se você quiser criar um lembrete no seu calendário clique em "Criar Lembrete" e você será avisado(a) um dia antes de cada aula, não perca nada\n\n` +
       events
         .map(
           (event) =>
