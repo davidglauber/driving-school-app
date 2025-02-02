@@ -3,6 +3,7 @@ import Tabs from "@/src/routes/Tabs";
 import { NewStudent } from "@/src/screens/Students/NewStudent/NewStudent";
 import { AddClasses } from "@/src/screens/Students/SeeStudent/AddClasses/AddClasses";
 import { SeeStudent } from "@/src/screens/Students/SeeStudent/SeeStudent";
+import { useEditModeStore } from "@/src/store/useEditModeStore";
 import { useNavigationIsReady } from "@/src/store/useNavigationIsReady";
 import { colors } from "@/src/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
@@ -27,6 +28,7 @@ const navigationRef = createRef<NavigationContainerRef<RootStackParamList>>();
 
 const MainNavigator = () => {
   const { setIsReady } = useNavigationIsReady();
+  const { isEdit } = useEditModeStore();
 
   return (
     <NavigationContainer
@@ -46,7 +48,7 @@ const MainNavigator = () => {
           component={NewStudent}
           options={({ navigation }) => ({
             headerShown: true,
-            title: "Cadastrar Aluno",
+            title: isEdit ? "Editar Aluno(a)" : "Cadastrar Aluno(a)",
             headerTintColor: colors.red,
             headerTitleStyle: {
               fontWeight: "bold",
@@ -94,7 +96,7 @@ const MainNavigator = () => {
           component={SeeStudent}
           options={({ navigation }) => ({
             headerShown: true,
-            title: "Detalhes do Aluno",
+            title: "Detalhes do Aluno(a)",
             headerTintColor: colors.red,
             headerTitleStyle: {
               fontWeight: "bold",

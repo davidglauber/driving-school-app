@@ -24,6 +24,7 @@ import { FlatList, Linking, Platform } from "react-native";
 import ProgressBar from "react-native-progress/Bar";
 import { openMap } from "../../Calendar/Calendar.utils";
 
+import { useEditModeStore } from "@/src/store/useEditModeStore";
 import { GenericStudentType, StudentClass } from "../Students.interface";
 dayjs.extend(customParseFormat);
 
@@ -74,6 +75,7 @@ export const SeeStudent = () => {
   const { student } = useStudentStore();
   const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
   const [isLoading, setIsLoading] = useState(false);
+  const { setIsEdit } = useEditModeStore();
   const totalClasses = student?.classesNeeded;
   const acquiredClasses = student?.classes ? student.classes.length : 0;
 
@@ -283,7 +285,10 @@ export const SeeStudent = () => {
                 <FontAwesome6 name={"plus"} size={24} color={colors.white} />
               }
               mt="l"
-              onPress={() => navigate("AddClasses", { isEdit: false })}
+              onPress={() => [
+                navigate("AddClasses", { isEdit: false }),
+                setIsEdit(false),
+              ]}
             />
             <CustomButton
               leftIcon={
@@ -292,7 +297,10 @@ export const SeeStudent = () => {
               color="red"
               titleColor="white"
               mt="l"
-              onPress={() => navigate("NewStudent", { isEdit: true })}
+              onPress={() => [
+                navigate("NewStudent", { isEdit: true }),
+                setIsEdit(true),
+              ]}
             />
             <CustomButton
               leftIcon={

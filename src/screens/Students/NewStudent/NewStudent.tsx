@@ -101,7 +101,7 @@ export const NewStudent = () => {
             labelInput="*CPF"
             placeholder="Digite aqui"
             keyboardType="number-pad"
-            maxLength={20}
+            maxLength={11}
           />
 
           <ViewBox marginVertical="xs" />
@@ -111,7 +111,7 @@ export const NewStudent = () => {
             labelInput="RG (opcional)"
             placeholder="Digite aqui"
             keyboardType="number-pad"
-            maxLength={10}
+            maxLength={20}
           />
 
           <ViewBox marginVertical="xs" />
