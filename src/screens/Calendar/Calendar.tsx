@@ -1,14 +1,11 @@
-import React, { useCallback, useState } from "react";
-import { height } from "../../utils/dimensions";
-import { ViewBox } from "../../utils/restyle/ViewBox";
 import { CustomButton } from "@/src/components/CustomButton/CustomButton";
+import { CustomDateTimeInput } from "@/src/components/CustomDateTimeInput/CustomDateTimeInput";
 import { CustomDivider } from "@/src/components/CustomDivider/CustomDivider";
 import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
 import { RootStackParamList } from "@/src/routes/Stack";
 import { useClassStore } from "@/src/store/useClassStore";
 import { useStudentStore } from "@/src/store/useStudentStore";
 import { colors } from "@/src/theme/colors";
-import { TouchableOpacityBox } from "@/src/utils/restyle/TouchableOpacityBox";
 import { FontAwesome6 } from "@expo/vector-icons";
 import {
   NavigationProp,
@@ -20,12 +17,16 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import LottieView from "lottie-react-native";
-import { FlatList, Linking, Platform } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import { radius } from "../../theme/radius";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
+import { ActivityIndicator, FlatList, Linking, Platform } from "react-native";
 import { LocaleConfig } from "react-native-calendars";
+import { radius } from "../../theme/radius";
+import { height } from "../../utils/dimensions";
 import { calendarPT_BR } from "../../utils/localeCalendarConfig";
 import { TextBox } from "../../utils/restyle/TextBox";
+import { TouchableOpacityBox } from "../../utils/restyle/TouchableOpacityBox";
+import { ViewBox } from "../../utils/restyle/ViewBox";
 import {
   GenericStudentType,
   StudentClass,
@@ -35,8 +36,6 @@ import {
   deleteClassFromStudent,
   getClassesByInstructor,
   openMap,
-  styleCalendar,
-  themeCalendar,
 } from "./Calendar.utils";
 
 dayjs.extend(customParseFormat);
@@ -54,10 +53,15 @@ export const Calendar = () => {
   const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
   const { setStudent } = useStudentStore();
   const { setClassStudent } = useClassStore();
+  const [isLoading, setIsLoading] = useState(false);
+  const { control, setValue } = useForm();
+  const selectedDate = useWatch({ control, name: "selectedDate" });
+
   const { data: instructorClasses, refetch } = useQuery({
     queryKey: ["instructorClasses"],
     queryFn: () => getClassesByInstructor(),
   });
+
   const { mutateAsync: deleteStudentClass, isPending: isPendingDelete } =
     useMutation({
       mutationKey: ["deleteStudentClass"],
@@ -73,11 +77,14 @@ export const Calendar = () => {
       },
     });
 
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  useEffect(() => {
+    // Set the default value to the current date on the first load
+    setValue("selectedDate", dayjs().format("DD/MM/YYYY"));
+  }, [setValue]);
 
   useFocusEffect(
     useCallback(() => {
-      refetch();
+      refetch().finally(() => setIsLoading(false));
     }, [isFocused])
   );
 
@@ -91,6 +98,7 @@ export const Calendar = () => {
     classToDelete: StudentClass
   ) => {
     await deleteStudentClass({ studentId, classToDelete });
+    setIsLoading(false);
   };
 
   const handleEditClass = (
@@ -118,11 +126,12 @@ export const Calendar = () => {
         keyExtractor={(classItem) => `${classItem.id}`}
         renderItem={({ item: classItem, index: classIndex }) => (
           <ViewBox
-            width="95%"
             key={`${item.id}-${classIndex}`}
             bg="white"
             padding="m"
             marginVertical="s"
+            borderWidth={2}
+            borderColor="gray"
             borderRadius={radius.m}
           >
             <TextBox variant="titleCardCalendar">{item.name}</TextBox>
@@ -222,19 +231,21 @@ export const Calendar = () => {
     </ViewBox>
   );
 
-  const flattenedClasses = instructorClasses
-    ? Object.values(instructorClasses).flat()
-    : [];
+  const filteredClasses = useMemo(() => {
+    const flattenedClasses = instructorClasses
+      ? Object.values(instructorClasses).flat()
+      : [];
 
-  const filteredClasses = flattenedClasses.filter(
-    (item: CalendarItemType) =>
-      item.classes &&
-      item.classes.some(
-        (classItem: StudentClass) =>
-          dayjs(classItem.classDate).format("YYYY-MM-DD") ===
-          dayjs(selectedDate).format("YYYY-MM-DD")
-      )
-  );
+    return flattenedClasses.filter(
+      (item: CalendarItemType) =>
+        item.classes &&
+        item.classes.some(
+          (classItem: StudentClass) =>
+            dayjs(classItem.classDate).format("YYYY-MM-DD") ===
+            dayjs(selectedDate, "DD/MM/YYYY").format("YYYY-MM-DD")
+        )
+    );
+  }, [instructorClasses, selectedDate]);
 
   return (
     <ViewBox
@@ -242,23 +253,31 @@ export const Calendar = () => {
       bg="white"
       justifyContent="center"
       paddingBottom="xxl"
+      paddingTop="m"
     >
       <LogoHeader />
-      <DateTimePicker
-        value={selectedDate}
-        mode="date"
-        display="default"
-        onChange={(event, date) => {
-          if (date) {
-            setSelectedDate(date);
-          }
-        }}
-      />
-      {filteredClasses?.length ? (
+      <ViewBox
+        flexDirection="row"
+        alignItems="center"
+        justifyContent="space-between"
+        paddingHorizontal="l"
+      >
+        <CustomDateTimeInput
+          mode="date"
+          labelInput="Data das aulas"
+          name="selectedDate"
+          control={control}
+          defaultValue={dayjs(selectedDate).format("DD/MM/YYYY")}
+        />
+      </ViewBox>
+      {isLoading ? (
+        <ActivityIndicator size="large" color={colors.red} />
+      ) : filteredClasses?.length ? (
         <FlatList
           data={filteredClasses}
           renderItem={({ item, index }) => renderItem({ item, index })}
           keyExtractor={(item, index) => index.toString()}
+          style={{ marginHorizontal: 22 }}
         />
       ) : (
         renderEmptyData()
