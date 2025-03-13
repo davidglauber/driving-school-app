@@ -30,9 +30,7 @@
       }
     },
     "owner": "socialempire",
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "1.0.0",
     "updates": {
       "url": "https://u.expo.dev/929cbb6f-a1da-4e39-aa40-b6a1964499fd"
     }

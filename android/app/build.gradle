@@ -91,8 +91,8 @@ android {
         applicationId 'com.socialempire.agoravaiv2'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.1.1"
+        versionCode 15
+        versionName "1.2.0"
     }
     signingConfigs {
         debug {
@@ -101,15 +101,19 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+            storeFile file('@socialempire__agora-vai-v2.jks')
+            storePassword '2e8018c006fbca02449bee708dd5df51'
+            keyAlias '035aa439b12cad76067dbb5eeda3e2ef'
+            keyPassword '14d5b059d456f4aad556f10b58121efa'
+        }
     }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             shrinkResources (findProperty('android.enableShrinkResourcesInReleaseBuilds')?.toBoolean() ?: false)
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
