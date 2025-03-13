@@ -1,7 +1,6 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { height } from "../../utils/dimensions";
 import { ViewBox } from "../../utils/restyle/ViewBox";
-
 import { CustomButton } from "@/src/components/CustomButton/CustomButton";
 import { CustomDivider } from "@/src/components/CustomDivider/CustomDivider";
 import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
@@ -22,8 +21,9 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import LottieView from "lottie-react-native";
 import { FlatList, Linking, Platform } from "react-native";
-import { Agenda, LocaleConfig } from "react-native-calendars";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { radius } from "../../theme/radius";
+import { LocaleConfig } from "react-native-calendars";
 import { calendarPT_BR } from "../../utils/localeCalendarConfig";
 import { TextBox } from "../../utils/restyle/TextBox";
 import {
@@ -72,6 +72,8 @@ export const Calendar = () => {
         refetch();
       },
     });
+
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   useFocusEffect(
     useCallback(() => {
@@ -220,6 +222,20 @@ export const Calendar = () => {
     </ViewBox>
   );
 
+  const flattenedClasses = instructorClasses
+    ? Object.values(instructorClasses).flat()
+    : [];
+
+  const filteredClasses = flattenedClasses.filter(
+    (item: CalendarItemType) =>
+      item.classes &&
+      item.classes.some(
+        (classItem: StudentClass) =>
+          dayjs(classItem.classDate).format("YYYY-MM-DD") ===
+          dayjs(selectedDate).format("YYYY-MM-DD")
+      )
+  );
+
   return (
     <ViewBox
       height={dynamicSystemHeight}
@@ -228,18 +244,25 @@ export const Calendar = () => {
       paddingBottom="xxl"
     >
       <LogoHeader />
-      <Agenda
-        showClosingKnob
-        items={instructorClasses}
-        pastScrollRange={24}
-        futureScrollRange={24}
-        renderItem={(item: CalendarItemType, index: number) =>
-          renderItem({ item, index })
-        }
-        renderEmptyData={renderEmptyData}
-        theme={themeCalendar}
-        style={styleCalendar}
+      <DateTimePicker
+        value={selectedDate}
+        mode="date"
+        display="default"
+        onChange={(event, date) => {
+          if (date) {
+            setSelectedDate(date);
+          }
+        }}
       />
+      {filteredClasses?.length ? (
+        <FlatList
+          data={filteredClasses}
+          renderItem={({ item, index }) => renderItem({ item, index })}
+          keyExtractor={(item, index) => index.toString()}
+        />
+      ) : (
+        renderEmptyData()
+      )}
     </ViewBox>
   );
 };
