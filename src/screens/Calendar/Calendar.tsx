@@ -19,7 +19,7 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import LottieView from "lottie-react-native";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
-import { ActivityIndicator, FlatList, Linking, Platform } from "react-native";
+import { FlatList, Linking, Platform } from "react-native";
 import { LocaleConfig } from "react-native-calendars";
 import { radius } from "../../theme/radius";
 import { height } from "../../utils/dimensions";
@@ -218,7 +218,7 @@ export const Calendar = () => {
   };
 
   const renderEmptyData = () => (
-    <ViewBox justifyContent="center" alignItems="center">
+    <ViewBox justifyContent="center" alignItems="center" height="70%">
       <LottieView
         source={require("../../../assets/animations/notFoundCar.json")}
         style={{ width: "100%", height: "80%" }}
@@ -263,16 +263,28 @@ export const Calendar = () => {
         paddingHorizontal="l"
       >
         <CustomDateTimeInput
+          style={{ width: "80%" }}
           mode="date"
           labelInput="Data das aulas"
           name="selectedDate"
           control={control}
           defaultValue={dayjs(selectedDate).format("DD/MM/YYYY")}
         />
+        <CustomButton
+          style={{ marginTop: "9%" }}
+          color="red"
+          titleColor="white"
+          isLoading={isLoading}
+          onPress={() => {
+            setIsLoading(true);
+            refetch().finally(() => setIsLoading(false));
+          }}
+          leftIcon={
+            <FontAwesome6 name="arrows-rotate" size={24} color={colors.white} />
+          }
+        />
       </ViewBox>
-      {isLoading ? (
-        <ActivityIndicator size="large" color={colors.red} />
-      ) : filteredClasses?.length ? (
+      {filteredClasses?.length ? (
         <FlatList
           data={filteredClasses}
           renderItem={({ item, index }) => renderItem({ item, index })}
