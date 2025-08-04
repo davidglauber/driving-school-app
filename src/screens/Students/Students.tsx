@@ -25,7 +25,7 @@ import LottieView from "lottie-react-native";
 import ProgressBar from "react-native-progress/Bar";
 import { openMap } from "../Calendar/Calendar.utils";
 import { GenericStudentType, StudentsInterface } from "./Students.interface";
-import { getStudentsByInstructor, checkIfInstructorIsAdmin, getInstructorsByFranchise, updateStudentInstructor } from "./Students.utils";
+import { getStudentsByInstructor, checkIfInstructorIsAdmin, getInstructorsByFranchise, moveStudentToInstructor } from "./Students.utils";
 import { auth } from "@/src/config/firebaseConfig";
 import { Modal, Pressable } from "react-native";
 import Toast from "react-native-toast-message";
@@ -257,15 +257,23 @@ export const Students = () => {
             disabled={!selectedInstructor || !studentToTransfer}
             onPress={async () => {
               if (studentToTransfer && selectedInstructor) {
-                await updateStudentInstructor(studentToTransfer.id?.toString(), selectedInstructor.id);
-                Toast.show({
-                  type: "customSuccessToast",
-                  text1: "Sucesso!",
-                  text2: `Aluno ${studentToTransfer.name} transferido para ${selectedInstructor.name}`,
-                });
-                setModalVisible(false);
-                setSelectedInstructor(null);
-                refetch();
+                try {
+                  await moveStudentToInstructor(studentToTransfer.id?.toString()!, selectedInstructor.id);
+                  Toast.show({
+                    type: "customSuccessToast",
+                    text1: "Sucesso!",
+                    text2: `Aluno ${studentToTransfer.name} transferido para ${selectedInstructor.name}`,
+                  });
+                  setModalVisible(false);
+                  setSelectedInstructor(null);
+                  refetch();
+                } catch (error: any) {
+                  Toast.show({
+                    type: "customErrorToast",
+                    text1: "Erro ao transferir aluno",
+                    text2: error.message ?? "Ocorreu um erro inesperado",
+                  });
+                }
               }
             }}
           />

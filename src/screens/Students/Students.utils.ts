@@ -1,5 +1,6 @@
-import { collection, doc, getDocs, getDoc, getFirestore, query, where, deleteDoc, updateDoc, setDoc } from "firebase/firestore";
-import { GenericStudentType } from "./Students.interface";
+import { collection, doc, getDocs, getDoc, getFirestore, query, where, deleteDoc, updateDoc, runTransaction, DocumentReference } from "firebase/firestore";
+import dayjs from "dayjs";
+import { GenericStudentType, StudentClass } from "./Students.interface";
 import { auth } from "@/src/config/firebaseConfig";
 
 // Resolve the instructor document that belongs to the currently-logged user
@@ -81,4 +82,87 @@ const updateStudentInstructor = async (studentId: string | undefined, instructor
     await updateDoc(studentRef, { instructor: instructorRef });
 };
 
-export { getStudentsByInstructor, checkIfInstructorIsAdmin, deleteStudentById, getInstructorsByFranchise, updateStudentInstructor, getCurrentInstructorRef };
+/**
+ * Check if a given class collides with any class already scheduled for the target instructor.
+ * Returns the name of the student that owns the colliding class or null when the slot is free.
+ */
+const isClassScheduledForInstructor = async (
+    newClass: StudentClass,
+    instructorRef: DocumentReference,
+    currentClassId?: string,
+): Promise<string | null> => {
+    const firestore = getFirestore();
+    const studentsRef = collection(firestore, "students");
+
+    const q = query(studentsRef, where("instructor", "==", instructorRef));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) return null;
+
+    for (const studentDoc of querySnapshot.docs) {
+        const studentData = studentDoc.data();
+        const existingClasses = studentData.classes || [];
+        const newClassDate = newClass.classDate;
+        const newClassStart = dayjs(`1970-01-01T${newClass.classStartTime}:00`);
+        const newClassEnd = dayjs(`1970-01-01T${newClass.classEndTime}:00`);
+
+        const collision = existingClasses.some((existing: StudentClass) => {
+            if (existing.id === currentClassId) return false;
+            if (existing.classDate !== newClassDate) return false;
+            const existingStart = dayjs(`1970-01-01T${existing.classStartTime}:00`);
+            const existingEnd = dayjs(`1970-01-01T${existing.classEndTime}:00`);
+            return newClassStart.isBefore(existingEnd) && newClassEnd.isAfter(existingStart);
+        });
+
+        if (collision) {
+            return studentData.name as string;
+        }
+    }
+    return null;
+};
+
+/**
+ * Atomically moves a student to a different instructor while validating schedule conflicts.
+ */
+const moveStudentToInstructor = async (
+    studentId: string,
+    targetInstructorId: string,
+) => {
+    if (!studentId) throw new Error("Student id is required");
+
+    const firestore = getFirestore();
+    const studentRef = doc(firestore, `students/${studentId}`);
+    const instructorRef = doc(firestore, `instructors/${targetInstructorId}`);
+
+    await runTransaction(firestore, async (tx) => {
+        const [studentSnap, instructorSnap] = await Promise.all([
+            tx.get(studentRef),
+            tx.get(instructorRef),
+        ]);
+
+        if (!studentSnap.exists()) {
+            throw new Error("Student not found");
+        }
+        if (!instructorSnap.exists()) {
+            throw new Error("Instructor not found");
+        }
+
+        const studentData = studentSnap.data() as GenericStudentType;
+        const classes = studentData.classes || [];
+
+        // validate collisions for every class
+        for (const c of classes) {
+            const collisionName = await isClassScheduledForInstructor(c, instructorRef);
+            if (collisionName) {
+                throw new Error(
+                    `Conflito de horário: já existe aula entre ${c.classStartTime} e ${c.classEndTime} com ${collisionName}`,
+                );
+            }
+        }
+
+        // write update
+        tx.update(studentRef, { instructor: instructorRef });
+    });
+};
+
+export { getStudentsByInstructor, checkIfInstructorIsAdmin, deleteStudentById, getInstructorsByFranchise, updateStudentInstructor, getCurrentInstructorRef, moveStudentToInstructor };
