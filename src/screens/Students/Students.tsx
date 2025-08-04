@@ -28,10 +28,12 @@ import { GenericStudentType, StudentsInterface } from "./Students.interface";
 import { getStudentsByInstructor, checkIfInstructorIsAdmin, getInstructorsByFranchise, updateStudentInstructor } from "./Students.utils";
 import { auth } from "@/src/config/firebaseConfig";
 import { Modal, Pressable } from "react-native";
+import Toast from "react-native-toast-message";
 
 export const Students = () => {
   const [modalVisible, setModalVisible] = React.useState(false);
   const [studentToTransfer, setStudentToTransfer] = React.useState<GenericStudentType | null>(null);
+  const [selectedInstructor, setSelectedInstructor] = React.useState<{id:string,name:string}|null>(null);
   const isFocused = useIsFocused();
   const { control, watch } = useForm();
   const { setStudent } = useStudentStore();
@@ -235,21 +237,35 @@ export const Students = () => {
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <Pressable
-                onPress={async () => {
-                  if (studentToTransfer) {
-                    await updateStudentInstructor(studentToTransfer.id?.toString(), item.id);
-                    setModalVisible(false);
-                    refetch();
-                  }
-                }}
+                onPress={() => setSelectedInstructor({ id: item.id, name: item.name })}
               >
-                <ViewBox paddingVertical="s">
-                  <TextBox>{item.name}</TextBox>
+                <ViewBox paddingVertical="s" bg={selectedInstructor?.id === item.id ? "gray" : undefined} borderRadius={radius.m} paddingHorizontal="m">
+                  <TextBox color={selectedInstructor?.id === item.id ? "darkGray" : "black"}>{item.name}</TextBox>
                 </ViewBox>
               </Pressable>
             )}
           />
-          <CustomButton mt="m" title="Fechar" color="red" titleColor="white" onPress={() => setModalVisible(false)} />
+          <CustomButton
+            mt="m"
+            title="Confirmar"
+            color="green"
+            titleColor="white"
+            disabled={!selectedInstructor || !studentToTransfer}
+            onPress={async () => {
+              if (studentToTransfer && selectedInstructor) {
+                await updateStudentInstructor(studentToTransfer.id?.toString(), selectedInstructor.id);
+                Toast.show({
+                  type: "customSuccessToast",
+                  text1: "Sucesso!",
+                  text2: `Aluno ${studentToTransfer.name} transferido para ${selectedInstructor.name}`,
+                });
+                setModalVisible(false);
+                setSelectedInstructor(null);
+                refetch();
+              }
+            }}
+          />
+          <CustomButton mt="s" title="Fechar" color="red" titleColor="white" onPress={() => {setSelectedInstructor(null); setModalVisible(false)}} />
         </ViewBox>
       </View>
     </Modal>
