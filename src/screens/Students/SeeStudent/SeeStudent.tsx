@@ -18,6 +18,8 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
+import { deleteStudentById } from "../Students.utils";
+import { Alert } from "react-native";
 
 import React, { useState } from "react";
 import { FlatList, Linking, Platform } from "react-native";
@@ -75,6 +77,24 @@ export const SeeStudent = () => {
   const { student } = useStudentStore();
   const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleDeleteStudent = () => {
+    Alert.alert(
+      "Atenção",
+      "Tem certeza que deseja deletar o aluno(a)?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Deletar",
+          style: "destructive",
+          onPress: async () => {
+            await deleteStudentById(student?.id?.toString());
+            navigate("Students" as never); // ensure navigation back to list
+          },
+        },
+      ]
+    );
+  };
   const { setIsEdit } = useEditModeStore();
   const totalClasses = student?.classesNeeded;
   const acquiredClasses = student?.classes ? student.classes.length : 0;
@@ -301,6 +321,15 @@ export const SeeStudent = () => {
                 navigate("NewStudent", { isEdit: true }),
                 setIsEdit(true),
               ]}
+            />
+            <CustomButton
+              leftIcon={
+                <FontAwesome6 name={"trash"} size={24} color={colors.white} />
+              }
+              color="red"
+              titleColor="white"
+              mt="l"
+              onPress={handleDeleteStudent}
             />
             <CustomButton
               leftIcon={

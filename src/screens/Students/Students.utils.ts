@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, getDoc, getFirestore, query, where } from "firebase/firestore";
+import { collection, doc, getDocs, getDoc, getFirestore, query, where, deleteDoc } from "firebase/firestore";
 import { GenericStudentType } from "./Students.interface";
 import { auth } from "@/src/config/firebaseConfig";
 
@@ -29,4 +29,11 @@ const checkIfInstructorIsAdmin = async (): Promise<boolean> => {
     return instructorData.isAdmin === true;
 };
 
-export { getStudentsByInstructor, checkIfInstructorIsAdmin };
+const deleteStudentById = async (id: string | undefined) => {
+    if (!id) return;
+    const firestore = getFirestore();
+    const docRef = doc(firestore, `students/${id}`);
+    await deleteDoc(docRef);
+};
+
+export { getStudentsByInstructor, checkIfInstructorIsAdmin, deleteStudentById };
