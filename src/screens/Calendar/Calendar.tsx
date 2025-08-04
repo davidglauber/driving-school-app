@@ -53,11 +53,10 @@ export const Calendar = () => {
   const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
   const { setStudent } = useStudentStore();
   const { setClassStudent } = useClassStore();
-  const [isLoading, setIsLoading] = useState(false);
   const { control, setValue } = useForm();
   const selectedDate = useWatch({ control, name: "selectedDate" });
 
-  const { data: instructorClasses, refetch } = useQuery({
+  const { data: instructorClasses, refetch, isLoading } = useQuery({
     queryKey: ["instructorClasses"],
     queryFn: () => getClassesByInstructor(),
   });
@@ -84,7 +83,7 @@ export const Calendar = () => {
 
   useFocusEffect(
     useCallback(() => {
-      refetch().finally(() => setIsLoading(false));
+      refetch();
     }, [isFocused])
   );
 
@@ -98,7 +97,6 @@ export const Calendar = () => {
     classToDelete: StudentClass
   ) => {
     await deleteStudentClass({ studentId, classToDelete });
-    setIsLoading(false);
   };
 
   const handleEditClass = (
@@ -231,6 +229,21 @@ export const Calendar = () => {
     </ViewBox>
   );
 
+  // Loading state component with car animation and fun message
+  const renderLoadingState = () => (
+    <ViewBox justifyContent="center" alignItems="center" height="70%">
+      <LottieView
+        source={require("../../../assets/animations/notFoundCar.json")}
+        style={{ width: "100%", height: "80%" }}
+        autoPlay
+        loop
+      />
+      <TextBox variant="notFoundText" paddingHorizontal="m" textAlign="center">
+        Carregando alunos na velocidade de um uno com escada no teto
+      </TextBox>
+    </ViewBox>
+  );
+
   const filteredClasses = useMemo(() => {
     const flattenedClasses = instructorClasses
       ? Object.values(instructorClasses).flat()
@@ -276,15 +289,16 @@ export const Calendar = () => {
           titleColor="white"
           isLoading={isLoading}
           onPress={() => {
-            setIsLoading(true);
-            refetch().finally(() => setIsLoading(false));
+            refetch();
           }}
           leftIcon={
             <FontAwesome6 name="arrows-rotate" size={24} color={colors.white} />
           }
         />
       </ViewBox>
-      {filteredClasses?.length ? (
+      {isLoading ? (
+        renderLoadingState()
+      ) : filteredClasses?.length ? (
         <FlatList
           data={filteredClasses}
           renderItem={({ item, index }) => renderItem({ item, index })}
