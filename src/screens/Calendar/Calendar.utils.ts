@@ -4,6 +4,7 @@ import { height, width } from "@/src/utils/dimensions";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import { collection, doc, getDoc, getDocs, getFirestore, orderBy, query, updateDoc, where } from "firebase/firestore";
+import { getCurrentInstructorRef } from "../Students/Students.utils";
 import { Linking, Platform } from "react-native";
 import { GenericStudentType, StudentClass } from "../Students/Students.interface";
 import { CalendarItemInterface } from "./Calendar.interface";
@@ -29,8 +30,8 @@ export const styleCalendar = {
 
 const getClassesByInstructor = async (): Promise<CalendarItemInterface> => {
   const firestore = getFirestore();
-  const currentUser = auth.currentUser;
-  const instructorRef = doc(firestore, `instructors/${currentUser?.uid}`);
+  const instructorRef = await getCurrentInstructorRef();
+  if (!instructorRef) return {} as CalendarItemInterface;
   const studentsRef = collection(firestore, "students");
 
   const q = query(studentsRef, where("instructor", "==", instructorRef));

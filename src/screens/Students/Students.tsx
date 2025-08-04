@@ -109,18 +109,22 @@ export const Students = () => {
 
         <CustomDivider />
         <ViewBox mt="m" flexDirection="row" justifyContent="space-between">
-          <CustomButton
-            color="white"
-            onPress={() => openMap(item.fullAddress)}
-            leftIcon={
-              <FontAwesome6 name="map-location-dot" size={24} color="black" />
-            }
-          />
-          <CustomButton
-            color="white"
-            onPress={() => Linking.openURL(`tel:${item.phone}`)}
-            leftIcon={<FontAwesome6 name="phone" size={24} color="black" />}
-          />
+          {isAdmin && (
+            <CustomButton
+              color="white"
+              onPress={() => openMap(item.fullAddress)}
+              leftIcon={
+                <FontAwesome6 name="map-location-dot" size={24} color="black" />
+              }
+            />
+          )}
+          {isAdmin && (
+            <CustomButton
+              color="white"
+              onPress={() => Linking.openURL(`tel:${item.phone}`)}
+              leftIcon={<FontAwesome6 name="phone" size={24} color="black" />}
+            />
+          )}
           <CustomButton
             color="white"
             onPress={() => {

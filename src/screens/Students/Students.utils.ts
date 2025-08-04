@@ -81,4 +81,4 @@ const updateStudentInstructor = async (studentId: string | undefined, instructor
     await updateDoc(studentRef, { instructor: instructorRef });
 };
 
-export { getStudentsByInstructor, checkIfInstructorIsAdmin, deleteStudentById, getInstructorsByFranchise, updateStudentInstructor };
+export { getStudentsByInstructor, checkIfInstructorIsAdmin, deleteStudentById, getInstructorsByFranchise, updateStudentInstructor, getCurrentInstructorRef };

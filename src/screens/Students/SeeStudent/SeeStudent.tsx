@@ -18,8 +18,10 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
-import { deleteStudentById } from "../Students.utils";
+import { deleteStudentById, checkIfInstructorIsAdmin } from "../Students.utils";
 import { Alert } from "react-native";
+import { useQuery } from "@tanstack/react-query";
+import { auth } from "@/src/config/firebaseConfig";
 
 import React, { useState } from "react";
 import { FlatList, Linking, Platform } from "react-native";
@@ -96,6 +98,10 @@ export const SeeStudent = () => {
     );
   };
   const { setIsEdit } = useEditModeStore();
+  const { data: isAdmin } = useQuery({
+    queryKey: ["isAdmin", auth.currentUser?.uid],
+    queryFn: () => checkIfInstructorIsAdmin(),
+  });
   const totalClasses = student?.classesNeeded;
   const acquiredClasses = student?.classes ? student.classes.length : 0;
 
@@ -252,22 +258,26 @@ export const SeeStudent = () => {
           <ClassesList classes={student?.classes} />
           <CustomDivider />
 
-          <PressableBox
-            onPress={() => Linking.openURL(`tel:${student?.phone || ""}`)}
-          >
-            <CustomLabelText
-              label="Telefone"
-              text={student?.phone || ""}
-              mb="s"
-            />
-          </PressableBox>
+          {isAdmin && (
+            <PressableBox
+              onPress={() => Linking.openURL(`tel:${student?.phone || ""}`)}
+            >
+              <CustomLabelText
+                label="Telefone"
+                text={student?.phone || ""}
+                mb="s"
+              />
+            </PressableBox>
+          )}
 
-          <PressableBox onPress={() => openMap(student?.fullAddress || "")}>
+          {isAdmin && (
+            <PressableBox onPress={() => openMap(student?.fullAddress || "")}>
             <CustomLabelText
               label="Endereço"
               text={student?.fullAddress || ""}
             />
           </PressableBox>
+          )}
 
           <CustomLabelText
             label="Profissão"
@@ -310,27 +320,31 @@ export const SeeStudent = () => {
                 setIsEdit(false),
               ]}
             />
-            <CustomButton
-              leftIcon={
-                <FontAwesome6 name={"pencil"} size={24} color={colors.white} />
-              }
-              color="red"
-              titleColor="white"
-              mt="l"
-              onPress={() => [
-                navigate("NewStudent", { isEdit: true }),
-                setIsEdit(true),
-              ]}
-            />
-            <CustomButton
-              leftIcon={
-                <FontAwesome6 name={"trash"} size={24} color={colors.white} />
-              }
-              color="red"
-              titleColor="white"
-              mt="l"
-              onPress={handleDeleteStudent}
-            />
+            {isAdmin && (
+              <CustomButton
+                leftIcon={
+                  <FontAwesome6 name={"pencil"} size={24} color={colors.white} />
+                }
+                color="red"
+                titleColor="white"
+                mt="l"
+                onPress={() => [
+                  navigate("NewStudent", { isEdit: true }),
+                  setIsEdit(true),
+                ]}
+              />
+            )}
+            {isAdmin && (
+              <CustomButton
+                leftIcon={
+                  <FontAwesome6 name={"trash"} size={24} color={colors.white} />
+                }
+                color="red"
+                titleColor="white"
+                mt="l"
+                onPress={handleDeleteStudent}
+              />
+            )}
             <CustomButton
               leftIcon={
                 <FontAwesome6 name={"share"} size={24} color={colors.white} />

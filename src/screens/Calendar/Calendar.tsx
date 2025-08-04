@@ -24,6 +24,8 @@ import { LocaleConfig } from "react-native-calendars";
 import { radius } from "../../theme/radius";
 import { height } from "../../utils/dimensions";
 import { calendarPT_BR } from "../../utils/localeCalendarConfig";
+import { checkIfInstructorIsAdmin } from "../Students/Students.utils";
+import { auth } from "@/src/config/firebaseConfig";
 import { TextBox } from "../../utils/restyle/TextBox";
 import { TouchableOpacityBox } from "../../utils/restyle/TouchableOpacityBox";
 import { ViewBox } from "../../utils/restyle/ViewBox";
@@ -53,6 +55,10 @@ export const Calendar = () => {
   const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
   const { setStudent } = useStudentStore();
   const { setClassStudent } = useClassStore();
+  const { data: isAdmin } = useQuery({
+    queryKey: ["isAdmin", auth.currentUser?.uid],
+    queryFn: () => checkIfInstructorIsAdmin(),
+  });
   const { control, setValue } = useForm();
   const selectedDate = useWatch({ control, name: "selectedDate" });
 
@@ -145,33 +151,37 @@ export const Calendar = () => {
                 <TextBox variant="textCardCalendar">{`${classItem.classStartTime} - ${classItem.classEndTime}`}</TextBox>
               </ViewBox>
             </ViewBox>
-            <TouchableOpacityBox
-              flexDirection="row"
-              columnGap="xs"
-              mt="s"
-              justifyContent="space-between"
-              onPress={() => openMap(item.fullAdress)}
-            >
-              <FontAwesome6 name="location-dot" size={22} color={colors.red} />
-              <ViewBox maxWidth="70%">
-                <TextBox variant="textCardCalendar" textAlign="right">
-                  {item.fullAdress}
-                </TextBox>
-              </ViewBox>
-            </TouchableOpacityBox>
-
-            <CustomDivider />
-
-            <ViewBox marginTop="s" rowGap="s">
+            {isAdmin && (
               <TouchableOpacityBox
                 flexDirection="row"
                 columnGap="xs"
+                mt="s"
                 justifyContent="space-between"
-                onPress={() => Linking.openURL(`tel:${item.phone}`)}
+                onPress={() => openMap(item.fullAdress)}
               >
-                <FontAwesome6 name="phone" size={18} color={colors.red} />
-                <TextBox variant="textCardCalendar">{item.phone}</TextBox>
+                <FontAwesome6 name="location-dot" size={22} color={colors.red} />
+                <ViewBox maxWidth="70%">
+                  <TextBox variant="textCardCalendar" textAlign="right">
+                    {item.fullAdress}
+                  </TextBox>
+                </ViewBox>
               </TouchableOpacityBox>
+            )}
+          
+            <CustomDivider />
+
+            <ViewBox marginTop="s" rowGap="s">
+              {isAdmin && (
+                <TouchableOpacityBox
+                  flexDirection="row"
+                  columnGap="xs"
+                  justifyContent="space-between"
+                  onPress={() => Linking.openURL(`tel:${item.phone}`)}
+                >
+                  <FontAwesome6 name="phone" size={18} color={colors.red} />
+                  <TextBox variant="textCardCalendar">{item.phone}</TextBox>
+                </TouchableOpacityBox>
+              )}
 
               <ViewBox flexDirection="row" justifyContent="space-between">
                 <CustomButton
