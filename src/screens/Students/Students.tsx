@@ -20,14 +20,18 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import React, { useCallback } from "react";
 import { useForm } from "react-hook-form";
-import { ActivityIndicator, FlatList, Linking } from "react-native";
+import { ActivityIndicator, FlatList, Linking, View } from "react-native";
 import LottieView from "lottie-react-native";
 import ProgressBar from "react-native-progress/Bar";
 import { openMap } from "../Calendar/Calendar.utils";
 import { GenericStudentType, StudentsInterface } from "./Students.interface";
-import { getStudentsByInstructor, checkIfInstructorIsAdmin } from "./Students.utils";
+import { getStudentsByInstructor, checkIfInstructorIsAdmin, getInstructorsByFranchise, updateStudentInstructor } from "./Students.utils";
+import { auth } from "@/src/config/firebaseConfig";
+import { Modal, Pressable } from "react-native";
 
 export const Students = () => {
+  const [modalVisible, setModalVisible] = React.useState(false);
+  const [studentToTransfer, setStudentToTransfer] = React.useState<GenericStudentType | null>(null);
   const isFocused = useIsFocused();
   const { control, watch } = useForm();
   const { setStudent } = useStudentStore();
@@ -38,14 +42,20 @@ export const Students = () => {
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["students"],
+    queryKey: ["students", auth.currentUser?.uid],
     queryFn: () => getStudentsByInstructor(),
   });
 
   const { data: isAdmin } = useQuery({
-    queryKey: ["isAdmin"],
+    queryKey: ["isAdmin", auth.currentUser?.uid],
     queryFn: () => checkIfInstructorIsAdmin(),
   });
+
+  const { data: instructors } = useQuery({
+    queryKey: ["instructors", auth.currentUser?.uid],
+    queryFn: () => getInstructorsByFranchise(),
+  });
+
   useFocusEffect(
     useCallback(() => {
       refetch();
@@ -111,8 +121,16 @@ export const Students = () => {
           />
           <CustomButton
             color="white"
+            onPress={() => {
+              setStudentToTransfer(item);
+              setModalVisible(true);
+            }}
+            leftIcon={<FontAwesome6 name="repeat" size={24} color="black" />}
+          />
+          <CustomButton
+            color="white"
             onPress={() => handleNavigate(item)}
-            title="Ver Detalhes"
+            leftIcon={<FontAwesome6 name="eye" size={24} color="black" />}
           />
         </ViewBox>
       </ViewBox>
@@ -197,6 +215,44 @@ export const Students = () => {
           )}
         </>
       )}
+    {/* Transfer Modal */}
+    <Modal
+      visible={modalVisible}
+      transparent
+      animationType="slide"
+      onRequestClose={() => setModalVisible(false)}
+    >
+      <View
+        style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0,0,0,0.5)", padding: spacing.l }}
+      >
+        <ViewBox bg="white" padding="l" borderRadius={radius.m} width={width * 0.8}>
+          <TextBox variant="titleCardCalendar" mb="m">Escolha o Instrutor</TextBox>
+          {(!instructors || instructors.length === 0) && (
+            <TextBox>Nenhum instrutor encontrado.</TextBox>
+          )}
+          <FlatList
+            data={instructors}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <Pressable
+                onPress={async () => {
+                  if (studentToTransfer) {
+                    await updateStudentInstructor(studentToTransfer.id?.toString(), item.id);
+                    setModalVisible(false);
+                    refetch();
+                  }
+                }}
+              >
+                <ViewBox paddingVertical="s">
+                  <TextBox>{item.name}</TextBox>
+                </ViewBox>
+              </Pressable>
+            )}
+          />
+          <CustomButton mt="m" title="Fechar" color="red" titleColor="white" onPress={() => setModalVisible(false)} />
+        </ViewBox>
+      </View>
+    </Modal>
     </ViewBox>
   );
 };
