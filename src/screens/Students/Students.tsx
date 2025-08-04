@@ -60,8 +60,11 @@ export const Students = () => {
   };
 
   const renderItem = ({ item, index }: StudentsInterface) => {
-    const acquiredClasses = item.classes ? item.classes.length : 0;
-    const progress = acquiredClasses / item.classesNeeded;
+        const acquiredClasses = item.classes ? item.classes.length : 0;
+    const totalNeeded = Number(item.classesNeeded) || 0;
+    const rawProgress = totalNeeded > 0 ? acquiredClasses / totalNeeded : 0;
+    // Clamp value between 0 and 1 to avoid invalid numbers for the ProgressBar component
+    const progress = Math.min(Math.max(rawProgress, 0), 1);
 
     return (
       <ViewBox
@@ -160,7 +163,7 @@ export const Students = () => {
             </ViewBox>
           }
           ListHeaderComponentStyle={{ marginBottom: spacing.m }}
-          keyExtractor={(_, index) => index.toExponential()}
+          keyExtractor={(item) => String(item.id ?? Math.random())}
           initialNumToRender={10}
           maxToRenderPerBatch={10}
           updateCellsBatchingPeriod={50}
