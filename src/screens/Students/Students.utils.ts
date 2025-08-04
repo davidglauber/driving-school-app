@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, getFirestore, query, where } from "firebase/firestore";
+import { collection, doc, getDocs, getDoc, getFirestore, query, where } from "firebase/firestore";
 import { GenericStudentType } from "./Students.interface";
 import { auth } from "@/src/config/firebaseConfig";
 
@@ -15,4 +15,18 @@ const getStudentsByInstructor = async () => {
     return students;
 };
 
-export { getStudentsByInstructor };
+const checkIfInstructorIsAdmin = async (): Promise<boolean> => {
+    const firestore = getFirestore();
+    const currentUser = auth.currentUser;
+    if (!currentUser) return false;
+
+    const instructorRef = doc(firestore, `instructors/${currentUser.uid}`);
+    const instructorSnap = await getDoc(instructorRef);
+
+    if (!instructorSnap.exists()) return false;
+
+    const instructorData = instructorSnap.data() as { isAdmin?: boolean };
+    return instructorData.isAdmin === true;
+};
+
+export { getStudentsByInstructor, checkIfInstructorIsAdmin };

@@ -21,10 +21,11 @@ import { useQuery } from "@tanstack/react-query";
 import React, { useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { ActivityIndicator, FlatList, Linking } from "react-native";
+import LottieView from "lottie-react-native";
 import ProgressBar from "react-native-progress/Bar";
 import { openMap } from "../Calendar/Calendar.utils";
 import { GenericStudentType, StudentsInterface } from "./Students.interface";
-import { getStudentsByInstructor } from "./Students.utils";
+import { getStudentsByInstructor, checkIfInstructorIsAdmin } from "./Students.utils";
 
 export const Students = () => {
   const isFocused = useIsFocused();
@@ -39,6 +40,11 @@ export const Students = () => {
   } = useQuery({
     queryKey: ["students"],
     queryFn: () => getStudentsByInstructor(),
+  });
+
+  const { data: isAdmin } = useQuery({
+    queryKey: ["isAdmin"],
+    queryFn: () => checkIfInstructorIsAdmin(),
   });
   useFocusEffect(
     useCallback(() => {
@@ -113,6 +119,21 @@ export const Students = () => {
     );
   };
 
+  // Empty state component with notfoundagrvai.json animation
+  const renderEmptyState = () => (
+    <ViewBox justifyContent="center" alignItems="center" height="70%">
+      <LottieView
+        source={require("../../../assets/animations/notfoundagrvai.json")}
+        style={{ width: "100%", height: "80%" }}
+        autoPlay
+        loop
+      />
+      <TextBox variant="notFoundText" paddingHorizontal="m" textAlign="center">
+        Nenhum resultado
+      </TextBox>
+    </ViewBox>
+  );
+
   return (
     <ViewBox
       height={height}
@@ -124,30 +145,27 @@ export const Students = () => {
       {isLoading ? (
         <ActivityIndicator size="small" color={colors.red} />
       ) : (
-        <FlatList
-          data={filteredStudents}
-          renderItem={renderItem}
-          contentContainerStyle={{ paddingBottom: height * 0.1 }}
-          showsVerticalScrollIndicator={false}
-          ListHeaderComponent={
-            <ViewBox
-              flexDirection="row"
-              alignItems="center"
-              justifyContent="space-between"
-            >
-              <CustomTextInput
-                name="search"
-                control={control}
-                placeholder="Pesquise o aluno"
-                rightIcon={
-                  <FontAwesome6
-                    name={"magnifying-glass"}
-                    size={24}
-                    color="black"
-                  />
-                }
-                style={{ width: width * 0.7 }}
-              />
+        <>
+          <ViewBox
+            flexDirection="row"
+            alignItems="center"
+            justifyContent="space-between"
+            marginBottom="m"
+          >
+            <CustomTextInput
+              name="search"
+              control={control}
+              placeholder="Pesquise o aluno"
+              rightIcon={
+                <FontAwesome6
+                  name={"magnifying-glass"}
+                  size={24}
+                  color="black"
+                />
+              }
+              style={{ width: isAdmin ? width * 0.7 : width * 0.88 }}
+            />
+            {isAdmin && (
               <CustomButton
                 color="red"
                 titleColor="white"
@@ -160,15 +178,24 @@ export const Students = () => {
                 }
                 onPress={() => navigate("NewStudent", { isEdit: false })}
               />
-            </ViewBox>
-          }
-          ListHeaderComponentStyle={{ marginBottom: spacing.m }}
-          keyExtractor={(item) => String(item.id ?? Math.random())}
-          initialNumToRender={10}
-          maxToRenderPerBatch={10}
-          updateCellsBatchingPeriod={50}
-          removeClippedSubviews
-        />
+            )}
+          </ViewBox>
+          {filteredStudents && filteredStudents.length > 0 ? (
+            <FlatList
+              data={filteredStudents}
+              renderItem={renderItem}
+              contentContainerStyle={{ paddingBottom: height * 0.1 }}
+              showsVerticalScrollIndicator={false}
+              keyExtractor={(item) => String(item.id ?? Math.random())}
+              initialNumToRender={10}
+              maxToRenderPerBatch={10}
+              updateCellsBatchingPeriod={50}
+              removeClippedSubviews
+            />
+          ) : (
+            renderEmptyState()
+          )}
+        </>
       )}
     </ViewBox>
   );
