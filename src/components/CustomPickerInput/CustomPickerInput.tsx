@@ -22,7 +22,7 @@ export const CustomPickerInput = ({
     <Controller
       control={control}
       name={name}
-      defaultValue={items[0]?.value}
+      defaultValue={{ label: "", value: "" }}
       render={({ field: { onChange, value }, fieldState: { error } }) => (
         <ViewBox width={"100%"} style={{ opacity: 1 }}>
           {labelInput && <TextBox variant="label">{labelInput}</TextBox>}
@@ -35,7 +35,7 @@ export const CustomPickerInput = ({
             marginTop="s"
           >
             <Picker
-              selectedValue={value}
+              selectedValue={value?.value ?? ""}
               onValueChange={(itemValue) => {
                 const selectedItem = items.find(
                   (item) => item.value === itemValue
