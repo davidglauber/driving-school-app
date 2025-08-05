@@ -2,6 +2,7 @@ import { CustomButton } from "@/src/components/CustomButton/CustomButton";
 import { CustomDivider } from "@/src/components/CustomDivider/CustomDivider";
 import { CustomTextInput } from "@/src/components/CustomTextInput/CustomTextInput";
 import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
+import { auth } from "@/src/config/firebaseConfig";
 import { RootStackParamList } from "@/src/routes/Stack";
 import { useStudentStore } from "@/src/store/useStudentStore";
 import { colors } from "@/src/theme/colors";
@@ -18,22 +19,16 @@ import {
   useNavigation,
 } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
+import LottieView from "lottie-react-native";
 import React, { useCallback } from "react";
 import { useForm } from "react-hook-form";
-import { ActivityIndicator, FlatList, Linking, View } from "react-native";
-import LottieView from "lottie-react-native";
+import { ActivityIndicator, FlatList, Linking } from "react-native";
 import ProgressBar from "react-native-progress/Bar";
 import { openMap } from "../Calendar/Calendar.utils";
 import { GenericStudentType, StudentsInterface } from "./Students.interface";
-import { getStudentsByInstructor, checkIfInstructorIsAdmin, getInstructorsByFranchise, moveStudentToInstructor } from "./Students.utils";
-import { auth } from "@/src/config/firebaseConfig";
-import { Modal, Pressable } from "react-native";
-import Toast from "react-native-toast-message";
+import { checkIfInstructorIsAdmin, getInstructorsByFranchise, getStudentsByInstructor } from "./Students.utils";
 
 export const Students = () => {
-  const [modalVisible, setModalVisible] = React.useState(false);
-  const [studentToTransfer, setStudentToTransfer] = React.useState<GenericStudentType | null>(null);
-  const [selectedInstructor, setSelectedInstructor] = React.useState<{id:string,name:string}|null>(null);
   const isFocused = useIsFocused();
   const { control, watch } = useForm();
   const { setStudent } = useStudentStore();
@@ -109,7 +104,6 @@ export const Students = () => {
 
         <CustomDivider />
         <ViewBox mt="m" flexDirection="row" justifyContent="space-between">
-          {isAdmin && (
             <CustomButton
               color="white"
               onPress={() => openMap(item.fullAddress)}
@@ -117,26 +111,16 @@ export const Students = () => {
                 <FontAwesome6 name="map-location-dot" size={24} color="black" />
               }
             />
-          )}
-          {isAdmin && (
             <CustomButton
               color="white"
               onPress={() => Linking.openURL(`tel:${item.phone}`)}
               leftIcon={<FontAwesome6 name="phone" size={24} color="black" />}
             />
-          )}
-          <CustomButton
-            color="white"
-            onPress={() => {
-              setStudentToTransfer(item);
-              setModalVisible(true);
-            }}
-            leftIcon={<FontAwesome6 name="repeat" size={24} color="black" />}
-          />
+        
           <CustomButton
             color="white"
             onPress={() => handleNavigate(item)}
-            leftIcon={<FontAwesome6 name="eye" size={24} color="black" />}
+            title="Ver Detalhes"
           />
         </ViewBox>
       </ViewBox>
@@ -221,66 +205,6 @@ export const Students = () => {
           )}
         </>
       )}
-    {/* Transfer Modal */}
-    <Modal
-      visible={modalVisible}
-      transparent
-      animationType="slide"
-      onRequestClose={() => setModalVisible(false)}
-    >
-      <View
-        style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0,0,0,0.5)", padding: spacing.l }}
-      >
-        <ViewBox bg="white" padding="l" borderRadius={radius.m} width={width * 0.8}>
-          <TextBox variant="titleCardCalendar" mb="m">Escolha o Instrutor</TextBox>
-          {(!instructors || instructors.length === 0) && (
-            <TextBox>Nenhum instrutor encontrado.</TextBox>
-          )}
-          <FlatList
-            data={instructors}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <Pressable
-                onPress={() => setSelectedInstructor({ id: item.id, name: item.name })}
-              >
-                <ViewBox paddingVertical="s" bg={selectedInstructor?.id === item.id ? "gray" : undefined} borderRadius={radius.m} paddingHorizontal="m">
-                  <TextBox color={selectedInstructor?.id === item.id ? "darkGray" : "black"}>{item.name}</TextBox>
-                </ViewBox>
-              </Pressable>
-            )}
-          />
-          <CustomButton
-            mt="m"
-            title="Confirmar"
-            color="green"
-            titleColor="white"
-            disabled={!selectedInstructor || !studentToTransfer}
-            onPress={async () => {
-              if (studentToTransfer && selectedInstructor) {
-                try {
-                  await moveStudentToInstructor(studentToTransfer.id?.toString()!, selectedInstructor.id);
-                  Toast.show({
-                    type: "customSuccessToast",
-                    text1: "Sucesso!",
-                    text2: `Aluno ${studentToTransfer.name} transferido para ${selectedInstructor.name}`,
-                  });
-                  setModalVisible(false);
-                  setSelectedInstructor(null);
-                  refetch();
-                } catch (error: any) {
-                  Toast.show({
-                    type: "customErrorToast",
-                    text1: "Erro ao transferir aluno",
-                    text2: error.message ?? "Ocorreu um erro inesperado",
-                  });
-                }
-              }
-            }}
-          />
-          <CustomButton mt="s" title="Fechar" color="red" titleColor="white" onPress={() => {setSelectedInstructor(null); setModalVisible(false)}} />
-        </ViewBox>
-      </View>
-    </Modal>
     </ViewBox>
   );
 };

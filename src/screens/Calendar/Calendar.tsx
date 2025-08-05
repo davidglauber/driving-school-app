@@ -249,7 +249,7 @@ export const Calendar = () => {
         loop
       />
       <TextBox variant="notFoundText" paddingHorizontal="m" textAlign="center">
-        Carregando alunos na velocidade de um uno com escada no teto
+        Carregando alunos na velocidade da luz
       </TextBox>
     </ViewBox>
   );
