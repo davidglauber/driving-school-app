@@ -29,11 +29,43 @@ const getStudentsByInstructor = async () => {
     if (!instructorRef) return [] as GenericStudentType[];
     const studentsRef = collection(firestore, "students");
 
-    const q = query(studentsRef, where("instructor", "==", instructorRef));
-    const querySnapshot = await getDocs(q);
-  
-    const students = querySnapshot.docs.map(doc => ({ ...doc.data() as GenericStudentType }));
-    return students;
+    // Check if current user is admin
+    const currentUser = auth.currentUser;
+    if (!currentUser) return [] as GenericStudentType[];
+    
+    const instructorDoc = await getDoc(instructorRef);
+    if (!instructorDoc.exists()) return [] as GenericStudentType[];
+    
+    const instructorData = instructorDoc.data() as { isAdmin?: boolean };
+    const isAdmin = instructorData.isAdmin === true;
+
+    if (isAdmin) {
+        // Admin sees all students in their franchise
+        const { franchise } = instructorData as { franchise?: any };
+        if (!franchise) return [] as GenericStudentType[];
+        
+        const q = query(studentsRef, where("instructor", "==", instructorRef));
+        const querySnapshot = await getDocs(q);
+        const students = querySnapshot.docs.map(doc => ({ ...doc.data() as GenericStudentType }));
+        return students;
+    } else {
+        // Regular instructor sees only students with classes assigned to them
+        const allStudentsSnap = await getDocs(studentsRef);
+        const studentsWithClasses: GenericStudentType[] = [];
+        
+        allStudentsSnap.docs.forEach((docSnap) => {
+            const student = docSnap.data() as GenericStudentType;
+            const hasClassesForInstructor = student.classes?.some(
+                (studentClass) => studentClass.instructor?.path === instructorRef.path
+            );
+            
+            if (hasClassesForInstructor) {
+                studentsWithClasses.push({ ...student });
+            }
+        });
+        
+        return studentsWithClasses;
+    }
 };
 
 const checkIfInstructorIsAdmin = async (): Promise<boolean> => {

@@ -191,14 +191,14 @@ export const Calendar = () => {
                 <CustomButton
                   color="red"
                   titleColor="white"
-                  title={isPastSelectedDate ? "Ver Detalhes" : undefined}
-                  style={{ width: isPastSelectedDate ? "100%" : undefined }}
+                  title={isPastSelectedDate || !isAdmin ? "Ver Detalhes" : undefined}
+                  style={{ width: isPastSelectedDate || !isAdmin ? "100%" : undefined }}
                   onPress={() => handleViewProfile(item.student)}
                   leftIcon={
-                    isPastSelectedDate ? undefined : <FontAwesome6 name="eye" size={24} color={colors.white} />
+                    isPastSelectedDate || !isAdmin ? undefined : <FontAwesome6 name="eye" size={24} color={colors.white} />
                   }
                 />
-                {!isPastSelectedDate && (
+                {!isPastSelectedDate && isAdmin && (
                   <CustomButton
                     color="red"
                     titleColor="white"
@@ -212,7 +212,7 @@ export const Calendar = () => {
                     }
                   />
                 )}
-                {!isPastSelectedDate && (
+                {!isPastSelectedDate && isAdmin && (
                   <CustomButton
                     color="red"
                     titleColor="white"

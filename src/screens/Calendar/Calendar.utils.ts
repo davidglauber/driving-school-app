@@ -42,7 +42,10 @@ const getClassesByInstructor = async (): Promise<CalendarItemInterface> => {
   querySnapshot.docs.forEach((docSnap) => {
     const student = docSnap.data() as GenericStudentType;
     student.classes?.forEach((studentClass) => {
-      allClasses.push({ student, studentClass });
+      // include only classes que pertencem a esse instrutor (campo instructor undefined = legado OU igual ao instrutor atual)
+      if (!studentClass.instructor || studentClass.instructor?.path === instructorRef.path) {
+        allClasses.push({ student, studentClass });
+      }
     });
   });
 
