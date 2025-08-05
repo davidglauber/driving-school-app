@@ -6,6 +6,8 @@ export type StudentClass = {
     chosenClass: { label: string; value: string };
     /** Firebase document reference to the instructor assigned to this class */
     instructor: any; // DocumentReference from firebase/firestore
+    /** Human readable instructor name */
+    instructorName?: string;
 }
 export type GenericStudentType = {
     id: number;

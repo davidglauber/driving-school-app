@@ -35,6 +35,7 @@ import {
   getClassesModalities,
   saveNewClasses,
 } from "./AddClasses.utils";
+import { auth } from "@/src/config/firebaseConfig";
 
 dayjs.extend(duration);
 
@@ -128,8 +129,9 @@ export const AddClasses = () => {
     if (isEdit) {
       try {
         const classToUpdate = { ...classes[0], id: classStudent?.id || "" };
-        const instructorRef = doc(getFirestore(), `instructors/${chosenInstructor?.value}`);
-        const classToUpdateWithInstructor = { ...classToUpdate, instructor: instructorRef };
+        const instructorId = chosenInstructor?.value || (auth.currentUser?.uid ?? "");
+        const instructorRef = doc(getFirestore(), `instructors/${instructorId}`);
+        const classToUpdateWithInstructor = { ...classToUpdate, instructor: instructorRef, instructorName: chosenInstructor?.label || "Matriz" };
         await editStudentClass({
           studentId: (student && student.id) || 0,
           classToUpdate: classToUpdateWithInstructor,
@@ -154,8 +156,9 @@ export const AddClasses = () => {
     } else {
       try {
         // attach instructor reference on each class
-        const instructorRef = doc(getFirestore(), `instructors/${chosenInstructor?.value}`);
-        const classesWithInstructor = classes.map((c)=>({ ...c, instructor: instructorRef }));
+        const instructorId = chosenInstructor?.value || (auth.currentUser?.uid ?? "");
+        const instructorRef = doc(getFirestore(), `instructors/${instructorId}`);
+        const classesWithInstructor = classes.map((c)=>({ ...c, instructor: instructorRef, instructorName: chosenInstructor?.label || "Matriz" }));
         await addNewClass(classesWithInstructor);
 
 

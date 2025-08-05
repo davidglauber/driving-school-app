@@ -49,11 +49,6 @@ const loginUser = async (data: FieldValues) => {
       data.password
     );
     
-    console.log("=== LOGIN DEBUG ===");
-    console.log("User UID:", userCredential.user.uid);
-    console.log("User Email:", userCredential.user.email);
-    console.log("==================");
-
     await ensureInstructorAuthUid(userCredential.user);
     
     return {

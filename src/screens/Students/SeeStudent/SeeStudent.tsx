@@ -47,6 +47,7 @@ const renderItem = ({ item, index }: { item: StudentClass; index: number }) => (
       <TextBox>
         {item.classStartTime} - {item.classEndTime}
       </TextBox>
+      <TextBox color="red">{item.instructorName ?? "Matriz"}</TextBox>
     </ViewBox>
   </ViewBox>
 );
