@@ -8,5 +8,9 @@ export interface ICustomDateTimeInput extends Omit<TextInputProps, "value"> {
     control: UseFormReturn["control"];
     mode?: DateTimePickerProps["mode"];
     defaultValue?: string;
+    /**
+     * When true, allows selecting past dates by disabling the default minimumDate restriction.
+     */
+    allowPastDates?: boolean;
 }
   

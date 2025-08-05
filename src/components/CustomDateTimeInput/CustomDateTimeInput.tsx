@@ -95,7 +95,13 @@ export const CustomDateTimeInput = ({
                 onChange(formattedDate);
                 setCurrentValue(formattedDate);
               }}
-              minimumDate={mode === "date" ? new Date() : undefined}
+              minimumDate={
+                props.allowPastDates
+                  ? undefined
+                  : mode === "date"
+                  ? new Date()
+                  : undefined
+              }
               onCancel={hideDatePicker}
             />
           </ViewBox>

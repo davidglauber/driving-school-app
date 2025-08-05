@@ -61,6 +61,12 @@ export const Calendar = () => {
   });
   const { control, setValue } = useForm();
   const selectedDate = useWatch({ control, name: "selectedDate" });
+  // Determine if the selected date is in the past
+  const isPastSelectedDate = useMemo(
+    () =>
+      dayjs(selectedDate, "DD/MM/YYYY").isBefore(dayjs().startOf("day")),
+    [selectedDate]
+  );
 
   const { data: instructorClasses, refetch, isLoading } = useQuery({
     queryKey: ["instructorClasses"],
@@ -187,36 +193,42 @@ export const Calendar = () => {
                 <CustomButton
                   color="red"
                   titleColor="white"
+                  title={isPastSelectedDate ? "Ver Detalhes" : undefined}
+                  style={{ width: isPastSelectedDate ? "100%" : undefined }}
                   onPress={() => handleViewProfile(item.student)}
                   leftIcon={
-                    <FontAwesome6 name="eye" size={24} color={colors.white} />
+                    isPastSelectedDate ? undefined : <FontAwesome6 name="eye" size={24} color={colors.white} />
                   }
                 />
-                <CustomButton
-                  color="red"
-                  titleColor="white"
-                  onPress={() => handleEditClass(item.student, classItem)}
-                  leftIcon={
-                    <FontAwesome6
-                      name="pencil"
-                      size={24}
-                      color={colors.white}
-                    />
-                  }
-                />
-                <CustomButton
-                  color="red"
-                  titleColor="white"
-                  onPress={() => handleDeleteClass(item.student.id, classItem)}
-                  leftIcon={
-                    <FontAwesome6
-                      name="trash-can"
-                      size={24}
-                      color={colors.white}
-                    />
-                  }
-                  isLoading={isPendingDelete}
-                />
+                {!isPastSelectedDate && (
+                  <CustomButton
+                    color="red"
+                    titleColor="white"
+                    onPress={() => handleEditClass(item.student, classItem)}
+                    leftIcon={
+                      <FontAwesome6
+                        name="pencil"
+                        size={24}
+                        color={colors.white}
+                      />
+                    }
+                  />
+                )}
+                {!isPastSelectedDate && (
+                  <CustomButton
+                    color="red"
+                    titleColor="white"
+                    onPress={() => handleDeleteClass(item.student.id, classItem)}
+                    leftIcon={
+                      <FontAwesome6
+                        name="trash-can"
+                        size={24}
+                        color={colors.white}
+                      />
+                    }
+                    isLoading={isPendingDelete}
+                  />
+                )}
               </ViewBox>
             </ViewBox>
           </ViewBox>
@@ -292,6 +304,7 @@ export const Calendar = () => {
           name="selectedDate"
           control={control}
           defaultValue={dayjs(selectedDate).format("DD/MM/YYYY")}
+          allowPastDates
         />
         <CustomButton
           style={{ marginTop: "9%" }}
