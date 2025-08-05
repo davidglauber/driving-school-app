@@ -40,18 +40,15 @@ const isClassScheduledForInstructor = async (newClass: StudentClass, instructorI
         const newClassEndTime = dayjs(`1970-01-01T${newClass.classEndTime}:00`);
 
         const isScheduled = existingClasses.some((existingClass: StudentClass) => {
-            if (existingClass.id === currentClassId) {
-                return false; // Ignore the class being edited
-            }
-            const existingClassDate = existingClass.classDate;
-            if (existingClassDate !== newClassDate) {
-                return false;
-            }
-            const existingClassStartTime = dayjs(`1970-01-01T${existingClass.classStartTime}:00`);
-            const existingClassEndTime = dayjs(`1970-01-01T${existingClass.classEndTime}:00`);
-            return (
-                newClassStartTime.isBefore(existingClassEndTime) && newClassEndTime.isAfter(existingClassStartTime)
-            );
+            if (existingClass.id === currentClassId) return false;
+            // Consider only classes pertencentes a ESSE instrutor (ou legado sem instructor)
+            const belongsToInstructor = !existingClass.instructor || existingClass.instructor?.path === instructorRef.path;
+            if (!belongsToInstructor) return false;
+
+            if (existingClass.classDate !== newClassDate) return false;
+            const existingStart = dayjs(`1970-01-01T${existingClass.classStartTime}:00`);
+            const existingEnd = dayjs(`1970-01-01T${existingClass.classEndTime}:00`);
+            return newClassStartTime.isBefore(existingEnd) && newClassEndTime.isAfter(existingStart);
         });
 
         if (isScheduled) {
