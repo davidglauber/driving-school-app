@@ -54,7 +54,11 @@ const getClassesByInstructor = async (): Promise<CalendarItemInterface> => {
   const allStudentsSnap = await getDocs(studentsRef);
   allStudentsSnap.docs.forEach((docSnap) => {
     const student = docSnap.data() as GenericStudentType;
-    // skip if already added entirely in legacy flow (to avoid duplicates)
+    // se o aluno já pertence a este instrutor (campo instructor) ele já foi tratado acima
+    if ((student as any).instructor?.path === instructorRef.path) {
+      return;
+    }
+
     student.classes?.forEach((studentClass) => {
       if (studentClass.instructor?.path === instructorRef.path) {
         allClasses.push({ student, studentClass });
