@@ -3,7 +3,7 @@ import { colors } from "@/src/theme/colors";
 import { height, width } from "@/src/utils/dimensions";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import { collection, doc, getDoc, getDocs, getFirestore, orderBy, query, updateDoc, where } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
 import { getCurrentInstructorRef } from "../Students/Students.utils";
 import { Linking, Platform } from "react-native";
 import { GenericStudentType, StudentClass } from "../Students/Students.interface";
@@ -34,14 +34,28 @@ const getClassesByInstructor = async (): Promise<CalendarItemInterface> => {
   if (!instructorRef) return {} as CalendarItemInterface;
   const studentsRef = collection(firestore, "students");
 
+  // 1. students owned by this instructor (legacy flow)
   const q = query(studentsRef, where("instructor", "==", instructorRef));
   const querySnapshot = await getDocs(q);
-  const allClasses: { student: GenericStudentType, studentClass: StudentClass }[] = [];
+  const allClasses: { student: GenericStudentType; studentClass: StudentClass }[] = [];
 
-  querySnapshot.docs.forEach(doc => {
-    const student = doc.data() as GenericStudentType;
-    student.classes?.forEach(studentClass => {
+  querySnapshot.docs.forEach((docSnap) => {
+    const student = docSnap.data() as GenericStudentType;
+    student.classes?.forEach((studentClass) => {
       allClasses.push({ student, studentClass });
+    });
+  });
+
+  // 2. extra classes assigned via class-level instructor field even if student belongs to another instructor
+  // we fetch all students that were NOT returned above (or even those), then filter classes by instructor field
+  const allStudentsSnap = await getDocs(studentsRef);
+  allStudentsSnap.docs.forEach((docSnap) => {
+    const student = docSnap.data() as GenericStudentType;
+    // skip if already added entirely in legacy flow (to avoid duplicates)
+    student.classes?.forEach((studentClass) => {
+      if (studentClass.instructor?.path === instructorRef.path) {
+        allClasses.push({ student, studentClass });
+      }
     });
   });
 

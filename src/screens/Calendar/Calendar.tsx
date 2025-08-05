@@ -157,7 +157,6 @@ export const Calendar = () => {
                 <TextBox variant="textCardCalendar">{`${classItem.classStartTime} - ${classItem.classEndTime}`}</TextBox>
               </ViewBox>
             </ViewBox>
-            {isAdmin && (
               <TouchableOpacityBox
                 flexDirection="row"
                 columnGap="xs"
@@ -172,7 +171,6 @@ export const Calendar = () => {
                   </TextBox>
                 </ViewBox>
               </TouchableOpacityBox>
-            )}
           
             <CustomDivider />
 

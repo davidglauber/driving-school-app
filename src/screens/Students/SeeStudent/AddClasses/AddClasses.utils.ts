@@ -13,10 +13,12 @@ const getClassesModalities = async () => {
     return classesModalities;
 };
 
-const isClassScheduled = async (newClass: StudentClass, currentClassId?: string) => {
+/**
+ * Check if a class is scheduled for a specific instructor
+ */
+const isClassScheduledForInstructor = async (newClass: StudentClass, instructorId: string, currentClassId?: string) => {
     const firestore = getFirestore();
-    const currentUser = auth.currentUser;
-    const instructorRef = doc(firestore, `instructors/${currentUser?.uid}`);
+    const instructorRef = doc(firestore, `instructors/${instructorId}`);
     const studentsRef = collection(firestore, "students");
 
     const q = query(
@@ -60,13 +62,28 @@ const isClassScheduled = async (newClass: StudentClass, currentClassId?: string)
     return null;
 };
 
-const saveNewClasses = async (studentId: number | '', newClasses: StudentClass[]) => {
+/**
+ * Check if a class is scheduled for the current instructor (for backward compatibility)
+ */
+const isClassScheduled = async (newClass: StudentClass, currentClassId?: string) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser?.uid) return null;
+    return isClassScheduledForInstructor(newClass, currentUser.uid, currentClassId);
+};
+
+const saveNewClasses = async (studentId: number | '', newClasses: StudentClass[], targetInstructorId?: string) => {
     const firestore = getFirestore();
     const studentDocRef = doc(firestore, `students/${studentId}`);
 
+    // Determine which instructor to check for conflicts
+    const instructorToCheck = targetInstructorId || auth.currentUser?.uid;
+    if (!instructorToCheck) {
+        throw new Error("Instructor ID is required");
+    }
+
     const validClasses = [];
     for (const newClass of newClasses) {
-        const scheduledStudentName = await isClassScheduled(newClass);
+        const scheduledStudentName = await isClassScheduledForInstructor(newClass, instructorToCheck);
         if (scheduledStudentName) {
             throw new Error(`Você já tem aula agendada entre ${newClass.classStartTime} e ${newClass.classEndTime} com ${scheduledStudentName}`);
         } else {
@@ -81,14 +98,20 @@ const saveNewClasses = async (studentId: number | '', newClasses: StudentClass[]
     }
 };
 
-const editSpecificClass = async (studentId: number, classToUpdate: StudentClass): Promise<void> => {
+const editSpecificClass = async (studentId: number, classToUpdate: StudentClass, targetInstructorId?: string): Promise<void> => {
     const firestore = getFirestore();
     const studentRef = doc(firestore, `students/${studentId}`);
     const studentDoc = await getDoc(studentRef);
 
     const studentData = studentDoc.data() as GenericStudentType;
 
-    const scheduledStudentName = await isClassScheduled(classToUpdate, classToUpdate.id);
+    // Determine which instructor to check for conflicts
+    const instructorToCheck = targetInstructorId || auth.currentUser?.uid;
+    if (!instructorToCheck) {
+        throw new Error("Instructor ID is required");
+    }
+
+    const scheduledStudentName = await isClassScheduledForInstructor(classToUpdate, instructorToCheck, classToUpdate.id);
     if (scheduledStudentName) {
         throw new Error(`Você já tem aula agendada entre ${classToUpdate.classStartTime} e ${classToUpdate.classEndTime} com ${scheduledStudentName}`);
     }
@@ -132,4 +155,4 @@ const classDurationMin = (
     return { isClassDurationFifteenMin, classes }
 };
 
-export { classDurationMin, getClassesModalities, saveNewClasses, editSpecificClass };
+export { classDurationMin, getClassesModalities, saveNewClasses, editSpecificClass, isClassScheduledForInstructor };

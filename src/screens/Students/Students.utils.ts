@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, getDoc, getFirestore, query, where, deleteDoc, updateDoc, runTransaction, DocumentReference } from "firebase/firestore";
+import { collection, doc, getDocs, getDoc, getFirestore, query, where, deleteDoc, updateDoc, runTransaction, DocumentReference, setDoc } from "firebase/firestore";
 import dayjs from "dayjs";
 import { GenericStudentType, StudentClass } from "./Students.interface";
 import { auth } from "@/src/config/firebaseConfig";
@@ -165,4 +165,30 @@ const moveStudentToInstructor = async (
     });
 };
 
-export { getStudentsByInstructor, checkIfInstructorIsAdmin, deleteStudentById, getInstructorsByFranchise, updateStudentInstructor, getCurrentInstructorRef, moveStudentToInstructor };
+/**
+ * Creates a COPY of a student assigned to a different instructor and appends the given classes.
+ */
+const copyStudentToInstructor = async (
+    student: GenericStudentType,
+    targetInstructorId: string,
+    classes: StudentClass[],
+) => {
+    const firestore = getFirestore();
+    const studentsRef = collection(firestore, "students");
+    const instructorRef = doc(firestore, `instructors/${targetInstructorId}`);
+
+    // Create a new Firestore document (auto-generated id)
+    const newStudentDoc = doc(studentsRef);
+
+    // Generate a numeric id to avoid collisions (timestamp based)
+    const newStudentId = Date.now();
+
+    await setDoc(newStudentDoc, {
+        ...student,
+        id: newStudentId,
+        instructor: instructorRef,
+        classes: classes,
+    });
+};
+
+export { getStudentsByInstructor, checkIfInstructorIsAdmin, deleteStudentById, getInstructorsByFranchise, updateStudentInstructor, getCurrentInstructorRef, moveStudentToInstructor, copyStudentToInstructor };

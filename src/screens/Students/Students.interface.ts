@@ -3,7 +3,9 @@ export type StudentClass = {
     classStartTime: string;
     classEndTime: string;
     classDate: string;
-    chosenClass: {label: string, value: string};
+    chosenClass: { label: string; value: string };
+    /** Firebase document reference to the instructor assigned to this class */
+    instructor: any; // DocumentReference from firebase/firestore
 }
 export type GenericStudentType = {
     id: number;
