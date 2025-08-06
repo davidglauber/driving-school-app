@@ -1,15 +1,13 @@
 import { CustomButton } from "@/src/components/CustomButton/CustomButton";
 import { CustomTextInput } from "@/src/components/CustomTextInput/CustomTextInput";
-import { RootStackParamList } from "@/src/routes/Stack";
 import { loginSchema } from "@/src/schemas/forms";
-import { useNavigationIsReady } from "@/src/store/useNavigationIsReady";
 import { height, width } from "@/src/utils/dimensions";
 import { ImageBox } from "@/src/utils/restyle/ImageBox";
 import { SafeAreaViewBox } from "@/src/utils/restyle/SafeAreaView";
 import { ViewBox } from "@/src/utils/restyle/ViewBox";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { NavigationProp, useNavigation } from "@react-navigation/native";
+
 import { useMutation } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
@@ -23,8 +21,6 @@ import Toast from "react-native-toast-message";
 import { loginUser } from "./Login.utils";
 
 export const Login = () => {
-  const { isReady } = useNavigationIsReady();
-  const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
   const [showPassword, setShowPassword] = useState(false);
   const { control, handleSubmit } = useForm({
     resolver: zodResolver(loginSchema),
@@ -42,7 +38,6 @@ export const Login = () => {
         text1: "Sucesso!",
         text2: `Bem-vindo(a), ${result?.user?.email}`,
       });
-      if (isReady) navigate("Tabs");
     } else {
       Toast.show({
         type: "customErrorToast",
