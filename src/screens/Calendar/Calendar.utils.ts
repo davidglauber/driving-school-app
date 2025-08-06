@@ -49,16 +49,11 @@ const getClassesByInstructor = async (): Promise<CalendarItemInterface> => {
     });
   });
 
-  // 2. extra classes assigned via class-level instructor field even if student belongs to another instructor
-  // we fetch all students that were NOT returned above (or even those), then filter classes by instructor field
-  const allStudentsSnap = await getDocs(studentsRef);
-  allStudentsSnap.docs.forEach((docSnap) => {
+  // 2. classes atribuídas via field instructorsUids (nova abordagem) 
+  const qExtra = query(studentsRef, where("instructorsUids", "array-contains", instructorRef.id));
+  const extraSnap = await getDocs(qExtra);
+  extraSnap.docs.forEach((docSnap) => {
     const student = docSnap.data() as GenericStudentType;
-    // se o aluno já pertence a este instrutor (campo instructor) ele já foi tratado acima
-    if ((student as any).instructor?.path === instructorRef.path) {
-      return;
-    }
-
     student.classes?.forEach((studentClass) => {
       if (studentClass.instructor?.path === instructorRef.path) {
         allClasses.push({ student, studentClass });

@@ -90,7 +90,8 @@ const saveNewClasses = async (studentId: number | '', newClasses: StudentClass[]
 
     if (validClasses.length > 0) {
         await updateDoc(studentDocRef, {
-            classes: arrayUnion(...validClasses)
+            classes: arrayUnion(...validClasses),
+            instructorsUids: arrayUnion(instructorToCheck)
         });
     }
 };
@@ -120,7 +121,7 @@ const editSpecificClass = async (studentId: number, classToUpdate: StudentClass,
         return studentClass;
     });
 
-    await updateDoc(studentRef, { classes: updatedClasses });
+    await updateDoc(studentRef, { classes: updatedClasses, instructorsUids: arrayUnion(instructorToCheck) });
 };
 
 const classDurationMin = (

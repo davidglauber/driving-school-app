@@ -49,22 +49,13 @@ const getStudentsByInstructor = async () => {
         const students = querySnapshot.docs.map(doc => ({ ...doc.data() as GenericStudentType }));
         return students;
     } else {
-        // Regular instructor sees only students with classes assigned to them
-        const allStudentsSnap = await getDocs(studentsRef);
-        const studentsWithClasses: GenericStudentType[] = [];
-        
-        allStudentsSnap.docs.forEach((docSnap) => {
-            const student = docSnap.data() as GenericStudentType;
-            const hasClassesForInstructor = student.classes?.some(
-                (studentClass) => studentClass.instructor?.path === instructorRef.path
-            );
-            
-            if (hasClassesForInstructor) {
-                studentsWithClasses.push({ ...student });
-            }
-        });
-        
-        return studentsWithClasses;
+        // Instrutor comum: alunos que contenham seu uid no array ou atribuição direta
+        const q1 = query(studentsRef, where("instructor", "==", instructorRef));
+        const q2 = query(studentsRef, where("instructorsUids", "array-contains", instructorRef.id));
+        const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+        const merged: Record<string, GenericStudentType> = {};
+        [...snap1.docs, ...snap2.docs].forEach((d)=>{ merged[d.id]= d.data() as GenericStudentType });
+        return Object.values(merged);
     }
 };
 
