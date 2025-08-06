@@ -54,8 +54,25 @@ const getStudentsByInstructor = async () => {
         const q2 = query(studentsRef, where("instructorsUids", "array-contains", instructorRef.id));
         const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
         const merged: Record<string, GenericStudentType> = {};
-        [...snap1.docs, ...snap2.docs].forEach((d)=>{ merged[d.id]= d.data() as GenericStudentType });
-        return Object.values(merged);
+        [...snap1.docs, ...snap2.docs].forEach((d) => {
+            merged[d.id] = d.data() as GenericStudentType;
+        });
+
+        // Exibe apenas alunos que ainda possuam pelo menos uma aula deste instrutor
+        const filtered = Object.values(merged).filter((student) => {
+            if (!student.classes || student.classes.length === 0) return false;
+
+            return student.classes.some((studentClass) => {
+                // Aula sem campo "instructor" = legado, considerada do instrutor se o próprio aluno pertence a ele
+                if (!studentClass.instructor) {
+                    return student.instructor?.path === instructorRef.path;
+                }
+                // Nova abordagem: compara o caminho do DocumentReference
+                return studentClass.instructor?.path === instructorRef.path;
+            });
+        });
+
+        return filtered;
     }
 };
 

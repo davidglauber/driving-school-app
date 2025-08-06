@@ -188,7 +188,13 @@ export const SeeStudent = () => {
 
   const handleDeleteClass = async (classToDelete: StudentClass) => {
     if (!student?.id) return;
-    await deleteStudentClass({ studentId: student.id, classToDelete });
+    // Convert date to normalized format (YYYY-MM-DD) to match backend comparison logic
+    const normalizedClass: StudentClass = {
+      ...classToDelete,
+      classDate: dayjs(classToDelete.classDate, "DD/MM/YYYY").format("YYYY-MM-DD"),
+    };
+
+    await deleteStudentClass({ studentId: student.id, classToDelete: normalizedClass });
     // Update local store to reflect deletion immediately
     if (student.classes) {
       const updatedClasses = student.classes.filter(
