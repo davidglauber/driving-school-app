@@ -1,5 +1,8 @@
 import { collection, doc, getDocs, getDoc, getFirestore, query, where, deleteDoc, updateDoc, runTransaction, DocumentReference, setDoc } from "firebase/firestore";
 import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+dayjs.extend(customParseFormat);
 import { GenericStudentType, StudentClass } from "./Students.interface";
 import { auth } from "@/src/config/firebaseConfig";
 
@@ -134,12 +137,16 @@ const isClassScheduledForInstructor = async (
     const firestore = getFirestore();
     const studentsRef = collection(firestore, "students");
 
-    const q = query(studentsRef, where("instructor", "==", instructorRef));
-    const querySnapshot = await getDocs(q);
+    // Students cujo campo principal aponta para o instrutor
+    const q1 = query(studentsRef, where("instructor", "==", instructorRef));
+    // Students que possuem o instrutor no array auxiliar
+    const q2 = query(studentsRef, where("instructorsUids", "array-contains", instructorRef.id));
 
-    if (querySnapshot.empty) return null;
+    const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+    const mergedDocs = [...snap1.docs, ...snap2.docs];
+    if (mergedDocs.length === 0) return null;
 
-    for (const studentDoc of querySnapshot.docs) {
+    for (const studentDoc of mergedDocs) {
         const studentData = studentDoc.data();
         const existingClasses = studentData.classes || [];
         const newClassDate = newClass.classDate;
@@ -148,7 +155,9 @@ const isClassScheduledForInstructor = async (
 
         const collision = existingClasses.some((existing: StudentClass) => {
             if (existing.id === currentClassId) return false;
-            if (existing.classDate !== newClassDate) return false;
+                        const existingDateFormatted = dayjs(existing.classDate, ["DD/MM/YYYY", "YYYY-MM-DD"]).format("YYYY-MM-DD");
+            const newDateFormatted = dayjs(newClassDate, ["DD/MM/YYYY", "YYYY-MM-DD"]).format("YYYY-MM-DD");
+            if (existingDateFormatted !== newDateFormatted) return false;
             const existingStart = dayjs(`1970-01-01T${existing.classStartTime}:00`);
             const existingEnd = dayjs(`1970-01-01T${existing.classEndTime}:00`);
             return newClassStart.isBefore(existingEnd) && newClassEnd.isAfter(existingStart);

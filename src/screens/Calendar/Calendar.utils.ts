@@ -61,7 +61,18 @@ const getClassesByInstructor = async (): Promise<CalendarItemInterface> => {
     });
   });
 
-  allClasses.sort((a, b) => {
+  // Remove possible duplicates coming from the two queries above
+  const uniqueMap = new Map<string, { student: GenericStudentType; studentClass: StudentClass }>();
+  allClasses.forEach(({ student, studentClass }) => {
+    const key = `${student.id}_${studentClass.id ?? studentClass.classStartTime}_${studentClass.classDate}`;
+    if (!uniqueMap.has(key)) {
+      uniqueMap.set(key, { student, studentClass });
+    }
+  });
+  const uniqueClasses = Array.from(uniqueMap.values());
+
+  // Sort by start time
+  uniqueClasses.sort((a, b) => {
     const startTimeA = dayjs(a.studentClass.classStartTime, "HH:mm");
     const startTimeB = dayjs(b.studentClass.classStartTime, "HH:mm");
     return startTimeA.isBefore(startTimeB) ? -1 : 1;
@@ -69,7 +80,7 @@ const getClassesByInstructor = async (): Promise<CalendarItemInterface> => {
 
   const calendarItems: CalendarItemInterface = {};
 
-  allClasses.forEach(({ student, studentClass }) => {
+  uniqueClasses.forEach(({ student, studentClass }) => {
     const { classDate, ...restClass } = studentClass;
     const formattedDate = dayjs(classDate, "DD/MM/YYYY").format("YYYY-MM-DD");
     if (!calendarItems[formattedDate]) {
