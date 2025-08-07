@@ -83,11 +83,15 @@ const saveNewClasses = async (studentId: number | '', newClasses: StudentClass[]
         throw new Error("Instructor ID is required");
     }
 
+    // Get instructor name for error message
+    const instructorDoc = await getDoc(doc(firestore, `instructors/${instructorToCheck}`));
+    const instructorName = instructorDoc.exists() ? (instructorDoc.data() as any).name : "Instrutor";
+
     const validClasses = [];
     for (const newClass of newClasses) {
         const scheduledStudentName = await isClassScheduledForInstructor(newClass, instructorToCheck);
         if (scheduledStudentName) {
-            throw new Error(`Você já tem aula agendada entre ${newClass.classStartTime} e ${newClass.classEndTime} com ${scheduledStudentName}`);
+            throw new Error(`${instructorName} já tem aula agendada entre ${newClass.classStartTime} e ${newClass.classEndTime} com ${scheduledStudentName}`);
         } else {
             validClasses.push({ ...newClass, id: uuidv4() });
         }
@@ -114,9 +118,13 @@ const editSpecificClass = async (studentId: number, classToUpdate: StudentClass,
         throw new Error("Instructor ID is required");
     }
 
+    // Get instructor name for error message
+    const instructorDoc = await getDoc(doc(firestore, `instructors/${instructorToCheck}`));
+    const instructorName = instructorDoc.exists() ? (instructorDoc.data() as any).name : "Instrutor";
+
     const scheduledStudentName = await isClassScheduledForInstructor(classToUpdate, instructorToCheck, classToUpdate.id);
     if (scheduledStudentName) {
-        throw new Error(`Você já tem aula agendada entre ${classToUpdate.classStartTime} e ${classToUpdate.classEndTime} com ${scheduledStudentName}`);
+        throw new Error(`${instructorName} já tem aula agendada entre ${classToUpdate.classStartTime} e ${classToUpdate.classEndTime} com ${scheduledStudentName}`);
     }
 
     const updatedClasses = studentData.classes?.map((studentClass) => {
