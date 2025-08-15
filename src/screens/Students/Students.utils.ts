@@ -276,7 +276,7 @@ export type StudentsPage = {
  * This function implements a simple but effective pagination strategy
  * that avoids duplicates by using document references as cursors.
  */
-export const getStudentsByInstructorPaginated = async (
+const getStudentsByInstructorPaginated = async (
     { pageSize, cursors }: { pageSize: number; cursors?: StudentsPageCursors }
 ): Promise<StudentsPage> => {
     const firestore = getFirestore();

@@ -318,7 +318,6 @@ export const Students = () => {
                 data={filteredStudents}
                 renderItem={renderItem}
                 contentContainerStyle={{ paddingBottom: height * 0.1 }}
-                showsVerticalScrollIndicator={false}
                 keyExtractor={(item) => {
                   // Ensure truly unique keys to prevent React warnings
                   const key = String(item.id ?? item.name ?? Math.random());
