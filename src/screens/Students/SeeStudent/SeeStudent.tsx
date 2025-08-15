@@ -152,6 +152,8 @@ export const SeeStudent = () => {
   const { data: isAdmin } = useQuery({
     queryKey: ["isAdmin", auth.currentUser?.uid],
     queryFn: () => checkIfInstructorIsAdmin(),
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
   });
 
   /* ------------------------------------------------------------------ */

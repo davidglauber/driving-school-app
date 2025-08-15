@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, getDoc, getFirestore, query, where, deleteDoc, updateDoc, runTransaction, DocumentReference, setDoc } from "firebase/firestore";
+import { collection, doc, getDocs, getDoc, getFirestore, query, where, deleteDoc, updateDoc, runTransaction, DocumentReference, setDoc, orderBy, limit, startAfter, QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 
@@ -10,19 +10,33 @@ import { auth } from "@/src/config/firebaseConfig";
 const getCurrentInstructorRef = async () => {
     const firestore = getFirestore();
     const currentUser = auth.currentUser;
-    if (!currentUser) return null;
+    if (!currentUser) {
+        console.log("No current user found");
+        return null;
+    }
+
+    console.log("Current user UID:", currentUser.uid);
 
     // 1. Try doc with the same uid
     const directRef = doc(firestore, `instructors/${currentUser.uid}`);
     const directSnap = await getDoc(directRef);
-    if (directSnap.exists()) return directRef;
+    if (directSnap.exists()) {
+        console.log("Found instructor doc directly");
+        return directRef;
+    }
+
+    console.log("Direct instructor doc not found, trying authUid query");
 
     // 2. Fallback – query by authUid field
     const instructorsRef = collection(firestore, "instructors");
     const q = query(instructorsRef, where("authUid", "==", currentUser.uid));
     const qs = await getDocs(q);
-    if (!qs.empty) return qs.docs[0].ref;
+    if (!qs.empty) {
+        console.log("Found instructor doc via authUid query");
+        return qs.docs[0].ref;
+    }
 
+    console.log("No instructor doc found via any method");
     return null;
 };
 
@@ -240,4 +254,125 @@ const copyStudentToInstructor = async (
     });
 };
 
-export { getStudentsByInstructor, checkIfInstructorIsAdmin, deleteStudentById, getInstructorsByFranchise, updateStudentInstructor, getCurrentInstructorRef, moveStudentToInstructor, copyStudentToInstructor };
+export { getStudentsByInstructor, checkIfInstructorIsAdmin, deleteStudentById, getInstructorsByFranchise, updateStudentInstructor, getCurrentInstructorRef, moveStudentToInstructor, copyStudentToInstructor, getStudentsByInstructorPaginated };
+
+/**
+ * Cursor types for paginated fetch
+ */
+export type StudentsPageCursors = {
+    /** Firestore cursors (typed as any to avoid SDK generic mismatches across versions) */
+    primary?: any | null;
+    secondary?: any | null;
+};
+
+export type StudentsPage = {
+    students: GenericStudentType[];
+    cursors: StudentsPageCursors;
+    exhausted: boolean; // true when no more documents in both queries
+};
+
+/**
+ * Paginated fetch for students belonging to the current instructor.
+ * This function implements a simple but effective pagination strategy
+ * that avoids duplicates by using document references as cursors.
+ */
+export const getStudentsByInstructorPaginated = async (
+    { pageSize, cursors }: { pageSize: number; cursors?: StudentsPageCursors }
+): Promise<StudentsPage> => {
+    const firestore = getFirestore();
+    const instructorRef = await getCurrentInstructorRef();
+    
+    if (!instructorRef) {
+        console.log("❌ No instructor ref found - user may not be logged in");
+        return { students: [], cursors: { primary: null, secondary: null }, exhausted: true };
+    }
+
+    console.log("✅ Instructor ref found:", instructorRef.path);
+    const studentsRef = collection(firestore, "students");
+
+    try {
+        // Simple strategy: Use only the primary query with document reference cursor
+        // This ensures consistent pagination without duplicates
+        
+        let q = query(
+            studentsRef, 
+            where("instructor", "==", instructorRef), 
+            limit(pageSize)
+        );
+        
+        if (cursors?.primary) {
+            console.log("📄 Using cursor for next page...");
+            q = query(
+                studentsRef, 
+                where("instructor", "==", instructorRef), 
+                startAfter(cursors.primary), 
+                limit(pageSize)
+            );
+        }
+        
+        const snapshot = await getDocs(q);
+        console.log(`📊 Query returned ${snapshot.docs.length} students`);
+        
+        if (snapshot.docs.length === 0) {
+            console.log("📭 No more students found");
+            return { 
+                students: [], 
+                cursors: { primary: null, secondary: null }, 
+                exhausted: true 
+            };
+        }
+        
+        // Extract students and ensure they have unique IDs
+        const students = snapshot.docs.map(doc => {
+            const data = doc.data() as GenericStudentType;
+            // Ensure the document ID is set
+            if (!data.id) {
+                data.id = parseInt(doc.id) || Date.now();
+            }
+            return data;
+        });
+        
+        // Sort by name for consistent display
+        students.sort((a, b) => a.name.localeCompare(b.name));
+        
+        // Set cursor for next page (use the last document as cursor)
+        const nextCursor = snapshot.docs[snapshot.docs.length - 1];
+        const exhausted = snapshot.docs.length < pageSize;
+        
+        console.log(`✅ Successfully fetched ${students.length} students, exhausted: ${exhausted}`);
+        
+        return { 
+            students, 
+            cursors: { primary: nextCursor, secondary: null }, 
+            exhausted 
+        };
+        
+    } catch (error) {
+        console.error("❌ Error in paginated fetch:", error);
+        
+        // Fallback: try the original function
+        console.log("🔄 Falling back to original getStudentsByInstructor function...");
+        try {
+            const fallbackStudents = await getStudentsByInstructor();
+            console.log(`📊 Fallback returned ${fallbackStudents.length} students`);
+            
+            // Deduplicate fallback results by ID
+            const uniqueFallback = fallbackStudents.filter((student, index, self) => 
+                index === self.findIndex(s => s.id === student.id)
+            );
+            
+            return {
+                students: uniqueFallback.slice(0, pageSize),
+                cursors: { primary: null, secondary: null },
+                exhausted: uniqueFallback.length <= pageSize
+            };
+        } catch (fallbackError) {
+            console.error("❌ Fallback also failed:", fallbackError);
+            return {
+                students: [],
+                cursors: { primary: null, secondary: null },
+                exhausted: true
+            };
+        }
+    }
+};

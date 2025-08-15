@@ -83,15 +83,14 @@ const saveNewClasses = async (studentId: number | '', newClasses: StudentClass[]
         throw new Error("Instructor ID is required");
     }
 
-    // Get instructor name for error message
-    const instructorDoc = await getDoc(doc(firestore, `instructors/${instructorToCheck}`));
-    const instructorName = instructorDoc.exists() ? (instructorDoc.data() as any).name : "Instrutor";
+    // We no longer read instructor name here to avoid extra reads.
+    // The UI can pass the name and attach it to the class if needed.
 
     const validClasses = [];
     for (const newClass of newClasses) {
         const scheduledStudentName = await isClassScheduledForInstructor(newClass, instructorToCheck);
         if (scheduledStudentName) {
-            throw new Error(`${instructorName} já tem aula agendada entre ${newClass.classStartTime} e ${newClass.classEndTime} com ${scheduledStudentName}`);
+            throw new Error(`Este instrutor já tem aula agendada entre ${newClass.classStartTime} e ${newClass.classEndTime} com ${scheduledStudentName}`);
         } else {
             validClasses.push({ ...newClass, id: uuidv4() });
         }
@@ -118,13 +117,11 @@ const editSpecificClass = async (studentId: number, classToUpdate: StudentClass,
         throw new Error("Instructor ID is required");
     }
 
-    // Get instructor name for error message
-    const instructorDoc = await getDoc(doc(firestore, `instructors/${instructorToCheck}`));
-    const instructorName = instructorDoc.exists() ? (instructorDoc.data() as any).name : "Instrutor";
+    // Avoid extra read for instructor name; keep generic message
 
     const scheduledStudentName = await isClassScheduledForInstructor(classToUpdate, instructorToCheck, classToUpdate.id);
     if (scheduledStudentName) {
-        throw new Error(`${instructorName} já tem aula agendada entre ${classToUpdate.classStartTime} e ${classToUpdate.classEndTime} com ${scheduledStudentName}`);
+        throw new Error(`Este instrutor já tem aula agendada entre ${classToUpdate.classStartTime} e ${classToUpdate.classEndTime} com ${scheduledStudentName}`);
     }
 
     const updatedClasses = studentData.classes?.map((studentClass) => {

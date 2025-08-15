@@ -57,16 +57,22 @@ export const AddClasses = () => {
       const { data: isAdmin } = useQuery({
       queryKey: ["isAdmin"],
       queryFn: () => checkIfInstructorIsAdmin(),
+      staleTime: 1000 * 60 * 5,
+      refetchOnWindowFocus: false,
     });
     const { data: classesModalities } = useQuery({
     queryKey: ["classesModalities"],
     queryFn: () => getClassesModalities(),
+    staleTime: 1000 * 60 * 10,
+    refetchOnWindowFocus: false,
   });
 
   const { data: instructors } = useQuery({
     queryKey: ["instructorsByFranchise"],
     queryFn: () => getInstructorsByFranchise(),
     enabled: isAdmin,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
   });
   const { mutateAsync: addNewClass, isPending: isPendingCreate } = useMutation({
     mutationKey: ["addNewClass"],

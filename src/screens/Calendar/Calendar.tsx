@@ -71,6 +71,8 @@ export const Calendar = () => {
   const { data: instructorClasses, refetch, isLoading } = useQuery({
     queryKey: ["instructorClasses"],
     queryFn: () => getClassesByInstructor(),
+    staleTime: 1000 * 60, // cache for 1 minute to reduce reads when revisiting
+    refetchOnWindowFocus: false,
   });
 
   const { mutateAsync: deleteStudentClass, isPending: isPendingDelete } =
@@ -93,9 +95,10 @@ export const Calendar = () => {
     setValue("selectedDate", dayjs().format("DD/MM/YYYY"));
   }, [setValue]);
 
+  // Avoid redundant reads: react-query will keep data fresh; explicit refetch on focus removed
   useFocusEffect(
     useCallback(() => {
-      refetch();
+      return () => {};
     }, [isFocused])
   );
 
