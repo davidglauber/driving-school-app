@@ -4,6 +4,7 @@ import { NewStudent } from "@/src/screens/Students/NewStudent/NewStudent";
 import { AddClasses } from "@/src/screens/Students/SeeStudent/AddClasses/AddClasses";
 import { SeeStudent } from "@/src/screens/Students/SeeStudent/SeeStudent";
 import { useEditModeStore } from "@/src/store/useEditModeStore";
+import { SeePsychologist } from "@/src/screens/Psychologists/SeePsychologist";
 import { useNavigationIsReady } from "@/src/store/useNavigationIsReady";
 import { colors } from "@/src/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,6 +22,7 @@ export type RootStackParamList = {
   NewStudent: { isEdit?: boolean };
   SeeStudent: undefined;
   AddClasses: { isEdit?: boolean };
+  SeePsychologist: { id: string };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -116,6 +118,30 @@ const MainNavigator = () => {
           })}
         />
         <Stack.Screen name="Tabs" component={Tabs} />
+        <Stack.Screen
+          name="SeePsychologist"
+          component={SeePsychologist}
+          options={({ navigation }) => ({
+            headerShown: true,
+            title: "Detalhes do Psicólogo(a)",
+            headerTintColor: colors.red,
+            headerTitleStyle: {
+              fontWeight: "bold",
+              fontFamily: "SFBold",
+              fontSize: 20,
+            },
+            headerLeft: () => (
+              <TouchableOpacity onPress={() => navigation.goBack()}>
+                <Ionicons
+                  name="arrow-back"
+                  size={24}
+                  color={colors.red}
+                  style={{ marginLeft: 15 }}
+                />
+              </TouchableOpacity>
+            ),
+          })}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

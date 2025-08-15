@@ -4,6 +4,7 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 
 dayjs.extend(customParseFormat);
 import { arrayUnion, collection, doc, getDoc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
+import { getInstructorRefByAuthUid } from "../../Students.utils";
 import { GenericStudentType, StudentClass } from "../../Students.interface";
 import { v4 as uuidv4 } from 'uuid';
 
@@ -19,15 +20,15 @@ const getClassesModalities = async () => {
 /**
  * Check if a class is scheduled for a specific instructor
  */
-const isClassScheduledForInstructor = async (newClass: StudentClass, instructorId: string, currentClassId?: string) => {
+const isClassScheduledForInstructor = async (newClass: StudentClass, instructorAuthUid: string, currentClassId?: string) => {
     const firestore = getFirestore();
-    const instructorRef = doc(firestore, `instructors/${instructorId}`);
+    const instructorRef = await getInstructorRefByAuthUid(instructorAuthUid);
     const studentsRef = collection(firestore, "students");
 
     // Students cujo campo principal aponta para o instrutor
     const q1 = query(studentsRef, where("instructor", "==", instructorRef));
-    // Students que possuem o instrutor no array auxiliar
-    const q2 = query(studentsRef, where("instructorsUids", "array-contains", instructorRef.id));
+    // Students que possuem o instrutor no array auxiliar (armazenamos authUid)
+    const q2 = query(studentsRef, where("instructorsUids", "array-contains", instructorAuthUid));
 
     const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
     const mergedDocs = [...snap1.docs, ...snap2.docs];

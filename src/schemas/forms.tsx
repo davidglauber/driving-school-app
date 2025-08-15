@@ -18,6 +18,14 @@ export const registerStudentSchema = z.object({
   classesAcquired: z.string().min(1, "Campo obrigatório"),
   psicolocicalEvaluationRequired: z.string().min(1, "Campo obrigatório"),
   psicolocicalEvaluationAcquired: z.string().min(1, "Campo obrigatório"),
+  // Optional psychologist selection: object with label/value like our pickers
+  chosenPsychologist: z
+    .object({
+      label: z.string(),
+      value: z.string(),
+    })
+    .optional()
+    .nullable(),
 });
 
 export const addClassSchema = z.object({

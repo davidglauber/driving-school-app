@@ -23,6 +23,7 @@ import {
 import { useMutation, useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { doc, getFirestore } from "firebase/firestore";
+import { getInstructorRefByAuthUid } from "../../Students.utils";
 import duration from "dayjs/plugin/duration";
 import React, { useEffect } from "react";
 import { FieldValues, SubmitHandler, useForm, useWatch } from "react-hook-form";
@@ -135,8 +136,8 @@ export const AddClasses = () => {
     if (isEdit) {
       try {
         const classToUpdate = { ...classes[0], id: classStudent?.id || "" };
-        const instructorId = chosenInstructor?.value || (auth.currentUser?.uid ?? "");
-        const instructorRef = doc(getFirestore(), `instructors/${instructorId}`);
+        const instructorAuthUid = chosenInstructor?.value || (auth.currentUser?.uid ?? "");
+        const instructorRef = await getInstructorRefByAuthUid(instructorAuthUid);
         const classToUpdateWithInstructor = { ...classToUpdate, instructor: instructorRef, instructorName: chosenInstructor?.label || "Matriz" };
         await editStudentClass({
           studentId: (student && student.id) || 0,
@@ -162,8 +163,8 @@ export const AddClasses = () => {
     } else {
       try {
         // attach instructor reference on each class
-        const instructorId = chosenInstructor?.value || (auth.currentUser?.uid ?? "");
-        const instructorRef = doc(getFirestore(), `instructors/${instructorId}`);
+        const instructorAuthUid = chosenInstructor?.value || (auth.currentUser?.uid ?? "");
+        const instructorRef = await getInstructorRefByAuthUid(instructorAuthUid);
         const classesWithInstructor = classes.map((c)=>({ ...c, instructor: instructorRef, instructorName: chosenInstructor?.label || "Matriz" }));
         await addNewClass(classesWithInstructor);
 

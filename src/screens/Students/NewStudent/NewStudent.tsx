@@ -16,6 +16,9 @@ import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { KeyboardAvoidingView, Platform } from "react-native";
 import Toast from "react-native-toast-message";
 import { GenericStudentType } from "../Students.interface";
+import { useQuery } from "@tanstack/react-query";
+import { CustomPickerInput } from "@/src/components/CustomPickerInput/CustomPickerInput";
+import { getPsychologistsByFranchise } from "../Students.utils";
 import { createUser, editUser } from "./NewStudent.utils";
 
 export const NewStudent = () => {
@@ -27,6 +30,12 @@ export const NewStudent = () => {
     defaultValues: isEdit ? (student as FieldValues) : undefined,
   });
   const { goBack } = useNavigation();
+  const { data: psychologists } = useQuery({
+    queryKey: ["psychologistsByFranchise"],
+    queryFn: () => getPsychologistsByFranchise(),
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
+  });
   const { mutateAsync: createNewUser, isPending: isPendingCreate } =
     useMutation({
       mutationKey: ["createNewUser"],
@@ -204,6 +213,14 @@ export const NewStudent = () => {
             placeholder="Digite aqui"
             keyboardType="number-pad"
             maxLength={3}
+          />
+
+          <ViewBox marginVertical="xs" />
+          <CustomPickerInput
+            labelInput="Psicólogo(a)"
+            name="chosenPsychologist"
+            control={control}
+            items={(psychologists || []).map((p: any) => ({ label: p.name, value: p.id }))}
           />
 
           <CustomButton

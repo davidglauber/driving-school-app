@@ -49,8 +49,12 @@ const getClassesByInstructor = async (): Promise<CalendarItemInterface> => {
     });
   });
 
-  // 2. classes atribuídas via field instructorsUids (nova abordagem) 
-  const qExtra = query(studentsRef, where("instructorsUids", "array-contains", instructorRef.id));
+  // 2. classes atribuídas via field instructorsUids (nova abordagem, usa authUid)
+  const instructorSnap = await getDoc(instructorRef);
+  const authUid = (instructorSnap.data() as any)?.authUid as string | undefined;
+  const qExtra = authUid
+    ? query(studentsRef, where("instructorsUids", "array-contains", authUid))
+    : query(studentsRef, where("instructor", "==", instructorRef));
   const extraSnap = await getDocs(qExtra);
   extraSnap.docs.forEach((docSnap) => {
     const student = docSnap.data() as GenericStudentType;
