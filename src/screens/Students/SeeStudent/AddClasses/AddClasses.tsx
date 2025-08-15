@@ -78,7 +78,8 @@ export const AddClasses = () => {
   const { mutateAsync: addNewClass, isPending: isPendingCreate } = useMutation({
     mutationKey: ["addNewClass"],
     mutationFn: (data: StudentClass[]) =>
-      saveNewClasses((student && student.id) || "", data, chosenInstructor?.value),
+      // Use __docId (Firestore document ID) instead of numeric id for database operations
+      saveNewClasses((student && (student as any).__docId) || "", data, chosenInstructor?.value),
   });
 
   const { mutateAsync: editStudentClass, isPending: isPendingEdit } =
@@ -140,7 +141,8 @@ export const AddClasses = () => {
         const instructorRef = await getInstructorRefByAuthUid(instructorAuthUid);
         const classToUpdateWithInstructor = { ...classToUpdate, instructor: instructorRef, instructorName: chosenInstructor?.label || "Matriz" };
         await editStudentClass({
-          studentId: (student && student.id) || 0,
+          // Use __docId (Firestore document ID) instead of numeric id for database operations
+          studentId: (student && (student as any).__docId) || "",
           classToUpdate: classToUpdateWithInstructor,
         });
 
@@ -151,7 +153,7 @@ export const AddClasses = () => {
           text1: "Sucesso!",
           text2: "Aula editada.",
         });
-        updateClasses(classes);
+        updateClasses([classToUpdateWithInstructor]);
         goBack();
       } catch (error: any) {
         Toast.show({
@@ -175,7 +177,7 @@ export const AddClasses = () => {
           text1: "Sucesso!",
           text2: `${classes.length > 1 ? "Aulas" : "Aula"} cadastrada com sucesso.`,
         });
-        updateClasses(classes);
+        updateClasses(classesWithInstructor);
         goBack();
       } catch (error: any) {
         Toast.show({

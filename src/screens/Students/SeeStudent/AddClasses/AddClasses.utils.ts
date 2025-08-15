@@ -74,8 +74,10 @@ const isClassScheduled = async (newClass: StudentClass, currentClassId?: string)
     return isClassScheduledForInstructor(newClass, currentUser.uid, currentClassId);
 };
 
-const saveNewClasses = async (studentId: number | '', newClasses: StudentClass[], targetInstructorId?: string) => {
+const saveNewClasses = async (studentId: number | string, newClasses: StudentClass[], targetInstructorId?: string) => {
     const firestore = getFirestore();
+    // studentId can be either numeric ID or Firestore document ID string
+    // This function now properly handles both cases
     const studentDocRef = doc(firestore, `students/${studentId}`);
 
     // Determine which instructor to check for conflicts
@@ -105,7 +107,7 @@ const saveNewClasses = async (studentId: number | '', newClasses: StudentClass[]
     }
 };
 
-const editSpecificClass = async (studentId: number, classToUpdate: StudentClass, targetInstructorId?: string): Promise<void> => {
+const editSpecificClass = async (studentId: number | string, classToUpdate: StudentClass, targetInstructorId?: string): Promise<void> => {
     const firestore = getFirestore();
     const studentRef = doc(firestore, `students/${studentId}`);
     const studentDoc = await getDoc(studentRef);
