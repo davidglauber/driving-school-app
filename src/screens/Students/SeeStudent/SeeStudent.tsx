@@ -20,7 +20,7 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
-import { deleteStudentById, checkIfInstructorIsAdmin } from "../Students.utils";
+import { deleteStudentById, checkIfInstructorIsAdmin, getPsychologistById } from "../Students.utils";
 import { Alert, Linking, Platform, FlatList } from "react-native";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { auth } from "@/src/config/firebaseConfig";
@@ -156,6 +156,52 @@ export const SeeStudent = () => {
     refetchOnWindowFocus: false,
   });
 
+  // Fetch psychologist data if student has a psychologist assigned
+  const { data: psychologist, isLoading: isLoadingPsychologist } = useQuery({
+    queryKey: ["psychologist", student?.psychologist],
+    queryFn: () => {
+      console.log("🔍 Fetching psychologist data for student:", {
+        psychologist: student?.psychologist,
+        type: typeof student?.psychologist,
+        path: student?.psychologist?.path
+      });
+      
+      let psychologistId: string | null = null;
+      
+      // Handle both string path and DocumentReference
+      if (typeof student?.psychologist === 'string' && student.psychologist.includes('/')) {
+        // Extract psychologist ID from the path (e.g., "/psico/EQcEWG60XAxktnF5fCZB" -> "EQcEWG60XAxktnF5fCZB")
+        psychologistId = student.psychologist.split('/').pop() || null;
+      } else if (student?.psychologist?.path && typeof student.psychologist.path === 'string') {
+        // Extract psychologist ID from DocumentReference path
+        psychologistId = student.psychologist.path.split('/').pop() || null;
+      }
+      
+      if (psychologistId) {
+        console.log("🔍 Extracted psychologist ID:", psychologistId);
+        return getPsychologistById(psychologistId);
+      }
+      
+      console.log("🔍 No psychologist reference found or invalid format");
+      return null;
+    },
+    enabled: !!student?.psychologist,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
+  });
+
+  // Debug logs
+  console.log("🔍 Student data:", {
+    name: student?.name,
+    psychologist: student?.psychologist,
+    psychologistType: typeof student?.psychologist,
+    psychologistPath: student?.psychologist?.path,
+    psychologistData: psychologist,
+    isLoadingPsychologist,
+    studentKeys: student ? Object.keys(student) : [],
+    fullStudentData: student
+  });
+
   /* ------------------------------------------------------------------ */
   /* Mutations                                                          */
   /* ------------------------------------------------------------------ */
@@ -166,7 +212,7 @@ export const SeeStudent = () => {
         studentId,
         classToDelete,
       }: {
-        studentId: number;
+        studentId: number | string;
         classToDelete: StudentClass;
       }) => deleteClassFromStudent(studentId, classToDelete),
     });
@@ -189,20 +235,48 @@ export const SeeStudent = () => {
   };
 
   const handleDeleteClass = async (classToDelete: StudentClass) => {
-    if (!student?.id) return;
+    if (!(student as any)?.__docId) {
+      console.error("🔍 No student __docId found");
+      return;
+    }
+
+    // Check if user is admin before allowing deletion
+    if (!isAdmin) {
+      console.error("🔍 User is not admin, cannot delete class");
+      Alert.alert("Erro", "Apenas administradores podem deletar aulas.");
+      return;
+    }
+
+    console.log("🔍 Attempting to delete class:", {
+      studentName: student?.name,
+      studentId: student?.id,
+      studentDocId: (student as any).__docId,
+      classToDelete,
+      isAdmin
+    });
+
     // Convert date to normalized format (YYYY-MM-DD) to match backend comparison logic
     const normalizedClass: StudentClass = {
       ...classToDelete,
       classDate: dayjs(classToDelete.classDate, "DD/MM/YYYY").format("YYYY-MM-DD"),
     };
 
-    await deleteStudentClass({ studentId: student.id, classToDelete: normalizedClass });
-    // Update local store to reflect deletion immediately
-    if (student.classes) {
-      const updatedClasses = student.classes.filter(
-        (cls) => cls.id !== classToDelete.id
-      );
-      setStudent({ ...student, classes: updatedClasses } as GenericStudentType);
+    try {
+      await deleteStudentClass({ studentId: (student as any).__docId, classToDelete: normalizedClass });
+      console.log("🔍 Class deleted successfully from database");
+      
+      // Update local store to reflect deletion immediately
+      if (student && student.classes) {
+        const updatedClasses = student.classes.filter(
+          (cls) => cls.id !== classToDelete.id
+        );
+        setStudent({ ...student, classes: updatedClasses } as GenericStudentType);
+        console.log("🔍 Local state updated");
+      }
+    } catch (error) {
+      console.error("🔍 Error in handleDeleteClass:", error);
+      // Show error to user
+      Alert.alert("Erro", "Não foi possível deletar a aula. Tente novamente.");
     }
   };
 
@@ -377,6 +451,55 @@ export const SeeStudent = () => {
 
           {/* Additional info */}
           <CustomLabelText label="Profissão" text={student?.profession || "Não informado"} mt="s" />
+          
+          {/* Psychologist information */}
+          {student?.psychologist ? (
+            <ViewBox mt="s">
+              {isLoadingPsychologist ? (
+                <CustomLabelText 
+                  label="Psicólogo" 
+                  text="Carregando..." 
+                  mt="s" 
+                />
+              ) : psychologist ? (
+                <PressableBox 
+                  onPress={() => {
+                    // Extract psychologist ID from the reference and navigate to psychologist details
+                    let psychologistId: string | null = null;
+                    if (typeof student.psychologist === 'string' && student.psychologist.includes('/')) {
+                      psychologistId = student.psychologist.split('/').pop() || null;
+                    } else if (student.psychologist?.path && typeof student.psychologist.path === 'string') {
+                      psychologistId = student.psychologist.path.split('/').pop() || null;
+                    }
+                    
+                    if (psychologistId) {
+                      // Navigate to SeePsychologist screen with the psychologist ID
+                      (navigate as any)("SeePsychologist", { id: psychologistId });
+                    }
+                  }}
+                >
+                  <CustomLabelText 
+                    label="Psicólogo" 
+                    text={`${(psychologist as any).name || "Nome não disponível"} (clique para ver detalhes)`} 
+                    mt="s" 
+                  />
+                </PressableBox>
+              ) : (
+                <CustomLabelText 
+                  label="Psicólogo" 
+                  text="Erro ao carregar dados" 
+                  mt="s" 
+                />
+              )}
+            </ViewBox>
+          ) : (
+            <CustomLabelText 
+              label="Psicólogo" 
+              text="Não atribuído" 
+              mt="s" 
+            />
+          )}
+          
           <CustomDivider />
           <CustomLabelText label="Aulas Necessárias" text={student?.classesNeeded || ""} mb="s" />
           <CustomLabelText label="Aulas Adquiridas" text={student?.classesAcquired || ""} mb="s" />

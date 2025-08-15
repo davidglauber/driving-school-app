@@ -22,6 +22,8 @@ export type GenericStudentType = {
     classesNeeded: number;
     classesAcquired: number;
     instructor?: any;
+    /** Firebase document reference to the psychologist assigned to this student */
+    psychologist?: any; // DocumentReference from firebase/firestore
     psicolocicalEvaluationRequired: number;
     psicolocicalEvaluationAcquired: number;
     classes?: StudentClass[];

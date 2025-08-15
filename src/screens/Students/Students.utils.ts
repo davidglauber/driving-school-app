@@ -175,6 +175,36 @@ const getPsychologistsByFranchise = async () => {
     return psychologists;
 };
 
+/**
+ * Get a specific psychologist by their document ID
+ * This function fetches psychologist data from the psico collection
+ */
+const getPsychologistById = async (psychologistId: string) => {
+    if (!psychologistId) return null;
+    
+    try {
+        console.log("🔍 Fetching psychologist with ID:", psychologistId);
+        const firestore = getFirestore();
+        const psychologistRef = doc(firestore, `psico/${psychologistId}`);
+        const psychologistSnap = await getDoc(psychologistRef);
+        
+        if (psychologistSnap.exists()) {
+            const data = psychologistSnap.data();
+            console.log("🔍 Psychologist data found:", { id: psychologistSnap.id, ...data });
+            return {
+                id: psychologistSnap.id,
+                ...data
+            };
+        } else {
+            console.log("🔍 Psychologist document does not exist for ID:", psychologistId);
+        }
+        return null;
+    } catch (error) {
+        console.error("🔍 Error fetching psychologist:", error);
+        return null;
+    }
+};
+
 const updateStudentInstructor = async (studentId: string | undefined, instructorAuthUid: string) => {
     if (!studentId) return;
     const firestore = getFirestore();
@@ -305,7 +335,7 @@ const copyStudentToInstructor = async (
     });
 };
 
-export { getStudentsByInstructor, checkIfInstructorIsAdmin, deleteStudentById, getInstructorsByFranchise, getPsychologistsByFranchise, updateStudentInstructor, getCurrentInstructorRef, moveStudentToInstructor, copyStudentToInstructor, getStudentsLocalFirst, getInstructorRefByAuthUid };
+export { getStudentsByInstructor, checkIfInstructorIsAdmin, deleteStudentById, getInstructorsByFranchise, getPsychologistsByFranchise, getPsychologistById, updateStudentInstructor, getCurrentInstructorRef, moveStudentToInstructor, copyStudentToInstructor, getStudentsLocalFirst, getInstructorRefByAuthUid };
 
 /**
  * Cursor types for paginated fetch

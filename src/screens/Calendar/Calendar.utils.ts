@@ -3,7 +3,7 @@ import { colors } from "@/src/theme/colors";
 import { height, width } from "@/src/utils/dimensions";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import { collection, doc, getDoc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
+import { arrayRemove, collection, doc, getDoc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
 import { getCurrentInstructorRef } from "../Students/Students.utils";
 import { Linking, Platform } from "react-native";
 import { GenericStudentType, StudentClass } from "../Students/Students.interface";
@@ -104,26 +104,86 @@ const getClassesByInstructor = async (): Promise<CalendarItemInterface> => {
 };
 
 
-const deleteClassFromStudent = async (studentId: number, classToDelete: StudentClass): Promise<void> => {
-  const firestore = getFirestore();
-  const studentRef = doc(firestore, `students/${studentId}`);
-  const studentDoc = await getDoc(studentRef);
+const deleteClassFromStudent = async (studentId: number | string, classToDelete: StudentClass): Promise<void> => {
+  try {
+    console.log("🔍 Deleting class:", {
+      studentId,
+      classToDelete,
+      studentIdType: typeof studentId
+    });
 
-  const studentData = studentDoc.data() as GenericStudentType;
+    const firestore = getFirestore();
+    const studentRef = doc(firestore, `students/${studentId}`);
+    const studentDoc = await getDoc(studentRef);
 
-  const normalizeDate = (date: string): string => {
-    return dayjs(date, 'DD/MM/YYYY').format('YYYY-MM-DD');
-  };
+    if (!studentDoc.exists()) {
+      throw new Error(`Student document not found with ID: ${studentId}`);
+    }
 
-  const updatedClasses = studentData.classes?.filter(
-    (studentClass) =>
-      studentClass.classStartTime !== classToDelete.classStartTime ||
-      studentClass.classEndTime !== classToDelete.classEndTime ||
-      normalizeDate(studentClass.classDate) !== classToDelete.classDate ||
-      studentClass.chosenClass.value !== classToDelete.chosenClass.value
-  );
+    const studentData = studentDoc.data() as GenericStudentType;
+    console.log("🔍 Student data found:", {
+      name: studentData.name,
+      totalClasses: studentData.classes?.length || 0
+    });
 
-  await updateDoc(studentRef, { classes: updatedClasses });
+    const normalizeDate = (date: string): string => {
+      return dayjs(date, 'DD/MM/YYYY').format('YYYY-MM-DD');
+    };
+
+    const updatedClasses = studentData.classes?.filter(
+      (studentClass) =>
+        studentClass.classStartTime !== classToDelete.classStartTime ||
+        studentClass.classEndTime !== classToDelete.classEndTime ||
+        normalizeDate(studentClass.classDate) !== classToDelete.classDate ||
+        studentClass.chosenClass.value !== classToDelete.chosenClass.value
+    );
+
+    console.log("🔍 Classes after filtering:", {
+      originalCount: studentData.classes?.length || 0,
+      filteredCount: updatedClasses?.length || 0,
+      classToDelete: {
+        startTime: classToDelete.classStartTime,
+        endTime: classToDelete.classEndTime,
+        date: classToDelete.classDate,
+        modality: classToDelete.chosenClass.value
+      }
+    });
+
+    await updateDoc(studentRef, { classes: updatedClasses });
+    
+    // If that student no longer has any class with the same instructor,
+    // remove the instructor authUid from instructorsUids array
+    try {
+      // Determine the instructor reference to check: prefer the one attached to the class
+      let instructorRefToCheck: any = (classToDelete as any)?.instructor;
+      if (!instructorRefToCheck) {
+        // Fallback to the current logged instructor
+        instructorRefToCheck = await getCurrentInstructorRef();
+      }
+      if (instructorRefToCheck) {
+        const stillHasClassesWithInstructor = (updatedClasses || []).some((cls) => {
+          return (cls as any)?.instructor?.path === instructorRefToCheck.path;
+        });
+        if (!stillHasClassesWithInstructor) {
+          const instructorSnap = await getDoc(instructorRefToCheck);
+          const instructorAuthUid = (instructorSnap.data() as any)?.authUid as string | undefined;
+          if (instructorAuthUid) {
+            await updateDoc(studentRef, { instructorsUids: arrayRemove(instructorAuthUid) });
+            console.log("🔍 Removed instructor authUid from instructorsUids for student", {
+              studentId,
+              instructorAuthUid,
+            });
+          }
+        }
+      }
+    } catch (cleanupError) {
+      console.warn("🔍 Cleanup instructorsUids step skipped due to error:", cleanupError);
+    }
+    console.log("🔍 Class deleted successfully");
+  } catch (error) {
+    console.error("🔍 Error deleting class:", error);
+    throw error;
+  }
 };
 
 
