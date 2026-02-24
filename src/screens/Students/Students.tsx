@@ -2,6 +2,7 @@ import { CustomButton } from "@/src/components/CustomButton/CustomButton";
 import { CustomDivider } from "@/src/components/CustomDivider/CustomDivider";
 import { CustomTextInput } from "@/src/components/CustomTextInput/CustomTextInput";
 import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
+import { ViewAsInstructorBanner } from "@/src/components/ViewAsInstructorBanner/ViewAsInstructorBanner";
 import { auth } from "@/src/config/firebaseConfig";
 import { RootStackParamList } from "@/src/routes/Stack";
 import { useStudentStore } from "@/src/store/useStudentStore";
@@ -26,18 +27,22 @@ import { ActivityIndicator, FlatList, Linking, RefreshControl } from "react-nati
 import ProgressBar from "react-native-progress/Bar";
 import { openMap } from "../Calendar/Calendar.utils";
 import { GenericStudentType, StudentsInterface } from "./Students.interface";
-import { checkIfInstructorIsAdmin, getInstructorsByFranchise, getStudentsLocalFirst } from "./Students.utils";
+import { checkIfInstructorIsAdmin, getEffectiveInstructorCacheKey, getInstructorsByFranchise, getStudentsLocalFirst } from "./Students.utils";
+import { useViewAsInstructorStore } from "@/src/store/useViewAsInstructorStore";
 
 export const Students = () => {
   const isFocused = useIsFocused();
+  // Subscribe to view-as store so query keys update when switching instructor
+  useViewAsInstructorStore((s) => s.viewAsInstructorAuthUid);
   const { control, watch } = useForm();
   const { setStudent } = useStudentStore();
   const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
   const searchText = watch("search", "");
   const [students, setStudents] = React.useState<GenericStudentType[]>([]);
 
+  const effectiveInstructorKey = getEffectiveInstructorCacheKey();
   const { data: all, isLoading, refetch } = useQuery({
-    queryKey: ["students-all", auth.currentUser?.uid],
+    queryKey: ["students-all", effectiveInstructorKey],
     queryFn: () => getStudentsLocalFirst(),
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
@@ -51,7 +56,7 @@ export const Students = () => {
   const loadMore = React.useCallback(() => {}, []);
 
   const { data: isAdmin } = useQuery({
-    queryKey: ["isAdmin", auth.currentUser?.uid],
+    queryKey: ["isAdmin", effectiveInstructorKey],
     queryFn: () => checkIfInstructorIsAdmin(),
     staleTime: 1000 * 60 * 5, // admin status rarely changes
     refetchOnWindowFocus: false,
@@ -180,6 +185,7 @@ export const Students = () => {
       paddingHorizontal="l"
     >
       <LogoHeader />
+      <ViewAsInstructorBanner />
       {isLoading ? (
         <ActivityIndicator size="small" color={colors.red} />
       ) : (

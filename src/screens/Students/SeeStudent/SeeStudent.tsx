@@ -20,8 +20,10 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
-import { deleteStudentById, checkIfInstructorIsAdmin, getPsychologistById } from "../Students.utils";
+import { deleteStudentById, checkIfInstructorIsAdmin, getEffectiveInstructorCacheKey, getPsychologistById } from "../Students.utils";
+import { useViewAsInstructorStore } from "@/src/store/useViewAsInstructorStore";
 import { Alert, Linking, Platform, FlatList } from "react-native";
+import Toast from "react-native-toast-message";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { auth } from "@/src/config/firebaseConfig";
 import ProgressBar from "react-native-progress/Bar";
@@ -149,8 +151,10 @@ export const SeeStudent = () => {
   /* ------------------------------------------------------------------ */
   /* Permissions                                                        */
   /* ------------------------------------------------------------------ */
+  const viewAsAuthUid = useViewAsInstructorStore((s) => s.viewAsInstructorAuthUid);
+  const effectiveInstructorKey = getEffectiveInstructorCacheKey();
   const { data: isAdmin } = useQuery({
-    queryKey: ["isAdmin", auth.currentUser?.uid],
+    queryKey: ["isAdmin", effectiveInstructorKey],
     queryFn: () => checkIfInstructorIsAdmin(),
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
@@ -221,6 +225,15 @@ export const SeeStudent = () => {
   /* Handlers                                                           */
   /* ------------------------------------------------------------------ */
   const handleDeleteStudent = () => {
+    if (viewAsAuthUid) {
+      Toast.show({
+        type: "customInfoToast",
+        text1: "Modo de acompanhamento",
+        text2: "Somente leitura. Volte para admin para editar.",
+        position: "bottom",
+      });
+      return;
+    }
     Alert.alert("Atenção", "Tem certeza que deseja deletar o aluno(a)?", [
       { text: "Cancelar", style: "cancel" },
       {
@@ -235,6 +248,15 @@ export const SeeStudent = () => {
   };
 
   const handleDeleteClass = async (classToDelete: StudentClass) => {
+    if (viewAsAuthUid) {
+      Toast.show({
+        type: "customInfoToast",
+        text1: "Modo de acompanhamento",
+        text2: "Somente leitura. Volte para admin para editar.",
+        position: "bottom",
+      });
+      return;
+    }
     if (!(student as any)?.__docId) {
       console.error("🔍 No student __docId found");
       return;
@@ -513,7 +535,19 @@ export const SeeStudent = () => {
               titleColor="white"
               leftIcon={<FontAwesome6 name="plus" size={24} color={colors.white} />}
               mt="l"
-              onPress={() => [navigate("AddClasses", { isEdit: false }), setIsEdit(false)]}
+              onPress={() => {
+                if (viewAsAuthUid) {
+                  Toast.show({
+                    type: "customInfoToast",
+                    text1: "Modo de acompanhamento",
+                    text2: "Somente leitura. Volte para admin para editar.",
+                    position: "bottom",
+                  });
+                  return;
+                }
+                navigate("AddClasses", { isEdit: false });
+                setIsEdit(false);
+              }}
             />
             {isAdmin && (
               <CustomButton

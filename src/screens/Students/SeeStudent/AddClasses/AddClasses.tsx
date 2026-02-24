@@ -37,6 +37,7 @@ import {
   saveNewClasses,
 } from "./AddClasses.utils";
 import { auth } from "@/src/config/firebaseConfig";
+import { useViewAsInstructorStore } from "@/src/store/useViewAsInstructorStore";
 
 dayjs.extend(duration);
 
@@ -110,7 +111,17 @@ export const AddClasses = () => {
     }
   }, [classStudent, setValue]);
 
+  const viewAsAuthUid = useViewAsInstructorStore((s) => s.viewAsInstructorAuthUid);
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+    if (viewAsAuthUid) {
+      Toast.show({
+        type: "customInfoToast",
+        text1: "Modo de acompanhamento",
+        text2: "Somente leitura. Volte para admin para editar.",
+        position: "bottom",
+      });
+      return;
+    }
     if (isAdmin && !chosenInstructor?.value) {
       Toast.show({
         type: "customErrorToast",

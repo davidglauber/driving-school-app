@@ -6,9 +6,14 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 dayjs.extend(customParseFormat);
 import { GenericStudentType, StudentClass } from "./Students.interface";
 import { auth } from "@/src/config/firebaseConfig";
+import { useViewAsInstructorStore } from "@/src/store/useViewAsInstructorStore";
 
-// Resolve the instructor document that belongs to the currently-logged user
-const getCurrentInstructorRef = async () => {
+/**
+ * Resolve the instructor document that belongs to the currently-logged Firebase user.
+ * Always uses auth.currentUser - ignores "view as instructor" override.
+ * Use this when we need the real logged-in user (e.g. franchise lookup for admin).
+ */
+const getAuthInstructorRef = async () => {
     const firestore = getFirestore();
     const currentUser = auth.currentUser;
     if (!currentUser) {
@@ -16,29 +21,44 @@ const getCurrentInstructorRef = async () => {
         return null;
     }
 
-    console.log("Current user UID:", currentUser.uid);
-
     // 1. Try doc with the same uid
     const directRef = doc(firestore, `instructors/${currentUser.uid}`);
     const directSnap = await getDoc(directRef);
     if (directSnap.exists()) {
-        console.log("Found instructor doc directly");
         return directRef;
     }
-
-    console.log("Direct instructor doc not found, trying authUid query");
 
     // 2. Fallback – query by authUid field
     const instructorsRef = collection(firestore, "instructors");
     const q = query(instructorsRef, where("authUid", "==", currentUser.uid));
     const qs = await getDocs(q);
     if (!qs.empty) {
-        console.log("Found instructor doc via authUid query");
         return qs.docs[0].ref;
     }
 
-    console.log("No instructor doc found via any method");
     return null;
+};
+
+/**
+ * Resolve the effective "current" instructor ref.
+ * When "view as instructor" is active, returns that instructor's ref.
+ * Otherwise returns the logged-in user's instructor ref.
+ */
+const getCurrentInstructorRef = async () => {
+    const viewAsAuthUid = useViewAsInstructorStore.getState().viewAsInstructorAuthUid;
+    if (viewAsAuthUid) {
+        return getInstructorRefByAuthUid(viewAsAuthUid);
+    }
+    return getAuthInstructorRef();
+};
+
+/**
+ * Returns a cache key for React Query that changes when switching between admin and view-as mode.
+ * Use in queryKey arrays so data refetches correctly when the effective instructor changes.
+ */
+const getEffectiveInstructorCacheKey = (): string => {
+    const viewAsAuthUid = useViewAsInstructorStore.getState().viewAsInstructorAuthUid;
+    return viewAsAuthUid ?? auth.currentUser?.uid ?? "anonymous";
 };
 
 /**
@@ -115,8 +135,27 @@ const getStudentsByInstructor = async () => {
     }
 };
 
+/**
+ * Check if the effective current instructor (view-as or auth) is admin.
+ * Use for UI: when viewing as instructor, admin controls disappear.
+ */
 const checkIfInstructorIsAdmin = async (): Promise<boolean> => {
     const instructorRef = await getCurrentInstructorRef();
+    if (!instructorRef) return false;
+    const instructorSnap = await getDoc(instructorRef);
+
+    if (!instructorSnap.exists()) return false;
+
+    const instructorData = instructorSnap.data() as { isAdmin?: boolean };
+    return instructorData.isAdmin === true;
+};
+
+/**
+ * Check if the logged-in user (auth) is admin.
+ * Use for Settings: admin can always access "view as instructor" even when viewing as non-admin.
+ */
+const checkIfAuthInstructorIsAdmin = async (): Promise<boolean> => {
+    const instructorRef = await getAuthInstructorRef();
     if (!instructorRef) return false;
     const instructorSnap = await getDoc(instructorRef);
 
@@ -133,13 +172,16 @@ const deleteStudentById = async (id: string | undefined) => {
     await deleteDoc(docRef);
 };
 
+/**
+ * Fetch instructors in the same franchise as the logged-in admin.
+ * Always uses getAuthInstructorRef so the list is correct even when "viewing as" another instructor.
+ */
 const getInstructorsByFranchise = async () => {
     const firestore = getFirestore();
-      // resolve logged instructor doc
-  const currentInstructorRef = await getCurrentInstructorRef();
-  if (!currentInstructorRef) return [];
-  const currentInstructorSnap = await getDoc(currentInstructorRef);
-  const { franchise } = currentInstructorSnap.data() as { franchise?: any };
+    const authInstructorRef = await getAuthInstructorRef();
+    if (!authInstructorRef) return [];
+    const authInstructorSnap = await getDoc(authInstructorRef);
+    const { franchise } = authInstructorSnap.data() as { franchise?: any };
     if (!franchise) return [];
 
     const instructorsRef = collection(firestore, "instructors");
@@ -335,7 +377,22 @@ const copyStudentToInstructor = async (
     });
 };
 
-export { getStudentsByInstructor, checkIfInstructorIsAdmin, deleteStudentById, getInstructorsByFranchise, getPsychologistsByFranchise, getPsychologistById, updateStudentInstructor, getCurrentInstructorRef, moveStudentToInstructor, copyStudentToInstructor, getStudentsLocalFirst, getInstructorRefByAuthUid };
+export {
+    getStudentsByInstructor,
+    checkIfInstructorIsAdmin,
+    checkIfAuthInstructorIsAdmin,
+    getEffectiveInstructorCacheKey,
+    deleteStudentById,
+    getInstructorsByFranchise,
+    getPsychologistsByFranchise,
+    getPsychologistById,
+    updateStudentInstructor,
+    getCurrentInstructorRef,
+    moveStudentToInstructor,
+    copyStudentToInstructor,
+    getStudentsLocalFirst,
+    getInstructorRefByAuthUid,
+};
 
 /**
  * Cursor types for paginated fetch

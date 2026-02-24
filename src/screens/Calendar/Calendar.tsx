@@ -2,6 +2,7 @@ import { CustomButton } from "@/src/components/CustomButton/CustomButton";
 import { CustomDateTimeInput } from "@/src/components/CustomDateTimeInput/CustomDateTimeInput";
 import { CustomDivider } from "@/src/components/CustomDivider/CustomDivider";
 import { LogoHeader } from "@/src/components/LogoHeader/LogoHeader";
+import { ViewAsInstructorBanner } from "@/src/components/ViewAsInstructorBanner/ViewAsInstructorBanner";
 import { RootStackParamList } from "@/src/routes/Stack";
 import { useClassStore } from "@/src/store/useClassStore";
 import { useStudentStore } from "@/src/store/useStudentStore";
@@ -23,7 +24,9 @@ import { LocaleConfig } from "react-native-calendars";
 import { radius } from "../../theme/radius";
 import { height } from "../../utils/dimensions";
 import { calendarPT_BR } from "../../utils/localeCalendarConfig";
-import { checkIfInstructorIsAdmin } from "../Students/Students.utils";
+import { checkIfInstructorIsAdmin, getEffectiveInstructorCacheKey } from "../Students/Students.utils";
+import { useViewAsInstructorStore } from "@/src/store/useViewAsInstructorStore";
+import Toast from "react-native-toast-message";
 import { auth } from "@/src/config/firebaseConfig";
 import { TextBox } from "../../utils/restyle/TextBox";
 import { TouchableOpacityBox } from "../../utils/restyle/TouchableOpacityBox";
@@ -55,8 +58,11 @@ export const Calendar = () => {
   const { setStudent } = useStudentStore();
   const { setClassStudent } = useClassStore();
   const didTriggerIndexBuildRef = useRef(false);
+  // Subscribe to view-as store so query keys update when switching instructor
+  const viewAsAuthUid = useViewAsInstructorStore((s) => s.viewAsInstructorAuthUid);
+  const effectiveInstructorKey = getEffectiveInstructorCacheKey();
   const { data: isAdmin } = useQuery({
-    queryKey: ["isAdmin", auth.currentUser?.uid],
+    queryKey: ["isAdmin", effectiveInstructorKey],
     queryFn: () => checkIfInstructorIsAdmin(),
   });
   const { control, setValue } = useForm();
@@ -71,7 +77,7 @@ export const Calendar = () => {
   );
 
   const { data: classesForSelectedDate, refetch, isLoading } = useQuery({
-    queryKey: ["instructorClassesByDate", selectedDate],
+    queryKey: ["instructorClassesByDate", effectiveInstructorKey, selectedDate],
     queryFn: () => getClassesByInstructorByDate(selectedDate),
     staleTime: 1000 * 60, // cache for 1 minute to reduce reads when revisiting
     refetchOnWindowFocus: false,
@@ -144,6 +150,15 @@ export const Calendar = () => {
     studentId: number | string,
     classToDelete: StudentClass
   ) => {
+    if (viewAsAuthUid) {
+      Toast.show({
+        type: "customInfoToast",
+        text1: "Modo de acompanhamento",
+        text2: "Somente leitura. Volte para admin para editar.",
+        position: "bottom",
+      });
+      return;
+    }
     await deleteStudentClass({ studentId, classToDelete });
   };
 
@@ -314,6 +329,7 @@ export const Calendar = () => {
       paddingTop="m"
     >
       <LogoHeader />
+      <ViewAsInstructorBanner />
       <ViewBox
         flexDirection="row"
         alignItems="center"
