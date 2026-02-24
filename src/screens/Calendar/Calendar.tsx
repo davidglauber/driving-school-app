@@ -9,15 +9,14 @@ import { colors } from "@/src/theme/colors";
 import { FontAwesome6 } from "@expo/vector-icons";
 import {
   NavigationProp,
-  useFocusEffect,
-  useIsFocused,
   useNavigation,
 } from "@react-navigation/native";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import LottieView from "lottie-react-native";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useEffect, useMemo, useRef } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { FlatList, Linking, Platform } from "react-native";
 import { LocaleConfig } from "react-native-calendars";
@@ -36,7 +35,8 @@ import {
 import { CalendarItemType } from "./Calendar.interface";
 import {
   deleteClassFromStudent,
-  getClassesByInstructor,
+  buildClassDatesIndexForInstructorStudents,
+  getClassesByInstructorByDate,
   openMap,
 } from "./Calendar.utils";
 
@@ -51,10 +51,10 @@ const dynamicSystemHeight = Platform.select({
 });
 
 export const Calendar = () => {
-  const isFocused = useIsFocused();
   const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
   const { setStudent } = useStudentStore();
   const { setClassStudent } = useClassStore();
+  const didTriggerIndexBuildRef = useRef(false);
   const { data: isAdmin } = useQuery({
     queryKey: ["isAdmin", auth.currentUser?.uid],
     queryFn: () => checkIfInstructorIsAdmin(),
@@ -64,16 +64,30 @@ export const Calendar = () => {
   // Determine if the selected date is in the past
   const isPastSelectedDate = useMemo(
     () =>
-      dayjs(selectedDate, "DD/MM/YYYY").isBefore(dayjs().startOf("day")),
+      selectedDate
+        ? dayjs(selectedDate, "DD/MM/YYYY").isBefore(dayjs().startOf("day"))
+        : false,
     [selectedDate]
   );
 
-  const { data: instructorClasses, refetch, isLoading } = useQuery({
-    queryKey: ["instructorClasses"],
-    queryFn: () => getClassesByInstructor(),
+  const { data: classesForSelectedDate, refetch, isLoading } = useQuery({
+    queryKey: ["instructorClassesByDate", selectedDate],
+    queryFn: () => getClassesByInstructorByDate(selectedDate),
     staleTime: 1000 * 60, // cache for 1 minute to reduce reads when revisiting
     refetchOnWindowFocus: false,
+    enabled: !!selectedDate,
   });
+
+  const { mutateAsync: buildIndex, isPending: isPendingBuildIndex } =
+    useMutation({
+      mutationKey: ["buildCalendarClassDatesIndex"],
+      mutationFn: () => buildClassDatesIndexForInstructorStudents(),
+      onSuccess: () => {
+        refetch();
+      },
+    });
+
+  const isCalendarBusy = isLoading || isPendingBuildIndex;
 
   const { mutateAsync: deleteStudentClass, isPending: isPendingDelete } =
     useMutation({
@@ -82,7 +96,7 @@ export const Calendar = () => {
         studentId,
         classToDelete,
       }: {
-        studentId: number;
+        studentId: number | string;
         classToDelete: StudentClass;
       }) => deleteClassFromStudent(studentId, classToDelete),
       onSuccess: () => {
@@ -95,12 +109,31 @@ export const Calendar = () => {
     setValue("selectedDate", dayjs().format("DD/MM/YYYY"));
   }, [setValue]);
 
-  // Avoid redundant reads: react-query will keep data fresh; explicit refetch on focus removed
-  useFocusEffect(
-    useCallback(() => {
-      return () => {};
-    }, [isFocused])
-  );
+  useEffect(() => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+    if (didTriggerIndexBuildRef.current) return;
+    didTriggerIndexBuildRef.current = true;
+
+    const key = `calendar-classDates-index:${uid}`;
+
+    (async () => {
+      try {
+        const existing = await AsyncStorage.getItem(key);
+        if (existing === "done") return;
+
+        // Mark as in progress to avoid multiple runs if the screen mounts twice.
+        await AsyncStorage.setItem(key, "in_progress");
+        await buildIndex();
+        await AsyncStorage.setItem(key, "done");
+      } catch {
+        // Allow retry next time.
+        try {
+          await AsyncStorage.removeItem(key);
+        } catch {}
+      }
+    })();
+  }, [buildIndex]);
 
   const handleViewProfile = (student: GenericStudentType) => {
     setStudent(student);
@@ -108,7 +141,7 @@ export const Calendar = () => {
   };
 
   const handleDeleteClass = async (
-    studentId: number,
+    studentId: number | string,
     classToDelete: StudentClass
   ) => {
     await deleteStudentClass({ studentId, classToDelete });
@@ -219,7 +252,12 @@ export const Calendar = () => {
                   <CustomButton
                     color="red"
                     titleColor="white"
-                    onPress={() => handleDeleteClass(item.student.id, classItem)}
+                    onPress={() =>
+                      handleDeleteClass(
+                        ((item.student as any).__docId as any) ?? item.student.id,
+                        classItem
+                      )
+                    }
                     leftIcon={
                       <FontAwesome6
                         name="trash-can"
@@ -267,22 +305,6 @@ export const Calendar = () => {
     </ViewBox>
   );
 
-  const filteredClasses = useMemo(() => {
-    const flattenedClasses = instructorClasses
-      ? Object.values(instructorClasses).flat()
-      : [];
-
-    return flattenedClasses.filter(
-      (item: CalendarItemType) =>
-        item.classes &&
-        item.classes.some(
-          (classItem: StudentClass) =>
-            dayjs(classItem.classDate).format("YYYY-MM-DD") ===
-            dayjs(selectedDate, "DD/MM/YYYY").format("YYYY-MM-DD")
-        )
-    );
-  }, [instructorClasses, selectedDate]);
-
   return (
     <ViewBox
       height={dynamicSystemHeight}
@@ -311,7 +333,8 @@ export const Calendar = () => {
           style={{ marginTop: "9%" }}
           color="red"
           titleColor="white"
-          isLoading={isLoading}
+          isLoading={isCalendarBusy}
+          disabled={isCalendarBusy}
           onPress={() => {
             refetch();
           }}
@@ -320,11 +343,11 @@ export const Calendar = () => {
           }
         />
       </ViewBox>
-      {isLoading ? (
+      {isCalendarBusy ? (
         renderLoadingState()
-      ) : filteredClasses?.length ? (
+      ) : classesForSelectedDate?.length ? (
         <FlatList
-          data={filteredClasses}
+          data={classesForSelectedDate}
           renderItem={({ item, index }) => renderItem({ item, index })}
           keyExtractor={(item, index) => index.toString()}
           style={{ marginHorizontal: 22 }}

@@ -3,10 +3,23 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 
 dayjs.extend(customParseFormat);
-import { arrayUnion, collection, doc, getDoc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
+import {
+    arrayUnion,
+    collection,
+    doc,
+    getDoc,
+    getDocs,
+    getFirestore,
+    query,
+    updateDoc,
+    where,
+} from "firebase/firestore";
 import { getInstructorRefByAuthUid } from "../../Students.utils";
 import { GenericStudentType, StudentClass } from "../../Students.interface";
 import { v4 as uuidv4 } from 'uuid';
+
+const normalizeToYmd = (date: string) =>
+    dayjs(date, ["DD/MM/YYYY", "YYYY-MM-DD"]).format("YYYY-MM-DD");
 
 const getClassesModalities = async () => {
     const firestore = getFirestore();
@@ -24,14 +37,32 @@ const isClassScheduledForInstructor = async (newClass: StudentClass, instructorA
     const firestore = getFirestore();
     const instructorRef = await getInstructorRefByAuthUid(instructorAuthUid);
     const studentsRef = collection(firestore, "students");
+    const newDateFormatted = normalizeToYmd(newClass.classDate);
 
     // Students cujo campo principal aponta para o instrutor
-    const q1 = query(studentsRef, where("instructor", "==", instructorRef));
+    const q1 = query(
+        studentsRef,
+        where("instructor", "==", instructorRef),
+        where("classDates", "array-contains", newDateFormatted)
+    );
     // Students que possuem o instrutor no array auxiliar (armazenamos authUid)
-    const q2 = query(studentsRef, where("instructorsUids", "array-contains", instructorAuthUid));
+    const q2 = query(
+        studentsRef,
+        where("instructorsUids", "array-contains", instructorAuthUid),
+        where("classDates", "array-contains", newDateFormatted)
+    );
 
     const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
-    const mergedDocs = [...snap1.docs, ...snap2.docs];
+    let mergedDocs = [...snap1.docs, ...snap2.docs];
+
+    // Backward compatibility: older docs may not have `classDates`.
+    // If we found nothing using the cheap indexed query, fallback to the original queries.
+    if (mergedDocs.length === 0) {
+        const q1Fallback = query(studentsRef, where("instructor", "==", instructorRef));
+        const q2Fallback = query(studentsRef, where("instructorsUids", "array-contains", instructorAuthUid));
+        const [snap1b, snap2b] = await Promise.all([getDocs(q1Fallback), getDocs(q2Fallback)]);
+        mergedDocs = [...snap1b.docs, ...snap2b.docs];
+    }
     if (mergedDocs.length === 0) {
         return null;
     }
@@ -49,8 +80,8 @@ const isClassScheduledForInstructor = async (newClass: StudentClass, instructorA
             const belongsToInstructor = !existingClass.instructor || existingClass.instructor?.path === instructorRef.path;
             if (!belongsToInstructor) return false;
 
-                        const existingDateFormatted = dayjs(existingClass.classDate, ["DD/MM/YYYY", "YYYY-MM-DD"]).format("YYYY-MM-DD");
-            const newDateFormatted = dayjs(newClassDate, ["DD/MM/YYYY", "YYYY-MM-DD"]).format("YYYY-MM-DD");
+            const existingDateFormatted = normalizeToYmd(existingClass.classDate);
+            const newDateFormatted = normalizeToYmd(newClassDate);
             if (existingDateFormatted !== newDateFormatted) return false;
             const existingStart = dayjs(`1970-01-01T${existingClass.classStartTime}:00`);
             const existingEnd = dayjs(`1970-01-01T${existingClass.classEndTime}:00`);
@@ -100,9 +131,11 @@ const saveNewClasses = async (studentId: number | string, newClasses: StudentCla
     }
 
     if (validClasses.length > 0) {
+        const classDates = Array.from(new Set(validClasses.map((c) => normalizeToYmd(c.classDate))));
         await updateDoc(studentDocRef, {
             classes: arrayUnion(...validClasses),
-            instructorsUids: arrayUnion(instructorToCheck)
+            instructorsUids: arrayUnion(instructorToCheck),
+            classDates: arrayUnion(...classDates),
         });
     }
 };
@@ -134,7 +167,15 @@ const editSpecificClass = async (studentId: number | string, classToUpdate: Stud
         return studentClass;
     });
 
-    await updateDoc(studentRef, { classes: updatedClasses, instructorsUids: arrayUnion(instructorToCheck) });
+    const classDates = Array.from(
+        new Set((updatedClasses || []).map((c) => normalizeToYmd(c.classDate)))
+    );
+
+    await updateDoc(studentRef, {
+        classes: updatedClasses,
+        instructorsUids: arrayUnion(instructorToCheck),
+        classDates,
+    });
 };
 
 const classDurationMin = (

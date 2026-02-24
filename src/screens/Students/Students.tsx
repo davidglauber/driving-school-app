@@ -41,6 +41,7 @@ export const Students = () => {
     queryFn: () => getStudentsLocalFirst(),
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
+    enabled: isFocused,
   });
 
   React.useEffect(() => {
@@ -54,6 +55,7 @@ export const Students = () => {
     queryFn: () => checkIfInstructorIsAdmin(),
     staleTime: 1000 * 60 * 5, // admin status rarely changes
     refetchOnWindowFocus: false,
+    enabled: isFocused,
   });
 
   const { data: instructors } = useQuery({
@@ -61,6 +63,7 @@ export const Students = () => {
     queryFn: () => getInstructorsByFranchise(),
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
+    enabled: isFocused,
   });
 
   // Let React Query manage caching; explicit refetch on focus removed
