@@ -80,6 +80,14 @@ def enableProguardInReleaseBuilds = (findProperty('android.enableProguardInRelea
  */
 def jscFlavor = 'org.webkit:android-jsc:+'
 
+// Load keystore credentials from keystore.properties (not committed to git).
+// This avoids hardcoding passwords in the build file.
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     ndkVersion rootProject.ext.ndkVersion
 
@@ -91,8 +99,8 @@ android {
         applicationId 'com.socialempire.agoravaiv2'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 22
-        versionName "1.5.0"
+        versionCode 24
+        versionName "1.5.2"
     }
     signingConfigs {
         debug {
@@ -102,10 +110,12 @@ android {
             keyPassword 'android'
         }
         release {
-            storeFile file('@socialempire__agora-vai-v2.jks')
-            storePassword '2e8018c006fbca02449bee708dd5df51'
-            keyAlias '035aa439b12cad76067dbb5eeda3e2ef'
-            keyPassword '14d5b059d456f4aad556f10b58121efa'
+            if (keystorePropertiesFile.exists()) {
+                storeFile rootProject.file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
         }
     }
     buildTypes {
