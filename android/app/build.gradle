@@ -109,8 +109,11 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
-        release {
-            if (keystorePropertiesFile.exists()) {
+        // Only configure a dedicated release keystore if a local
+        // keystore.properties file is present. This keeps CI / fresh
+        // clones working without requiring a release keystore up front.
+        if (keystorePropertiesFile.exists()) {
+            release {
                 storeFile rootProject.file(keystoreProperties['storeFile'])
                 storePassword keystoreProperties['storePassword']
                 keyAlias keystoreProperties['keyAlias']
@@ -123,7 +126,14 @@ android {
             signingConfig signingConfigs.debug
         }
         release {
-            signingConfig signingConfigs.release
+            // If a proper release keystore is configured, use it.
+            // Otherwise, fall back to the debug keystore so local
+            // builds and internal testing can still produce a signed APK.
+            if (keystorePropertiesFile.exists()) {
+                signingConfig signingConfigs.release
+            } else {
+                signingConfig signingConfigs.debug
+            }
             shrinkResources (findProperty('android.enableShrinkResourcesInReleaseBuilds')?.toBoolean() ?: false)
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
