@@ -10,7 +10,7 @@ import { ScrollViewBox } from "@/src/utils/restyle/ScrollViewBox";
 import { ViewBox } from "@/src/utils/restyle/ViewBox";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React from "react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { KeyboardAvoidingView, Platform } from "react-native";
@@ -18,13 +18,15 @@ import Toast from "react-native-toast-message";
 import { GenericStudentType } from "../Students.interface";
 import { useQuery } from "@tanstack/react-query";
 import { CustomPickerInput } from "@/src/components/CustomPickerInput/CustomPickerInput";
-import { getPsychologistsByFranchise } from "../Students.utils";
+import { getEffectiveInstructorCacheKey, getPsychologistsByFranchise } from "../Students.utils";
 import { createUser, editUser } from "./NewStudent.utils";
 
 export const NewStudent = () => {
   const { params } = useRoute<RouteProp<RootStackParamList, "NewStudent">>();
   const isEdit = params.isEdit;
   const { student, setStudent } = useStudentStore();
+  const queryClient = useQueryClient();
+  const effectiveInstructorKey = getEffectiveInstructorCacheKey();
   const { control, handleSubmit } = useForm({
     resolver: zodResolver(registerStudentSchema),
     defaultValues: isEdit ? (student as FieldValues) : undefined,
@@ -59,7 +61,19 @@ export const NewStudent = () => {
             position: "bottom",
           });
           // Keep existing metadata (like __docId/classes) and apply edited fields.
-          setStudent({ ...(student as any), ...(data as any) } as GenericStudentType);
+          const updatedStudent = { ...(student as any), ...(data as any) } as GenericStudentType;
+          setStudent(updatedStudent);
+          queryClient.setQueryData(
+            ["students-all", effectiveInstructorKey],
+            (prev: any) => {
+              if (!Array.isArray(prev)) return prev;
+              return prev.map((listStudent: any) =>
+                listStudent?.__docId === (student as any)?.__docId
+                  ? { ...listStudent, ...(data as any) }
+                  : listStudent
+              );
+            }
+          );
           goBack();
         })
         .catch((error) => {

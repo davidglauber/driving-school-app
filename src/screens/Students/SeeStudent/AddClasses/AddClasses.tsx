@@ -9,7 +9,11 @@ import { addClassSchema } from "@/src/schemas/forms";
 import { useClassStore } from "@/src/store/useClassStore";
 import { useStudentStore } from "@/src/store/useStudentStore";
 import { spacing } from "@/src/theme/spacing";
-import { checkIfInstructorIsAdmin, getInstructorsByFranchise } from "../../Students.utils";
+import {
+  checkIfInstructorIsAdmin,
+  getEffectiveInstructorCacheKey,
+  getInstructorsByFranchise,
+} from "../../Students.utils";
 import { ScrollViewBox } from "@/src/utils/restyle/ScrollViewBox";
 import { TextBox } from "@/src/utils/restyle/TextBox";
 import { ViewBox } from "@/src/utils/restyle/ViewBox";
@@ -20,9 +24,8 @@ import {
   useNavigation,
   useRoute,
 } from "@react-navigation/native";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { doc, getFirestore } from "firebase/firestore";
 import { getInstructorRefByAuthUid } from "../../Students.utils";
 import duration from "dayjs/plugin/duration";
 import React, { useEffect } from "react";
@@ -54,7 +57,9 @@ export const AddClasses = () => {
     },
     resolver: zodResolver(addClassSchema),
   });
-  const { student, updateClasses } = useStudentStore();
+  const { student, updateClasses, setStudent } = useStudentStore();
+  const queryClient = useQueryClient();
+  const effectiveInstructorKey = getEffectiveInstructorCacheKey();
   const { classStudent } = useClassStore();
       const { data: isAdmin } = useQuery({
       queryKey: ["isAdmin"],
@@ -164,7 +169,35 @@ export const AddClasses = () => {
           text1: "Sucesso!",
           text2: "Aula editada.",
         });
-        updateClasses([classToUpdateWithInstructor]);
+        // Update local state by replacing the edited class (not appending),
+        // otherwise the UI shows a temporary duplicate until the next refetch.
+        if (student) {
+          const currentClasses = student.classes || [];
+          const hasCurrentClass = currentClasses.some(
+            (existingClass) => existingClass.id === classToUpdateWithInstructor.id
+          );
+
+          const updatedClasses = hasCurrentClass
+            ? currentClasses.map((existingClass) =>
+                existingClass.id === classToUpdateWithInstructor.id
+                  ? classToUpdateWithInstructor
+                  : existingClass
+              )
+            : [...currentClasses, classToUpdateWithInstructor];
+
+          setStudent({ ...student, classes: updatedClasses } as any);
+          queryClient.setQueryData(
+            ["students-all", effectiveInstructorKey],
+            (prev: any) => {
+              if (!Array.isArray(prev)) return prev;
+              return prev.map((listStudent: any) =>
+                listStudent?.__docId === (student as any)?.__docId
+                  ? { ...listStudent, classes: updatedClasses }
+                  : listStudent
+              );
+            }
+          );
+        }
         goBack();
       } catch (error: any) {
         Toast.show({
@@ -189,6 +222,20 @@ export const AddClasses = () => {
           text2: `${classes.length > 1 ? "Aulas" : "Aula"} cadastrada com sucesso.`,
         });
         updateClasses(classesWithInstructor);
+        if (student) {
+          const mergedClasses = [...(student.classes || []), ...classesWithInstructor];
+          queryClient.setQueryData(
+            ["students-all", effectiveInstructorKey],
+            (prev: any) => {
+              if (!Array.isArray(prev)) return prev;
+              return prev.map((listStudent: any) =>
+                listStudent?.__docId === (student as any)?.__docId
+                  ? { ...listStudent, classes: mergedClasses }
+                  : listStudent
+              );
+            }
+          );
+        }
         goBack();
       } catch (error: any) {
         Toast.show({

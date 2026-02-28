@@ -24,8 +24,7 @@ import { deleteStudentById, checkIfInstructorIsAdmin, getEffectiveInstructorCach
 import { useViewAsInstructorStore } from "@/src/store/useViewAsInstructorStore";
 import { Alert, Linking, Platform, FlatList } from "react-native";
 import Toast from "react-native-toast-message";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { auth } from "@/src/config/firebaseConfig";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import ProgressBar from "react-native-progress/Bar";
 import { openMap, deleteClassFromStudent } from "../../Calendar/Calendar.utils";
 import { useEditModeStore } from "@/src/store/useEditModeStore";
@@ -144,6 +143,7 @@ const ClassesList = ({
 export const SeeStudent = () => {
   const { student, setStudent } = useStudentStore();
   const { setClassStudent } = useClassStore();
+  const queryClient = useQueryClient();
   const { navigate } = useNavigation<NavigationProp<RootStackParamList>>();
   const [isLoading, setIsLoading] = useState(false);
   const { setIsEdit } = useEditModeStore();
@@ -241,7 +241,15 @@ export const SeeStudent = () => {
         style: "destructive",
         onPress: async () => {
           // Prefer Firestore document id when available; fallback to legacy numeric id.
-          await deleteStudentById((student as any)?.__docId || student?.id?.toString());
+          const studentDocId = (student as any)?.__docId || student?.id?.toString();
+          await deleteStudentById(studentDocId);
+          queryClient.setQueryData(
+            ["students-all", effectiveInstructorKey],
+            (prev: any) => {
+              if (!Array.isArray(prev)) return prev;
+              return prev.filter((listStudent: any) => listStudent?.__docId !== studentDocId);
+            }
+          );
           navigate("Students" as never);
         },
       },
@@ -294,6 +302,17 @@ export const SeeStudent = () => {
           (cls) => cls.id !== classToDelete.id
         );
         setStudent({ ...student, classes: updatedClasses } as GenericStudentType);
+        queryClient.setQueryData(
+          ["students-all", effectiveInstructorKey],
+          (prev: any) => {
+            if (!Array.isArray(prev)) return prev;
+            return prev.map((listStudent: any) =>
+              listStudent?.__docId === (student as any)?.__docId
+                ? { ...listStudent, classes: updatedClasses }
+                : listStudent
+            );
+          }
+        );
         console.log("🔍 Local state updated");
       }
     } catch (error) {
