@@ -240,7 +240,8 @@ export const SeeStudent = () => {
         text: "Deletar",
         style: "destructive",
         onPress: async () => {
-          await deleteStudentById(student?.id?.toString());
+          // Prefer Firestore document id when available; fallback to legacy numeric id.
+          await deleteStudentById((student as any)?.__docId || student?.id?.toString());
           navigate("Students" as never);
         },
       },

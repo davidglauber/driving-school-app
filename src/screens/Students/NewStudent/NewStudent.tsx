@@ -43,7 +43,9 @@ export const NewStudent = () => {
     });
   const { mutateAsync: editStudent, isPending: isPendingEdit } = useMutation({
     mutationKey: ["editStudent"],
-    mutationFn: (data: FieldValues) => editUser(student?.id.toString(), data),
+    mutationFn: (data: FieldValues) =>
+      // Prefer Firestore document id when available; fallback to legacy numeric id.
+      editUser((student as any)?.__docId || student?.id?.toString(), data),
   });
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
@@ -56,7 +58,8 @@ export const NewStudent = () => {
             text2: "Informações atualizadas.",
             position: "bottom",
           });
-          setStudent(data as GenericStudentType);
+          // Keep existing metadata (like __docId/classes) and apply edited fields.
+          setStudent({ ...(student as any), ...(data as any) } as GenericStudentType);
           goBack();
         })
         .catch((error) => {
