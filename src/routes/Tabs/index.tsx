@@ -5,6 +5,7 @@ import { colors } from "@/src/theme/colors";
 import { radius } from "@/src/theme/radius";
 import { height } from "@/src/utils/dimensions";
 import { FontAwesome6 } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Platform } from "react-native";
 import { AnimatedTabBarNavigator } from "react-native-animated-nav-tab-bar";
 
@@ -16,19 +17,27 @@ type TabBarIconProps = {
 
 const Tabs = AnimatedTabBarNavigator();
 const isIOS = Platform.OS === "ios";
-export default () => (
-  <Tabs.Navigator
-    initialRouteName="Calendar"
-    tabBarOptions={{
-      activeTintColor: colors.red,
-      inactiveTintColor: colors.white,
-      activeBackgroundColor: colors.white,
-      tabStyle: {
-        height: height * 0.09,
-        backgroundColor: colors.red,
-        borderTopLeftRadius: isIOS ? radius.xxl : radius.xl,
-        borderTopRightRadius: isIOS ? radius.xxl : radius.xl,
-      },
+
+export default function TabNavigator() {
+  const insets = useSafeAreaInsets();
+  // Add bottom padding so the tab bar sits above the system navigation bar (avoids overlap on Android).
+  // Use at least 24 on Android when inset is 0 (e.g. some emulators).
+  const tabBarBottomPadding = isIOS ? insets.bottom : Math.max(insets.bottom, 24);
+
+  return (
+    <Tabs.Navigator
+      initialRouteName="Calendar"
+      tabBarOptions={{
+        activeTintColor: colors.red,
+        inactiveTintColor: colors.white,
+        activeBackgroundColor: colors.white,
+        tabStyle: {
+          height: height * 0.09 + tabBarBottomPadding,
+          paddingBottom: tabBarBottomPadding,
+          backgroundColor: colors.red,
+          borderTopLeftRadius: isIOS ? radius.xxl : radius.xl,
+          borderTopRightRadius: isIOS ? radius.xxl : radius.xl,
+        },
       labelStyle: {
         fontFamily: "SFBold",
         fontSize: 20,
@@ -86,4 +95,5 @@ export default () => (
       }}
     />
   </Tabs.Navigator>
-);
+  );
+}

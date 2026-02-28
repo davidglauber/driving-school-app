@@ -8,6 +8,7 @@ import { StatusBar } from "expo-status-bar";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { ActivityIndicator } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import "react-native-reanimated";
 import Toast from "react-native-toast-message";
 import { toastConfig } from "./src/components/CustomToast/CustomToast";
@@ -58,18 +59,20 @@ export default function RootLayout() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={theme}>
-        {user ? (
-          <MainNavigator />
-        ) : (
-          <NavigationContainer>
-            <Login />
-          </NavigationContainer>
-        )}
-        <StatusBar backgroundColor="#FFFFFF" style="dark" />
-      </ThemeProvider>
-      <Toast config={toastConfig} />
-    </QueryClientProvider>
+    <SafeAreaProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider theme={theme}>
+          {user ? (
+            <MainNavigator />
+          ) : (
+            <NavigationContainer>
+              <Login />
+            </NavigationContainer>
+          )}
+          <StatusBar backgroundColor="#FFFFFF" style="dark" />
+        </ThemeProvider>
+        <Toast config={toastConfig} />
+      </QueryClientProvider>
+    </SafeAreaProvider>
   );
 }
