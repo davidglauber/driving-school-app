@@ -45,23 +45,24 @@ const isClassScheduledForInstructor = async (newClass: StudentClass, instructorA
         where("instructor", "==", instructorRef),
         where("classDates", "array-contains", newDateFormatted)
     );
-    // Students que possuem o instrutor no array auxiliar (armazenamos authUid)
+    // Students that include this instructor authUid in the helper array.
+    // IMPORTANT: Firestore does not allow two `array-contains` clauses in a single query.
+    // Keep this query with a single array filter and do date/time filtering in memory below.
     const q2 = query(
         studentsRef,
-        where("instructorsUids", "array-contains", instructorAuthUid),
-        where("classDates", "array-contains", newDateFormatted)
+        where("instructorsUids", "array-contains", instructorAuthUid)
     );
 
     const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
     let mergedDocs = [...snap1.docs, ...snap2.docs];
 
     // Backward compatibility: older docs may not have `classDates`.
-    // If we found nothing using the cheap indexed query, fallback to the original queries.
+    // If we found nothing, re-run only the direct-instructor query without the date filter.
+    // The instructorsUids query above already runs without date constraints.
     if (mergedDocs.length === 0) {
         const q1Fallback = query(studentsRef, where("instructor", "==", instructorRef));
-        const q2Fallback = query(studentsRef, where("instructorsUids", "array-contains", instructorAuthUid));
-        const [snap1b, snap2b] = await Promise.all([getDocs(q1Fallback), getDocs(q2Fallback)]);
-        mergedDocs = [...snap1b.docs, ...snap2b.docs];
+        const snap1b = await getDocs(q1Fallback);
+        mergedDocs = [...snap1b.docs, ...mergedDocs];
     }
     if (mergedDocs.length === 0) {
         return null;
