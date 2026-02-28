@@ -391,6 +391,7 @@ export {
     moveStudentToInstructor,
     copyStudentToInstructor,
     getStudentsLocalFirst,
+    getStudentsFastFirstLoad,
     getInstructorRefByAuthUid,
 };
 
@@ -561,4 +562,70 @@ const getStudentsLocalFirst = async (forceRefresh?: boolean): Promise<GenericStu
     } catch {}
 
     return students;
+};
+
+/**
+ * Fast first load for Students screen.
+ * Fetches a limited chunk from Firestore to render UI quickly,
+ * while the full dataset can still load in background.
+ */
+const getStudentsFastFirstLoad = async (take = 60): Promise<GenericStudentType[]> => {
+    const firestore = getFirestore();
+    const instructorRef = await getCurrentInstructorRef();
+    if (!instructorRef) return [];
+
+    const studentsRef = collection(firestore, "students");
+    const instructorSnap = await getDoc(instructorRef);
+    const isAdmin = !!(instructorSnap.exists() && (instructorSnap.data() as any)?.isAdmin === true);
+
+    let docs: any[] = [];
+    if (isAdmin) {
+        const q = query(
+            studentsRef,
+            where("instructor", "==", instructorRef),
+            limit(take),
+        );
+        const snapshot = await getDocs(q);
+        docs = snapshot.docs;
+    } else {
+        const q1 = query(studentsRef, where("instructor", "==", instructorRef), limit(take));
+        const instructorData = instructorSnap.data() as any;
+        const authUid = instructorData?.authUid;
+
+        if (authUid) {
+            const q2 = query(studentsRef, where("instructorsUids", "array-contains", authUid), limit(take));
+            const q3 = query(studentsRef, where("instructorsUids", "array-contains", instructorRef.id), limit(take));
+            const [snap1, snap2, snap3] = await Promise.all([getDocs(q1), getDocs(q2), getDocs(q3)]);
+            const merged = [...snap1.docs, ...snap2.docs, ...snap3.docs];
+            const seen: Record<string, boolean> = {};
+            docs = merged.filter((d) => {
+                if (seen[d.id]) return false;
+                seen[d.id] = true;
+                return true;
+            });
+        } else {
+            const snapshot = await getDocs(q1);
+            docs = snapshot.docs;
+        }
+    }
+
+    const collator = new Intl.Collator("pt-BR", { sensitivity: "base" });
+    const hashStringToNumber = (str: string): number => {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = (hash * 31 + str.charCodeAt(i)) | 0;
+        }
+        return Math.abs(hash);
+    };
+
+    return docs
+        .map((d) => {
+            const data = d.data() as GenericStudentType;
+            if (!(typeof data.id === "number" && Number.isFinite(data.id))) {
+                data.id = hashStringToNumber(d.id);
+            }
+            (data as any).__docId = d.id;
+            return data;
+        })
+        .sort((a, b) => collator.compare(a.name || "", b.name || ""));
 };
